@@ -1,0 +1,44 @@
+# Binary executables and libraries
+*.exe
+*.dll
+*.pyd
+*.obj
+*.o
+*.a
+*.lib
+*.so
+*.dylib
+
+# Packages and archives
+*.zip
+*.tar.gz
+*.rar
+*.7z
+*.pkg
+*.msi
+
+# Python artifacts
+__pycache__/
+*.pyc
+*.pyo
+venv/
+env/
+.env
+
+# Build outputs
+build/
+dist/
+
+# Security Keys & Sensitive Credentials
+*.key
+*.pem
+*.pfx
+*.cer
+*.crt
+*Private*
+
+# Logs & Runtime State
+*.log
+*.state
+scratch/
+.system_generated/

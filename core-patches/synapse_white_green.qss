@@ -1,0 +1,318 @@
+/* ==========================================================================
+   SYNAPSE COMMAND — DIGIHUB WHITE & GREEN ENTERPRISE QT6 STYLESHEET
+   Translates DiGiHub SaaS Design Language to Native Qt Widgets
+   ========================================================================== */
+
+/* --- 1. Global Reset & Typography --- */
+QWidget {
+    background-color: #FFFFFF;
+    color: #202C24;
+    font-family: "Segoe UI", "Inter", -apple-system, sans-serif;
+    font-size: 11px;
+    selection-background-color: #E8F6EC;
+    selection-color: #167A3B;
+    outline: none;
+}
+
+QMainWindow {
+    background-color: #FFFFFF;
+}
+
+/* --- 2. Main Command ToolBar --- */
+QToolBar {
+    background-color: #FFFFFF;
+    border-top: none;
+    border-left: none;
+    border-right: none;
+    border-bottom: 1px solid #E5EDE7;
+    spacing: 5px;
+    padding: 6px 10px;
+}
+
+QToolBar::separator {
+    width: 1px;
+    background-color: #E5EDE7;
+    margin: 4px 6px;
+}
+
+QToolButton {
+    background-color: #FFFFFF;
+    color: #323E37;
+    border: 1px solid #E5EDE7;
+    border-radius: 6px;
+    padding: 5px 10px;
+    font-weight: 600;
+    font-size: 11px;
+}
+
+QToolButton:hover {
+    background-color: #F3FAF5;
+    border-color: #279B50;
+    color: #279B50;
+}
+
+QToolButton:pressed {
+    background-color: #E8F6EC;
+    border-color: #218543;
+    color: #167A3B;
+}
+
+QToolButton:checked {
+    background-color: #279B50;
+    border: 1px solid #218543;
+    color: #FFFFFF;
+}
+
+QToolButton:checked:hover {
+    background-color: #218543;
+    border-color: #167A3B;
+    color: #FFFFFF;
+}
+
+/* --- 3. Left Locations Sidebar & Panels --- */
+ComputerSelectPanel, QDockWidget {
+    background-color: #FFFFFF;
+    border-right: 1px solid #E5EDE7;
+    color: #202C24;
+}
+
+QDockWidget::title {
+    background-color: #FFFFFF;
+    padding: 8px 12px;
+    font-weight: 700;
+    color: #202C24;
+    border-bottom: 1px solid #E5EDE7;
+}
+
+QTreeView, QListView {
+    background-color: #FFFFFF;
+    border: 1px solid #E5EDE7;
+    border-radius: 6px;
+    color: #202C24;
+    padding: 4px;
+}
+
+QTreeView::item, QListView::item {
+    padding: 5px 8px;
+    border-radius: 4px;
+    color: #323E37;
+}
+
+QTreeView::item:hover, QListView::item:hover {
+    background-color: #F3FAF5;
+    color: #279B50;
+}
+
+QTreeView::item:selected, QListView::item:selected {
+    background-color: #E8F6EC;
+    color: #167A3B;
+    font-weight: 600;
+}
+
+/* --- 4. Central Computer Monitoring Workspace & Grid --- */
+ComputerMonitoringWidget, ComputerMonitoringView, QGraphicsView {
+    background-color: #F8FAF8;
+    border: none;
+}
+
+QGraphicsView::viewport {
+    background-color: #F8FAF8;
+}
+
+/* --- 5. Right Inspector Panel --- */
+ComputerInspectorPanel {
+    background-color: #FFFFFF;
+    border-left: 1px solid #E5EDE7;
+    color: #202C24;
+}
+
+QLabel {
+    background-color: transparent;
+    color: #202C24;
+}
+
+QLabel[text*="Total"], QLabel[text*="Online"], QLabel[text*="Offline"], QLabel[text*="Quick Stats"] {
+    font-weight: 600;
+    color: #4D5B53;
+}
+
+/* --- 6. Input Fields & Search Bars --- */
+QLineEdit {
+    background-color: #F8FAF8;
+    border: 1px solid #E5EDE7;
+    border-radius: 6px;
+    padding: 5px 10px;
+    color: #202C24;
+    font-size: 11px;
+}
+
+QLineEdit:focus {
+    background-color: #FFFFFF;
+    border: 1px solid #279B50;
+}
+
+/* --- 7. Buttons & Controls --- */
+QPushButton {
+    background-color: #FFFFFF;
+    border: 1px solid #E5EDE7;
+    border-radius: 6px;
+    padding: 6px 14px;
+    font-weight: 600;
+    color: #323E37;
+}
+
+QPushButton:hover {
+    background-color: #F3FAF5;
+    border-color: #279B50;
+    color: #279B50;
+}
+
+QPushButton:pressed {
+    background-color: #E8F6EC;
+    border-color: #218543;
+    color: #167A3B;
+}
+
+QPushButton:default {
+    background-color: #279B50;
+    border-color: #218543;
+    color: #FFFFFF;
+}
+
+QPushButton:default:hover {
+    background-color: #218543;
+}
+
+/* --- 8. Tabs --- */
+QTabWidget::pane {
+    border: 1px solid #E5EDE7;
+    background-color: #FFFFFF;
+    border-radius: 6px;
+}
+
+QTabBar::tab {
+    background-color: #F8FAF8;
+    border: 1px solid #E5EDE7;
+    padding: 6px 14px;
+    font-weight: 500;
+    color: #6E7D75;
+    margin-right: 2px;
+    border-top-left-radius: 6px;
+    border-top-right-radius: 6px;
+}
+
+QTabBar::tab:selected {
+    background-color: #FFFFFF;
+    border-bottom: 2px solid #279B50;
+    color: #279B50;
+    font-weight: 700;
+}
+
+QTabBar::tab:hover:!selected {
+    background-color: #F3FAF5;
+    color: #279B50;
+}
+
+/* --- 9. Bottom Status Bar --- */
+QStatusBar {
+    background-color: #FFFFFF;
+    border-top: 1px solid #E5EDE7;
+    color: #6E7D75;
+    padding: 2px 8px;
+}
+
+QStatusBar::item {
+    border: none;
+}
+
+/* --- 10. Zoom Slider --- */
+QSlider::groove:horizontal {
+    height: 4px;
+    background: #E5EDE7;
+    border-radius: 2px;
+}
+
+QSlider::sub-page:horizontal {
+    background: #279B50;
+    border-radius: 2px;
+}
+
+QSlider::handle:horizontal {
+    background: #279B50;
+    border: 1px solid #218543;
+    width: 14px;
+    margin-top: -5px;
+    margin-bottom: -5px;
+    border-radius: 7px;
+}
+
+QSlider::handle:horizontal:hover {
+    background: #218543;
+}
+
+/* --- 11. Minimal Modern ScrollBars --- */
+QScrollBar:vertical {
+    border: none;
+    background-color: #F8FAF8;
+    width: 8px;
+    margin: 0px;
+}
+
+QScrollBar::handle:vertical {
+    background-color: #D1DDD4;
+    min-height: 20px;
+    border-radius: 4px;
+}
+
+QScrollBar::handle:vertical:hover {
+    background-color: #94A398;
+}
+
+QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
+    height: 0px;
+}
+
+QScrollBar:horizontal {
+    border: none;
+    background-color: #F8FAF8;
+    height: 8px;
+    margin: 0px;
+}
+
+QScrollBar::handle:horizontal {
+    background-color: #D1DDD4;
+    min-width: 20px;
+    border-radius: 4px;
+}
+
+QScrollBar::handle:horizontal:hover {
+    background-color: #94A398;
+}
+
+QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal {
+    width: 0px;
+}
+
+/* --- 12. Menus & Popups --- */
+QMenu {
+    background-color: #FFFFFF;
+    border: 1px solid #E5EDE7;
+    border-radius: 6px;
+    padding: 4px 0px;
+}
+
+QMenu::item {
+    padding: 6px 20px 6px 12px;
+    color: #202C24;
+}
+
+QMenu::item:selected {
+    background-color: #F3FAF5;
+    color: #279B50;
+}
+
+QMenu::separator {
+    height: 1px;
+    background-color: #E5EDE7;
+    margin: 4px 8px;
+}

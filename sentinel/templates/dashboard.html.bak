@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Synapse AI Sentinel - Enterprise Guardian</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0B1020;
+      --surface: #111A2D;
+      --surface-elevated: #162238;
+      --border: #28384F;
+      --text: #F1F5F9;
+      --text-muted: #94A3B8;
+      --primary: #3B82F6;
+      --emerald: #10B981;
+      --emerald-glow: rgba(16, 185, 129, 0.2);
+      --rose: #F43F5E;
+      --rose-glow: rgba(244, 63, 94, 0.2);
+      --amber: #F59E0B;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 24px;
+    }
+    .container { max-width: 1400px; margin: 0 auto; }
+    
+    /* Header */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--border);
+    }
+    .brand { display: flex; align-items: center; gap: 14px; }
+    .brand-icon {
+      width: 44px;
+      height: 44px;
+      background: linear-gradient(135deg, #2563EB, #1D4ED8);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      box-shadow: 0 4px 14px rgba(37, 99, 235, 0.4);
+    }
+    .brand-title { font-size: 20px; font-weight: 700; letter-spacing: -0.3px; }
+    .brand-sub { font-size: 13px; color: var(--text-muted); }
+
+    /* Top Stats Bar */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 18px;
+      position: relative;
+    }
+    .stat-label { font-size: 13px; color: var(--text-muted); margin-bottom: 6px; }
+    .stat-value { font-size: 26px; font-weight: 700; display: flex; align-items: center; gap: 10px; }
+    .status-pill {
+      font-size: 12px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-weight: 600;
+      letter-spacing: 0.3px;
+    }
+    .pill-active { background: var(--emerald-glow); color: var(--emerald); border: 1px solid var(--emerald); }
+    .pill-paused { background: rgba(245, 158, 11, 0.15); color: var(--amber); border: 1px solid var(--amber); }
+
+    /* Controls Row */
+    .controls-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 24px;
+    }
+    .section-title { font-size: 15px; font-weight: 600; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; }
+    .toggles-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 14px;
+    }
+    .toggle-box {
+      background: var(--surface-elevated);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.2s;
+    }
+    .toggle-box:hover { border-color: var(--primary); }
+    .toggle-info h4 { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+    .toggle-info p { font-size: 12px; color: var(--text-muted); }
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 44px;
+      height: 24px;
+    }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .slider {
+      position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
+      background-color: #334155; transition: .2s; border-radius: 24px;
+    }
+    .slider:before {
+      position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px;
+      background-color: white; transition: .2s; border-radius: 50%;
+    }
+    input:checked + .slider { background-color: var(--primary); }
+    input:checked + .slider:before { transform: translateX(20px); }
+
+    /* Main Grid Split */
+    .main-grid {
+      display: grid;
+      grid-template-columns: 1fr 1.6fr;
+      gap: 24px;
+    }
+    @media (max-width: 1024px) {
+      .main-grid { grid-template-columns: 1fr; }
+    }
+
+    /* Locked Culprits Panel */
+    .panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+    }
+    .btn {
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s;
+    }
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-primary:hover { background: #2563EB; }
+    .btn-danger { background: var(--rose); color: white; }
+    .btn-danger:hover { background: #E11D48; }
+    .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text); }
+    .btn-outline:hover { background: var(--surface-elevated); }
+    .btn-sm { padding: 4px 10px; font-size: 12px; }
+
+    /* Culprit Items */
+    .culprits-list { display: flex; flex-direction: column; gap: 10px; margin-top: 12px; }
+    .culprit-card {
+      background: rgba(244, 63, 94, 0.08);
+      border: 1px solid rgba(244, 63, 94, 0.3);
+      border-radius: 8px;
+      padding: 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .culprit-details h4 { font-size: 14px; font-weight: 600; color: #FDA4AF; }
+    .culprit-details p { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+    .empty-state {
+      padding: 36px 20px;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+
+    /* Violations Table */
+    .violations-table { width: 100%; border-collapse: collapse; margin-top: 12px; font-size: 13px; }
+    .violations-table th { text-align: left; padding: 10px 12px; color: var(--text-muted); border-bottom: 1px solid var(--border); font-weight: 600; }
+    .violations-table td { padding: 12px; border-bottom: 1px solid rgba(40, 56, 79, 0.5); }
+    .violations-table tr:hover { background: var(--surface-elevated); }
+    .badge-violation {
+      background: rgba(244, 63, 94, 0.15);
+      color: #FB7185;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-weight: 600;
+      font-size: 11px;
+    }
+
+    /* Modal */
+    .modal-backdrop {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(4px);
+      z-index: 999;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+    .modal-content {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      max-width: 900px;
+      width: 100%;
+      overflow: hidden;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+    }
+    .modal-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .modal-body { padding: 20px; text-align: center; }
+    .modal-body img { max-width: 100%; max-height: 70vh; border-radius: 6px; border: 1px solid var(--border); }
+    .close-btn { background: none; border: none; color: var(--text-muted); font-size: 22px; cursor: pointer; }
+    .close-btn:hover { color: var(--text); }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="brand">
+        <div class="brand-icon">🛡️</div>
+        <div>
+          <div class="brand-title">SYNAPSE AI SENTINEL</div>
+          <div class="brand-sub">Real-Time Autonomous Classroom Policy Guardian</div>
+        </div>
+      </div>
+      <div style="display: flex; gap: 10px;">
+        <button id="toggleBtn" class="btn btn-outline" onclick="toggleSentinel()">⏸️ Pause Sentinel</button>
+        <button class="btn btn-danger" onclick="unlockAll()">🔓 Unlock All Computers</button>
+      </div>
+    </header>
+
+    <!-- Stats Bar -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">GUARDIAN STATUS</div>
+        <div class="stat-value">
+          <span id="statusPill" class="status-pill pill-active">ACTIVE WATCHING</span>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">MONITORED COMPUTERS</div>
+        <div class="stat-value" id="totalComputers">34 <span style="font-size: 14px; font-weight: normal; color: var(--text-muted);">PCs in Lab</span></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">CURRENTLY LOCKED</div>
+        <div class="stat-value" id="lockedCount" style="color: var(--rose);">0 <span style="font-size: 14px; font-weight: normal; color: var(--text-muted);">Culprits</span></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">LAST SCAN CYCLE</div>
+        <div class="stat-value" id="lastScanTime" style="font-size: 20px;">--:--:--</div>
+      </div>
+    </div>
+
+    <!-- Active Targets Configuration -->
+    <div class="controls-card">
+      <div class="section-title">
+        <span>ACTIVE DETECTION TRIPWIRES</span>
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <span style="font-size: 12px; color: var(--text-muted);">Sensitivity:</span>
+          <select id="sensitivitySelect" onchange="updateSensitivity()" style="background: var(--surface-elevated); color: var(--text); border: 1px solid var(--border); padding: 4px 8px; border-radius: 4px; font-size: 12px;">
+            <option value="low">Low (Fewer alerts)</option>
+            <option value="medium" selected>Standard (Recommended)</option>
+            <option value="strict">Strict (High sensitivity)</option>
+          </select>
+        </div>
+      </div>
+      <div class="toggles-grid">
+        <div class="toggle-box" onclick="toggleTarget('sports_streams')">
+          <div class="toggle-info">
+            <h4>⚽ Sports Streams</h4>
+            <p>Football, Cricket, Tennis, Hotstar Sports, Cricbuzz</p>
+          </div>
+          <label class="switch"><input type="checkbox" id="tgt_sports_streams" checked onclick="event.stopPropagation()"><span class="slider"></span></label>
+        </div>
+
+        <div class="toggle-box" onclick="toggleTarget('movies_streaming')">
+          <div class="toggle-info">
+            <h4>🎬 Movies & Entertainment</h4>
+            <p>Netflix, Prime, YouTube full movies, piracy streams</p>
+          </div>
+          <label class="switch"><input type="checkbox" id="tgt_movies_streaming" checked onclick="event.stopPropagation()"><span class="slider"></span></label>
+        </div>
+
+        <div class="toggle-box" onclick="toggleTarget('video_games')">
+          <div class="toggle-info">
+            <h4>🎮 Video Games</h4>
+            <p>Roblox, Minecraft, Steam, 3D browser games</p>
+          </div>
+          <label class="switch"><input type="checkbox" id="tgt_video_games" checked onclick="event.stopPropagation()"><span class="slider"></span></label>
+        </div>
+
+        <div class="toggle-box" onclick="toggleTarget('social_media_reels')">
+          <div class="toggle-info">
+            <h4>📱 Social Media Reels / Shorts</h4>
+            <p>Instagram Reels, TikTok, YouTube Shorts (9:16)</p>
+          </div>
+          <label class="switch"><input type="checkbox" id="tgt_social_media_reels" checked onclick="event.stopPropagation()"><span class="slider"></span></label>
+        </div>
+      </div>
+    </div>
+
+    <!-- BYOD FLEET RELEASE & CONNECT CONTROL -->
+    <div class="controls-card" style="border-left: 4px solid var(--emerald);">
+      <div class="section-title">
+        <div>
+          <span>BYOD FLEET & DEVICE RELEASE CONTROL</span>
+          <span id="fleetModeBadge" class="status-pill pill-active" style="margin-left: 10px; font-size: 11px;">FLEET CONNECTED</span>
+        </div>
+        <div style="display: flex; gap: 10px;">
+          <button class="btn btn-primary" onclick="fleetConnectAll()">⚡ Connect Every Device</button>
+          <button class="btn btn-outline" style="border-color: var(--emerald); color: var(--emerald);" onclick="fleetReleaseAll()">🕊️ Release Every Device</button>
+        </div>
+      </div>
+      <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">
+        Release devices at the end of class so students can freely disconnect or switch Wi-Fi. Connect devices when class begins to enforce Synapse management.
+      </p>
+
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 10px;">
+        <input type="text" id="fleetSearch" placeholder="🔍 Filter student laptops by name or IP..." onkeyup="renderFleet()" style="background: var(--surface-elevated); color: var(--text); border: 1px solid var(--border); padding: 8px 14px; border-radius: 6px; font-size: 13px; width: 340px;">
+        <div style="font-size: 12px; color: var(--text-muted);">
+          <strong id="fleetReleasedStats" style="color: var(--emerald);">0</strong> Released &bull; <strong id="fleetConnectedStats" style="color: #60A5FA;">41</strong> Managed
+        </div>
+      </div>
+
+      <div style="max-height: 280px; overflow-y: auto; border: 1px solid var(--border); border-radius: 8px;">
+        <table class="violations-table" style="margin-top: 0;">
+          <thead style="position: sticky; top: 0; background: var(--surface-elevated); z-index: 2;">
+            <tr>
+              <th>Device Name</th>
+              <th>IP Address</th>
+              <th>BYOD State</th>
+              <th>Session Note</th>
+              <th style="text-align: right; padding-right: 18px;">Action</th>
+            </tr>
+          </thead>
+          <tbody id="fleetTbody">
+            <tr><td colspan="5" style="text-align: center; color: var(--text-muted); padding: 20px;">Loading fleet...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Main Grid -->
+    <div class="main-grid">
+      <!-- Active Culprits Panel -->
+      <div class="panel">
+        <div class="section-title">
+          <span>LOCKED CULPRIT COMPUTERS</span>
+          <span style="font-size: 12px; color: var(--text-muted);">Individually Frozen</span>
+        </div>
+        <div id="culpritsContainer" class="culprits-list">
+          <div class="empty-state">✅ Classroom clear. No student computers currently locked.</div>
+        </div>
+      </div>
+
+      <!-- Recent Violations Audit Feed -->
+      <div class="panel">
+        <div class="section-title">
+          <span>EVIDENCE AUDIT LOG</span>
+          <span style="font-size: 12px; color: var(--text-muted);">Click row to view screenshot</span>
+        </div>
+        <div style="overflow-x: auto;">
+          <table class="violations-table">
+            <thead>
+              <tr>
+                <th>Time</th>
+                <th>Computer / User</th>
+                <th>Violation</th>
+                <th>Evidence</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="violationsTbody">
+              <tr><td colspan="5" style="text-align: center; color: var(--text-muted); padding: 30px;">Loading audit feed...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Evidence Modal -->
+  <div id="evidenceModal" class="modal-backdrop" onclick="closeModal(event)">
+    <div class="modal-content" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <h3 id="modalTitle" style="font-size: 15px; font-weight: 600;">Evidence Screenshot</h3>
+        <button class="close-btn" onclick="closeModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <img id="modalImg" src="" alt="Proof Screenshot">
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let currentConfig = {};
+
+    async function fetchStatus() {
+      try {
+        const res = await fetch('/api/status');
+        const data = await res.json();
+        
+        // Update stats
+        const statusPill = document.getElementById('statusPill');
+        const toggleBtn = document.getElementById('toggleBtn');
+        if (data.enabled) {
+          statusPill.className = 'status-pill pill-active';
+          statusPill.textContent = 'ACTIVE WATCHING';
+          toggleBtn.innerHTML = '⏸️ Pause Sentinel';
+        } else {
+          statusPill.className = 'status-pill pill-paused';
+          statusPill.textContent = 'PAUSED';
+          toggleBtn.innerHTML = '▶️ Resume Sentinel';
+        }
+
+        document.getElementById('totalComputers').innerHTML = `${data.total_computers} <span style="font-size: 14px; font-weight: normal; color: var(--text-muted);">PCs in Lab</span>`;
+        document.getElementById('lockedCount').innerHTML = `${data.locked_count} <span style="font-size: 14px; font-weight: normal; color: var(--text-muted);">Culprits</span>`;
+        document.getElementById('lastScanTime').textContent = data.last_scan_time || 'Scanning...';
+
+        // Update Target Toggles if not modified
+        currentConfig.targets = data.targets;
+        for (const [key, val] of Object.entries(data.targets)) {
+          const el = document.getElementById('tgt_' + key);
+          if (el) el.checked = val;
+        }
+
+        // Render Culprits
+        const culpritsContainer = document.getElementById('culpritsContainer');
+        if (!data.locked_computers || data.locked_computers.length === 0) {
+          culpritsContainer.innerHTML = '<div class="empty-state">✅ Classroom clear. No student computers currently locked.</div>';
+        } else {
+          culpritsContainer.innerHTML = data.locked_computers.map(c => `
+            <div class="culprit-card">
+              <div class="culprit-details">
+                <h4>🚫 ${c.name} (${c.ip})</h4>
+                <p>Reason: <strong>${c.reason}</strong> &bull; Locked at: ${c.lock_time}</p>
+              </div>
+              <button class="btn btn-primary btn-sm" onclick="unlockHost('${c.ip}')">🔓 Unlock Student</button>
+            </div>
+          `).join('');
+        }
+
+        // Render Violations Table
+        const tbody = document.getElementById('violationsTbody');
+        if (!data.recent_violations || data.recent_violations.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--text-muted); padding: 24px;">No recorded violations today.</td></tr>';
+        } else {
+          tbody.innerHTML = data.recent_violations.map(v => {
+            const relPath = v.evidence_image ? v.evidence_image.replace(/^.*SynapseViolations\\\\?/, '').replace(/\\\\/g, '/') : '';
+            return `
+              <tr style="cursor: pointer;" onclick="viewEvidence('${relPath}', '${v.computer_name}: ${v.violation_type}')">
+                <td>${v.timestamp.split(' ')[1] || v.timestamp}</td>
+                <td><strong>${v.computer_name}</strong><br><span style="font-size: 11px; color: var(--text-muted);">${v.ip}</span></td>
+                <td><span class="badge-violation">${v.violation_type}</span></td>
+                <td>${relPath ? '📸 View Proof' : 'No image'}</td>
+                <td><button class="btn btn-outline btn-sm" onclick="event.stopPropagation(); unlockHost('${v.ip}')">Unlock</button></td>
+              </tr>
+            `;
+          }).join('');
+        }
+
+      } catch (err) {
+        console.error('Failed to fetch status:', err);
+      }
+    }
+
+    async function toggleSentinel() {
+      await fetch('/api/toggle', { method: 'POST' });
+      fetchStatus();
+    }
+
+    async function toggleTarget(targetKey) {
+      const el = document.getElementById('tgt_' + targetKey);
+      el.checked = !el.checked;
+      const targets = currentConfig.targets || {};
+      targets[targetKey] = el.checked;
+      await fetch('/api/config', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ detection_targets: targets })
+      });
+      fetchStatus();
+    }
+
+    async function updateSensitivity() {
+      const val = document.getElementById('sensitivitySelect').value;
+      await fetch('/api/config', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sensitivity: val })
+      });
+    }
+
+    async function unlockHost(ip) {
+      await fetch('/api/unlock', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ip: ip })
+      });
+      fetchStatus();
+    }
+
+    async function unlockAll() {
+      if (confirm('Unlock all student computers in the classroom now?')) {
+        await fetch('/api/unlock_all', { method: 'POST' });
+        fetchStatus();
+      }
+    }
+
+    // ==========================================
+    //           BYOD FLEET MANAGEMENT
+    // ==========================================
+    let fleetData = [];
+
+    async function fetchFleet() {
+      try {
+        const res = await fetch('/api/fleet');
+        const data = await res.json();
+        fleetData = data.devices || [];
+
+        const badge = document.getElementById('fleetModeBadge');
+        if (data.global_mode === 'RELEASED') {
+          badge.className = 'status-pill pill-paused';
+          badge.textContent = 'ALL DEVICES RELEASED';
+        } else {
+          badge.className = 'status-pill pill-active';
+          badge.textContent = 'FLEET CONNECTED & MANAGED';
+        }
+
+        document.getElementById('fleetReleasedStats').textContent = data.released_count;
+        document.getElementById('fleetConnectedStats').textContent = data.connected_count;
+
+        renderFleet();
+      } catch (err) {
+        console.error('Failed to fetch fleet:', err);
+      }
+    }
+
+    function renderFleet() {
+      const query = (document.getElementById('fleetSearch').value || '').toLowerCase().trim();
+      const tbody = document.getElementById('fleetTbody');
+
+      const filtered = fleetData.filter(d => 
+        d.name.toLowerCase().includes(query) || d.ip.includes(query)
+      );
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding: 20px; color: var(--text-muted);">No matching devices found.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = filtered.map(d => {
+        const isRel = d.status === 'RELEASED';
+        const statusPill = isRel 
+          ? '<span class="status-pill" style="background: rgba(16, 185, 129, 0.15); color: var(--emerald); border: 1px solid var(--emerald); font-size: 11px;">🕊️ RELEASED</span>'
+          : '<span class="status-pill" style="background: rgba(59, 130, 246, 0.15); color: #60A5FA; border: 1px solid var(--primary); font-size: 11px;">🔒 CONNECTED</span>';
+          
+        const actionBtn = isRel
+          ? `<button class="btn btn-primary btn-sm" onclick="fleetConnectDevice('${d.ip}')">⚡ Connect Device</button>`
+          : `<button class="btn btn-outline btn-sm" style="border-color: var(--emerald); color: var(--emerald);" onclick="fleetReleaseDevice('${d.ip}')">🕊️ Release Device</button>`;
+
+        return `
+          <tr>
+            <td><strong>${d.name}</strong></td>
+            <td><code>${d.ip}</code></td>
+            <td>${statusPill}</td>
+            <td style="color: var(--text-muted); font-size: 12px;">${d.details}</td>
+            <td style="text-align: right; padding-right: 18px;">${actionBtn}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    async function fleetReleaseAll() {
+      if (confirm('Release EVERY device in the classroom now? Students will be free to disconnect or switch Wi-Fi.')) {
+        await fetch('/api/fleet/release_all', { method: 'POST' });
+        fetchFleet();
+      }
+    }
+
+    async function fleetConnectAll() {
+      if (confirm('Connect EVERY device in the classroom to active Synapse management?')) {
+        await fetch('/api/fleet/connect_all', { method: 'POST' });
+        fetchFleet();
+      }
+    }
+
+    async function fleetReleaseDevice(ip) {
+      await fetch('/api/fleet/release_device', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ip: ip })
+      });
+      fetchFleet();
+    }
+
+    async function fleetConnectDevice(ip) {
+      await fetch('/api/fleet/connect_device', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ip: ip })
+      });
+      fetchFleet();
+    }
+
+    function viewEvidence(relPath, title) {
+      if (!relPath) return;
+      document.getElementById('modalTitle').textContent = title;
+      document.getElementById('modalImg').src = '/api/evidence/' + relPath;
+      document.getElementById('evidenceModal').style.display = 'flex';
+    }
+
+    function closeModal(e) {
+      if (!e || e.target.id === 'evidenceModal' || e.target.className === 'close-btn') {
+        document.getElementById('evidenceModal').style.display = 'none';
+      }
+    }
+
+    // Auto refresh every 2.5 seconds
+    setInterval(() => {
+      fetchStatus();
+      fetchFleet();
+    }, 2500);
+    fetchStatus();
+    fetchFleet();
+  </script>
+</body>
+</html>

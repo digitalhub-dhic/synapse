@@ -1,0 +1,11 @@
+{
+  "global_mode": "CONNECTED",
+  "last_global_change": null,
+  "released_devices": {},
+  "connected_devices": {
+    "192.168.1.147": {
+      "name": "SUB 1",
+      "connected_at": "2026-10-30 10:18:41"
+    }
+  }
+}

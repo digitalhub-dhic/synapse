@@ -1,0 +1,1631 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Synapse Command — Enterprise Cross-Platform Management</title>
+  
+  <!-- Web App Manifest for Linux/macOS/Windows PWA Installability -->
+  <link rel="manifest" href="data:application/manifest+json;base64,ewogICJuYW1lIjogIlN5bmFwc2UgQ29tbWFuZCBFbnRlcnByaXNlIiwKICAic2hvcnRfbmFtZSI6ICJTeW5hcHNlIiwKICAic3RhcnRfdXJsIjogIi4iLAogICJkaXNwbGF5IjogInN0YW5kYWxvbmUiLAogICJiYWNrZ3JvdW5kX2NvbG9yIjogIiNGRkZGRkYiLAogICJ0aGVtZV9jb2xvciI6ICIjMjc5QjUwIgp9">
+  <meta name="theme-color" content="#279B50">
+
+  <!-- Inter & JetBrains Mono Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  
+  <!-- Tailwind CSS Engine -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#F3FAF5',
+              100: '#E8F6EC',
+              200: '#C7EAD1',
+              500: '#279B50',
+              600: '#218543',
+              700: '#167A3B',
+              800: '#115E2D',
+              900: '#0B421F',
+            },
+            neutral: {
+              25: '#FCFCFD',
+              50: '#F8FAF8',
+              100: '#F1F5F2',
+              200: '#E5EDE7',
+              300: '#D1DDD4',
+              400: '#94A398',
+              500: '#6E7D75',
+              600: '#4D5B53',
+              700: '#323E37',
+              800: '#202C24',
+              900: '#131A15',
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+            mono: ['JetBrains Mono', 'Menlo', 'monospace']
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    :root {
+      --primary: #279B50;
+      --primary-hover: #218543;
+      --border-color: #E5EDE7;
+      --bg-surface: #FFFFFF;
+      --bg-subtle: #F8FAF8;
+      --text-main: #202C24;
+      --text-muted: #6E7D75;
+    }
+
+    * {
+      box-sizing: border-box;
+      user-select: none;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      color: var(--text-main);
+      background-color: #FFFFFF;
+      overflow: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Custom scrollbars */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #F8FAF8;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #D1DDD4;
+      border-radius: 3px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94A398;
+    }
+
+    /* Card styling */
+    .device-card {
+      transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.1s ease;
+    }
+    .device-card:hover {
+      border-color: #279B50;
+      box-shadow: 0 4px 14px -2px rgba(39, 155, 80, 0.08), 0 2px 6px -1px rgba(0, 0, 0, 0.04);
+    }
+    .device-card.selected {
+      border-color: #279B50 !important;
+      background-color: #F3FAF5 !important;
+      box-shadow: 0 0 0 1.5px #279B50;
+    }
+
+    /* Privacy Veil Blur */
+    .privacy-veiled svg text, 
+    .privacy-veiled svg rect:not([fill*="#F"]):not([fill*="#1"]):not([fill*="#0"]) {
+      filter: blur(4px);
+      transition: filter 0.2s ease;
+    }
+    .privacy-veiled .device-card:hover svg text,
+    .privacy-veiled .device-card:hover svg rect {
+      filter: blur(0px);
+    }
+
+    /* Dropdown animation */
+    .dropdown-menu {
+      transform-origin: top right;
+      transition: opacity 0.1s ease, transform 0.1s ease;
+    }
+    .dropdown-menu.hidden {
+      opacity: 0;
+      transform: scale(0.97);
+      pointer-events: none;
+    }
+    .dropdown-menu:not(.hidden) {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    details summary::-webkit-details-marker {
+      display: none;
+    }
+    details[open] summary svg.chevron {
+      transform: rotate(90deg);
+    }
+  </style>
+</head>
+<body class="h-screen w-screen flex flex-col bg-white text-neutral-800 antialiased overflow-hidden">
+
+  <!-- ========================================================================= -->
+  <!-- 1. TOP HEADER (SLIM, CLEAN, MINIMAL + CROSS-PLATFORM CONTROLS)            -->
+  <!-- ========================================================================= -->
+  <header class="h-13 bg-white border-b border-neutral-200 px-4 flex items-center justify-between shrink-0 z-30">
+    <!-- Left: Logo & Workspace -->
+    <div class="flex items-center space-x-4">
+      <div class="flex items-center space-x-2.5">
+        <div class="w-8 h-8 rounded-lg bg-brand-500 flex items-center justify-center text-white shadow-sm">
+          <svg class="w-4.5 h-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+          </svg>
+        </div>
+        <div class="flex items-baseline space-x-1.5">
+          <span class="font-bold text-base tracking-tight text-neutral-900">SYNAPSE</span>
+          <span class="font-normal text-xs text-neutral-500 uppercase tracking-widest">Command</span>
+        </div>
+      </div>
+
+      <div class="h-4 w-px bg-neutral-200"></div>
+
+      <!-- Workspace Selector -->
+      <div class="relative group">
+        <button class="flex items-center space-x-1.5 text-xs font-medium text-neutral-700 hover:text-brand-700 py-1 px-2 rounded-md hover:bg-neutral-50 transition">
+          <span class="w-2 h-2 rounded-full bg-brand-500"></span>
+          <span class="font-semibold text-neutral-900">Main Campus</span>
+          <span class="text-neutral-400">/</span>
+          <span>Computer Lab 01</span>
+          <svg class="w-3.5 h-3.5 text-neutral-400 ml-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Center: Global Search (Linear-Style Ctrl+K) -->
+    <div class="flex-1 max-w-md mx-6">
+      <div class="relative">
+        <svg class="w-4 h-4 text-neutral-400 absolute left-3 top-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        </svg>
+        <input 
+          id="globalSearchInput" 
+          type="text" 
+          placeholder="Search computers, users, IPs, apps (Ctrl+K)..." 
+          class="w-full pl-9 pr-14 py-1.5 bg-neutral-50 border border-neutral-200 rounded-lg text-xs text-neutral-800 placeholder-neutral-400 focus:outline-none focus:border-brand-500 focus:bg-white transition"
+          oninput="renderComputerCards()"
+        />
+        <kbd class="absolute right-2.5 top-2 px-1.5 py-0.5 text-[10px] font-mono text-neutral-400 bg-white border border-neutral-200 rounded">⌘K</kbd>
+      </div>
+    </div>
+
+    <!-- Right: Privacy Mode, PWA Install, Connection Status, Profile -->
+    <div class="flex items-center space-x-2.5 text-xs">
+      
+      <!-- Privacy Blur Toggle -->
+      <button onclick="togglePrivacyVeil()" id="btnPrivacyVeil" class="flex items-center space-x-1 px-2.5 py-1 bg-white border border-neutral-200 rounded-md text-neutral-600 hover:text-neutral-900 hover:bg-neutral-50 transition" title="Toggle Educational Privacy Blur">
+        <svg class="w-3.5 h-3.5 text-neutral-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18" /></svg>
+        <span class="text-[11px] font-medium">Privacy Veil</span>
+      </button>
+
+      <!-- Install App PWA (Linux / macOS / Windows) -->
+      <button onclick="triggerPWAInstall()" class="hidden sm:flex items-center space-x-1 px-2.5 py-1 bg-brand-50 border border-brand-200 rounded-md text-brand-700 hover:bg-brand-100 transition" title="Install Native App on Linux, macOS, or Windows">
+        <svg class="w-3.5 h-3.5 text-brand-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+        <span class="text-[11px] font-medium">Install App</span>
+      </button>
+
+      <!-- Active Timer Badge -->
+      <div id="activeTimerBadge" class="hidden items-center space-x-1.5 px-2.5 py-1 bg-amber-50 border border-amber-200 text-amber-800 rounded-md">
+        <svg class="w-3.5 h-3.5 text-amber-600 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <span id="activeTimerText" class="font-medium text-[11px]">Shutdown in 45m</span>
+        <button onclick="cancelActiveTimer()" class="text-amber-700 hover:text-amber-900 ml-1 font-bold">×</button>
+      </div>
+
+      <!-- Live Connection Indicator -->
+      <div class="flex items-center space-x-1.5 px-2.5 py-1 bg-brand-50 border border-brand-100 rounded-md text-brand-700">
+        <span class="w-2 h-2 rounded-full bg-brand-500 animate-pulse"></span>
+        <span class="font-medium text-[11px]">Live Fleet</span>
+      </div>
+
+      <!-- Profile -->
+      <div class="flex items-center space-x-2 pl-2 border-l border-neutral-200">
+        <div class="w-7 h-7 rounded-full bg-brand-100 border border-brand-200 text-brand-800 flex items-center justify-center font-bold text-xs">
+          A
+        </div>
+        <div class="text-left leading-tight hidden md:block">
+          <div class="font-semibold text-neutral-900 text-[11px]">Administrator</div>
+          <div id="currentTimeDisplay" class="text-[10px] text-neutral-400 font-mono">10:00 AM</div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ========================================================================= -->
+  <!-- 2. MAIN APP CONTAINER (3-COLUMN: SIDEBAR + WORKSPACE + INSPECTOR)        -->
+  <!-- ========================================================================= -->
+  <div class="flex-1 flex overflow-hidden">
+
+    <!-- ======================================================================= -->
+    <!-- 2A. LEFT SIDEBAR (CLEAN, MINIMAL, PRIMARY NAV ONLY)                    -->
+    <!-- ======================================================================= -->
+    <aside id="leftSidebar" class="w-56 bg-white border-r border-neutral-200 flex flex-col shrink-0 z-20">
+      
+      <!-- Primary Nav List -->
+      <nav class="flex-1 px-3 py-3 space-y-1 overflow-y-auto">
+        
+        <!-- Overview -->
+        <a href="#overview" onclick="setStatusFilter('all')" class="flex items-center px-2.5 py-2 rounded-lg text-xs font-medium text-neutral-600 hover:text-neutral-900 hover:bg-neutral-50 transition group">
+          <svg class="w-4 h-4 mr-2.5 text-neutral-400 group-hover:text-neutral-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+          </svg>
+          Overview
+        </a>
+
+        <!-- Live Monitor (ACTIVE) -->
+        <a href="#monitor" onclick="setStatusFilter('all')" class="flex items-center justify-between px-2.5 py-2 rounded-lg text-xs font-semibold text-brand-700 bg-brand-50 border border-brand-100 transition">
+          <div class="flex items-center">
+            <svg class="w-4 h-4 mr-2.5 text-brand-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+            </svg>
+            Live Monitor
+          </div>
+          <span id="sidebarTotalBadge" class="px-1.5 py-0.5 text-[10px] font-mono font-medium bg-brand-500 text-white rounded-full">48</span>
+        </a>
+
+        <!-- BYOD Sentinel -->
+        <a href="#byod" onclick="setStatusFilter('byod')" class="flex items-center justify-between px-2.5 py-2 rounded-lg text-xs font-medium text-neutral-600 hover:text-neutral-900 hover:bg-neutral-50 transition group">
+          <div class="flex items-center">
+            <svg class="w-4 h-4 mr-2.5 text-neutral-400 group-hover:text-neutral-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+            </svg>
+            BYOD Sentinel
+          </div>
+          <span class="px-1.5 py-0.5 text-[10px] font-mono text-neutral-500 bg-neutral-100 rounded">10</span>
+        </a>
+
+        <!-- Remote Access -->
+        <a href="#remote" class="flex items-center px-2.5 py-2 rounded-lg text-xs font-medium text-neutral-600 hover:text-neutral-900 hover:bg-neutral-50 transition group">
+          <svg class="w-4 h-4 mr-2.5 text-neutral-400 group-hover:text-neutral-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+          </svg>
+          Remote Access
+        </a>
+
+        <div class="pt-3 pb-1">
+          <div class="px-2 text-[10px] font-semibold uppercase tracking-wider text-neutral-400 flex items-center justify-between">
+            <span>Locations</span>
+            <input id="locationSearchInput" type="hidden" value="" />
+          </div>
+        </div>
+
+        <!-- Locations Expandable List -->
+        <div class="space-y-0.5">
+          <button onclick="filterByLocation('All Labs')" class="w-full flex items-center justify-between px-2.5 py-1.5 text-xs text-neutral-700 hover:bg-neutral-50 rounded-md transition text-left font-medium">
+            <span class="flex items-center">
+              <span class="w-1.5 h-1.5 rounded-full bg-neutral-400 mr-2"></span>
+              All Locations
+            </span>
+            <span class="text-[10px] font-mono text-neutral-400">48</span>
+          </button>
+          
+          <button onclick="filterByLocation('Lab 01')" class="w-full flex items-center justify-between px-2.5 py-1.5 text-xs text-brand-700 bg-brand-50/70 rounded-md transition text-left font-semibold">
+            <span class="flex items-center">
+              <span class="w-1.5 h-1.5 rounded-full bg-brand-500 mr-2"></span>
+              Computer Lab 01
+            </span>
+            <span id="sidebarLabCount" class="text-[10px] font-mono text-brand-700 font-bold">28</span>
+          </button>
+
+          <button onclick="filterByLocation('Lab 02')" class="w-full flex items-center justify-between px-2.5 py-1.5 text-xs text-neutral-700 hover:bg-neutral-50 rounded-md transition text-left">
+            <span class="flex items-center">
+              <span class="w-1.5 h-1.5 rounded-full bg-neutral-300 mr-2"></span>
+              Computer Lab 02
+            </span>
+            <span class="text-[10px] font-mono text-neutral-400">12</span>
+          </button>
+
+          <button onclick="filterByLocation('Library')" class="w-full flex items-center justify-between px-2.5 py-1.5 text-xs text-neutral-700 hover:bg-neutral-50 rounded-md transition text-left">
+            <span class="flex items-center">
+              <span class="w-1.5 h-1.5 rounded-full bg-neutral-300 mr-2"></span>
+              Library Research Pod
+            </span>
+            <span class="text-[10px] font-mono text-neutral-400">8</span>
+          </button>
+        </div>
+
+      </nav>
+
+      <!-- Cross-Platform OS Agent Status -->
+      <div class="p-3 border-t border-neutral-200 bg-neutral-50/50 flex items-center justify-between text-xs text-neutral-500">
+        <div class="flex items-center space-x-1.5 text-[11px]">
+          <span class="w-2 h-2 rounded-full bg-brand-500"></span>
+          <span>Core v4.11.3</span>
+        </div>
+        <button onclick="refreshScreenshots()" title="Refresh Screen Previews" class="p-1 hover:text-brand-600 rounded hover:bg-white transition">
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+          </svg>
+        </button>
+      </div>
+    </aside>
+
+    <!-- ======================================================================= -->
+    <!-- 2B. MAIN WORKSPACE (MAXIMUM SPACE, CLEAN, FOCUSED)                     -->
+    <!-- ======================================================================= -->
+    <main class="flex-1 flex flex-col bg-white overflow-hidden">
+      
+      <!-- Workspace Sub-Header & Command Toolbar -->
+      <div class="h-14 px-5 border-b border-neutral-200 flex items-center justify-between bg-white shrink-0 z-10">
+        
+        <!-- Left: Location Title & Status Filters -->
+        <div class="flex items-center space-x-4">
+          <div>
+            <h1 id="currentLocationTitle" class="text-sm font-bold text-neutral-900 leading-tight">Computer Lab 01</h1>
+            <div class="text-[11px] text-neutral-500 flex items-center space-x-2 mt-0.5">
+              <span>28 Workstations</span>
+              <span class="text-neutral-300">•</span>
+              <span class="text-brand-600 font-medium"><span id="chipOnlineCount">24</span> Online</span>
+              <span class="text-neutral-300">•</span>
+              <span class="text-neutral-400"><span id="chipOfflineCount">4</span> Offline</span>
+            </div>
+          </div>
+
+          <div class="h-6 w-px bg-neutral-200 mx-1"></div>
+
+          <!-- Status Filter Chips -->
+          <div class="flex items-center p-0.5 bg-neutral-100 rounded-lg text-xs">
+            <button id="filterChipAll" onclick="setStatusFilter('all')" class="px-2.5 py-1 rounded-md font-medium text-brand-700 bg-white shadow-sm transition">All</button>
+            <button id="filterChipOnline" onclick="setStatusFilter('online')" class="px-2.5 py-1 rounded-md text-neutral-600 hover:text-neutral-900 transition">Online</button>
+            <button id="filterChipOffline" onclick="setStatusFilter('offline')" class="px-2.5 py-1 rounded-md text-neutral-600 hover:text-neutral-900 transition">Offline</button>
+            <button id="filterChipIdle" onclick="setStatusFilter('byod')" class="px-2.5 py-1 rounded-md text-neutral-600 hover:text-neutral-900 transition">BYOD</button>
+          </div>
+        </div>
+
+        <!-- Right: Primary Actions, View Mode Switcher, & More Actions -->
+        <div class="flex items-center space-x-2.5">
+          
+          <!-- Selection Counter Badge -->
+          <div id="selectionBadge" class="hidden items-center space-x-1.5 px-2 py-1 bg-brand-50 border border-brand-200 rounded-md text-brand-800 text-xs">
+            <span id="selectedCountText" class="font-bold">1 Selected</span>
+            <button onclick="clearSelection()" class="text-brand-600 hover:text-brand-900 ml-1 font-bold">✕</button>
+          </div>
+
+          <!-- PRIMARY COMMAND BUTTON 1: MONITOR -->
+          <button id="btnMonitor" onclick="executeOnSelected('monitor')" class="inline-flex items-center space-x-1.5 px-3 py-1.5 bg-brand-500 hover:bg-brand-600 text-white text-xs font-semibold rounded-lg shadow-sm transition active:scale-[0.98]">
+            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+            </svg>
+            <span>Monitor</span>
+          </button>
+
+          <!-- PRIMARY COMMAND BUTTON 2: REMOTE VIEW -->
+          <button onclick="executeOnSelected('view')" class="inline-flex items-center space-x-1.5 px-3 py-1.5 bg-white border border-neutral-200 hover:bg-neutral-50 text-neutral-700 text-xs font-medium rounded-lg transition active:scale-[0.98]">
+            <svg class="w-3.5 h-3.5 text-neutral-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+            </svg>
+            <span>Remote View</span>
+          </button>
+
+          <!-- PRIMARY COMMAND BUTTON 3: REMOTE CONTROL -->
+          <button onclick="executeOnSelected('control')" class="inline-flex items-center space-x-1.5 px-3 py-1.5 bg-white border border-neutral-200 hover:bg-neutral-50 text-neutral-700 text-xs font-medium rounded-lg transition active:scale-[0.98]">
+            <svg class="w-3.5 h-3.5 text-neutral-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" />
+            </svg>
+            <span>Remote Control</span>
+          </button>
+
+          <!-- PRIMARY COMMAND BUTTON 4: POWER (DROPDOWN TRIGGER) -->
+          <div class="relative">
+            <button onclick="togglePowerMenu()" class="inline-flex items-center space-x-1 px-3 py-1.5 bg-white border border-neutral-200 hover:bg-neutral-50 text-neutral-700 text-xs font-medium rounded-lg transition">
+              <svg class="w-3.5 h-3.5 text-neutral-500 mr-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+              </svg>
+              <span>Power</span>
+              <svg class="w-3 h-3 text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+            
+            <!-- Power Dropdown -->
+            <div id="powerDropdown" class="hidden absolute right-0 mt-1 w-48 bg-white border border-neutral-200 rounded-lg shadow-lg py-1 z-50 text-xs">
+              <button onclick="confirmPowerDownSelected()" class="w-full text-left px-3 py-2 text-neutral-700 hover:bg-neutral-50 flex items-center space-x-2">
+                <svg class="w-3.5 h-3.5 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" /></svg>
+                <span>Shutdown Selected</span>
+              </button>
+              <button onclick="runCommand('reboot', 'Selected computers')" class="w-full text-left px-3 py-2 text-neutral-700 hover:bg-neutral-50 flex items-center space-x-2">
+                <svg class="w-3.5 h-3.5 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+                <span>Reboot Selected</span>
+              </button>
+              <button onclick="runCommand('wol', 'Wake-on-LAN broadcast sent')" class="w-full text-left px-3 py-2 text-neutral-700 hover:bg-neutral-50 flex items-center space-x-2">
+                <svg class="w-3.5 h-3.5 text-brand-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+                <span>Wake on LAN (Magic Packet)</span>
+              </button>
+              <div class="border-t border-neutral-100 my-1"></div>
+              <button onclick="confirmPowerDownAll()" class="w-full text-left px-3 py-2 text-red-600 hover:bg-red-50 flex items-center space-x-2 font-medium">
+                <svg class="w-3.5 h-3.5 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                <span>Power Down Entire Lab</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- MORE ACTIONS (CLEAN ORGANIZED SECONDARY MENU) -->
+          <div class="relative">
+            <button onclick="toggleMoreActionsMenu()" class="inline-flex items-center space-x-1 px-2.5 py-1.5 bg-white border border-neutral-200 hover:bg-neutral-50 text-neutral-700 text-xs font-medium rounded-lg transition" title="More Administrative Operations">
+              <span>More</span>
+              <svg class="w-3.5 h-3.5 text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+
+            <!-- More Actions Dropdown (All Original Capabilities Preserved!) -->
+            <div id="moreActionsDropdown" class="hidden absolute right-0 mt-1 w-56 bg-white border border-neutral-200 rounded-lg shadow-lg py-1 z-50 text-xs">
+              
+              <!-- Freeze / Lock Screen -->
+              <button id="btnFreeze" onclick="toggleFreezeAll()" class="w-full text-left px-3 py-2 text-neutral-700 hover:bg-neutral-50 flex items-center space-x-2.5">
+                <svg class="w-4 h-4 text-neutral-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                <span>Lock / Freeze Screens</span>
+              </button>
+
+              <!-- Send Broadcast Message -->
+              <button onclick="openPromptModal('Broadcast Message', 'Send an instant administrative announcement to selected workstations:', 'Please save your files and prepare for system maintenance.')" class="w-full text-left px-3 py-2 text-neutral-700 hover:bg-neutral-50 flex items-center space-x-2.5">
+                <svg class="w-4 h-4 text-neutral-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg>
+                <span>Send Broadcast Message</span>
+              </button>
+
+              <!-- Distribute File / URL -->
+              <button onclick="openPromptModal('Open Website / Distribute URL', 'Push a web URL to open on all active workstations:', 'https://digihub.dhic.local')" class="w-full text-left px-3 py-2 text-neutral-700 hover:bg-neutral-50 flex items-center space-x-2.5">
+                <svg class="w-4 h-4 text-neutral-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+                <span>Open URL / Push Website</span>
+              </button>
+
+              <!-- Execute Remote Script -->
+              <button onclick="openPromptModal('Run Remote Command', 'Execute command via Synapse Sentinel Daemon:', 'shutdown /r /t 60')" class="w-full text-left px-3 py-2 text-neutral-700 hover:bg-neutral-50 flex items-center space-x-2.5">
+                <svg class="w-4 h-4 text-neutral-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                <span>Run Remote Command</span>
+              </button>
+
+              <div class="border-t border-neutral-100 my-1"></div>
+
+              <!-- Timed Shutdown Presets -->
+              <div class="px-3 py-1.5 text-[10px] uppercase font-bold text-neutral-400 tracking-wider">Scheduled Timers</div>
+              
+              <button onclick="setGlobalShutdownTimer(30)" class="w-full text-left px-3 py-1.5 text-neutral-700 hover:bg-neutral-50 flex items-center justify-between">
+                <span>Shutdown in 30 minutes</span>
+                <span class="text-[10px] text-neutral-400 font-mono">30m</span>
+              </button>
+
+              <button onclick="setGlobalShutdownTimer(60)" class="w-full text-left px-3 py-1.5 text-neutral-700 hover:bg-neutral-50 flex items-center justify-between">
+                <span>Shutdown in 60 minutes</span>
+                <span class="text-[10px] text-neutral-400 font-mono">1h</span>
+              </button>
+
+              <button onclick="promptCustomShutdownTimer()" class="w-full text-left px-3 py-1.5 text-neutral-700 hover:bg-neutral-50 flex items-center justify-between">
+                <span>Custom Shutdown Timer...</span>
+                <span class="text-[10px] text-brand-600 font-semibold">Custom</span>
+              </button>
+
+              <div class="border-t border-neutral-100 my-1"></div>
+
+              <!-- Demo Mode / Presentation -->
+              <button id="btnDemo" onclick="runCommand('demo', 'Teacher Presentation broadcast started')" class="w-full text-left px-3 py-2 text-neutral-700 hover:bg-neutral-50 flex items-center space-x-2.5">
+                <svg class="w-4 h-4 text-neutral-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z" /></svg>
+                <span>Broadcast Teacher Screen</span>
+              </button>
+
+            </div>
+          </div>
+
+          <div class="h-6 w-px bg-neutral-200 mx-1"></div>
+
+          
+          <!-- Live Stream vs Demo Feed Toggle -->
+          <div class="flex items-center p-0.5 bg-neutral-100 rounded-lg text-neutral-500 text-[11px] font-medium mr-1">
+            <button id="feedDemoBtn" onclick="switchFeedMode('demo')" title="Simulated High-Fidelity Mockups" class="px-2 py-1 rounded bg-white text-brand-700 shadow-sm transition">Demo Mockup</button>
+            <button id="feedLiveBtn" onclick="switchFeedMode('live')" title="Live VNC/WebSocket Network Feeds" class="px-2 py-1 rounded text-neutral-600 hover:text-neutral-900 transition flex items-center space-x-1">
+              <span class="w-1.5 h-1.5 rounded-full bg-brand-500 animate-pulse"></span>
+              <span>Live Stream</span>
+            </button>
+          </div>
+
+          <!-- View Switchers (Grid, Compact, Floorplan, List) -->
+          <div class="flex items-center p-0.5 bg-neutral-100 rounded-lg text-neutral-500">
+            <button id="viewGridBtn" onclick="switchViewMode('grid')" title="Standard Grid View" class="p-1 rounded bg-white text-neutral-900 shadow-sm">
+              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
+            </button>
+            <button id="viewCompactBtn" onclick="switchViewMode('compact')" title="Compact View" class="p-1 rounded hover:text-neutral-900">
+              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" /></svg>
+            </button>
+            <button id="viewFloorplanBtn" onclick="switchViewMode('floorplan')" title="Interactive Lab Floorplan View" class="p-1 rounded hover:text-neutral-900">
+              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
+            </button>
+            <button id="viewListBtn" onclick="switchViewMode('list')" title="Detailed Table View" class="p-1 rounded hover:text-neutral-900">
+              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" /></svg>
+            </button>
+          </div>
+
+          <!-- Zoom Slider -->
+          <input id="gridZoomSlider" type="range" min="160" max="320" value="230" step="10" oninput="adjustCardSize(this.value)" class="w-16 accent-brand-500 cursor-pointer" title="Adjust Card Size" />
+
+          <!-- Toggle Right Inspector Button -->
+          <button onclick="toggleInspector()" class="p-1.5 text-neutral-500 hover:text-neutral-900 hover:bg-neutral-100 rounded-lg ml-1" title="Toggle Inspector Panel">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+          </button>
+
+        </div>
+      </div>
+
+      <!-- Scrollable Device Grid Workspace -->
+      <div id="monitoringScrollContainer" class="flex-1 p-5 overflow-y-auto bg-neutral-50/40">
+        
+        <!-- Standard & Compact Grid View -->
+        <div id="computerGrid" class="grid gap-4" style="grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));">
+          <!-- Dynamic cards rendered via renderComputerCards() -->
+        </div>
+
+        <!-- Interactive Room Floorplan Blueprint View (Hidden by default) -->
+        <div id="floorplanContainer" class="hidden flex-col items-center justify-center p-6 bg-white border border-neutral-200 rounded-xl shadow-sm">
+          <div class="w-full max-w-4xl border-2 border-dashed border-neutral-300 rounded-xl p-6 bg-neutral-50 relative">
+            <div class="text-center font-bold text-xs uppercase text-neutral-400 tracking-wider mb-6 flex justify-between items-center">
+              <span>◄ West Entrance (Door)</span>
+              <span class="px-3 py-1 bg-brand-100 text-brand-800 rounded font-semibold text-[11px]">Teacher Podium / Projector Front</span>
+              <span>East Windows ►</span>
+            </div>
+            
+            <div id="floorplanGrid" class="grid grid-cols-4 gap-4">
+              <!-- Dynamically rendered floorplan desks -->
+            </div>
+
+            <div class="mt-8 text-center text-xs text-neutral-400 flex items-center justify-center space-x-4">
+              <span class="flex items-center"><span class="w-2.5 h-2.5 rounded-full bg-brand-500 mr-1.5"></span> Online</span>
+              <span class="flex items-center"><span class="w-2.5 h-2.5 rounded-full bg-neutral-400 mr-1.5"></span> Offline / Standby</span>
+              <span class="flex items-center"><span class="w-2.5 h-2.5 rounded-full bg-amber-500 mr-1.5"></span> BYOD Guest</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- List Table View (Hidden by default) -->
+        <div id="computerListTable" class="hidden bg-white border border-neutral-200 rounded-xl overflow-hidden shadow-sm">
+          <table class="w-full text-left text-xs">
+            <thead class="bg-neutral-50 border-b border-neutral-200 text-neutral-500 font-semibold uppercase tracking-wider text-[10px]">
+              <tr>
+                <th class="py-2.5 px-4 w-10">#</th>
+                <th class="py-2.5 px-4">Computer Name</th>
+                <th class="py-2.5 px-4">Status</th>
+                <th class="py-2.5 px-4">IP Address</th>
+                <th class="py-2.5 px-4">Logged In User</th>
+                <th class="py-2.5 px-4">Active Application</th>
+                <th class="py-2.5 px-4">CPU / RAM</th>
+                <th class="py-2.5 px-4 text-right">Quick Actions</th>
+              </tr>
+            </thead>
+            <tbody id="computerListTableBody" class="divide-y divide-neutral-100">
+              <!-- Rendered via JS -->
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+
+    </main>
+
+    <!-- ======================================================================= -->
+    <!-- 2C. RIGHT INSPECTOR (COLLAPSIBLE, PROGRESSIVE DISCLOSURE)              -->
+    <!-- ======================================================================= -->
+    <aside id="rightInspector" class="w-80 bg-white border-l border-neutral-200 flex flex-col shrink-0 z-20 transition-all duration-200">
+      
+      <!-- Inspector Header -->
+      <div class="h-14 px-4 border-b border-neutral-200 flex items-center justify-between shrink-0">
+        <div class="flex items-center space-x-2">
+          <span class="font-bold text-xs uppercase tracking-wider text-neutral-500">Inspector</span>
+          <span id="inspCompStatusPill" class="px-2 py-0.5 text-[10px] font-medium rounded-full bg-neutral-100 text-neutral-500">No Device</span>
+        </div>
+        
+        <div class="flex items-center space-x-1">
+          <button onclick="toggleInspector()" class="p-1 text-neutral-400 hover:text-neutral-700 rounded hover:bg-neutral-50" title="Collapse Panel">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Inspector Tab Switchers (Progressive tabs) -->
+      <div class="flex border-b border-neutral-200 px-3 bg-neutral-50/50 text-xs">
+        <button id="tabComputerBtn" onclick="switchInspectorTab('computer')" class="flex-1 py-2 font-medium text-brand-700 border-b-2 border-brand-500 text-center">Workstation</button>
+        <button id="tabDetailsBtn" onclick="switchInspectorTab('details')" class="flex-1 py-2 font-medium text-neutral-500 hover:text-neutral-800 text-center">Telemetry</button>
+        <button id="tabGlobalBtn" onclick="switchInspectorTab('global')" class="flex-1 py-2 font-medium text-neutral-500 hover:text-neutral-800 text-center">Fleet Policy</button>
+      </div>
+
+      <!-- Inspector Body (Scrollable) -->
+      <div class="flex-1 overflow-y-auto p-4 space-y-4">
+        
+        <!-- WORKSTATION TAB CONTENT -->
+        <div id="inspectorTabComputer" class="space-y-4">
+          
+          <!-- Computer Title & Primary ID -->
+          <div id="inspectorComputerHeader" class="bg-neutral-50 border border-neutral-200 rounded-xl p-3">
+            <div class="flex items-start justify-between">
+              <div>
+                <h3 id="inspCompName" class="text-sm font-bold text-neutral-900 leading-tight">computer 01</h3>
+                <div id="inspCompIP" class="text-xs text-neutral-500 font-mono mt-0.5">192.168.1.101</div>
+              </div>
+              <button onclick="promptRenameComputer(selectedCompId)" class="p-1 text-neutral-400 hover:text-brand-600 rounded hover:bg-white" title="Rename Computer">
+                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
+              </button>
+            </div>
+
+            <!-- Primary Actions Button Group -->
+            <div class="grid grid-cols-2 gap-2 mt-3 pt-3 border-t border-neutral-200">
+              <button onclick="executeDirectAction(selectedCompId, 'control')" class="w-full py-1.5 px-2 bg-brand-500 hover:bg-brand-600 text-white font-medium text-xs rounded-lg flex items-center justify-center space-x-1 transition shadow-sm">
+                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" /></svg>
+                <span>Control</span>
+              </button>
+              <button onclick="executeDirectAction(selectedCompId, 'view')" class="w-full py-1.5 px-2 bg-white border border-neutral-200 hover:bg-neutral-50 text-neutral-700 font-medium text-xs rounded-lg flex items-center justify-center space-x-1 transition">
+                <svg class="w-3.5 h-3.5 text-neutral-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                <span>Preview</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Essential Info Cards -->
+          <div class="space-y-2.5">
+            
+            <!-- User -->
+            <div class="p-2.5 bg-white border border-neutral-200 rounded-lg flex items-center justify-between">
+              <div>
+                <div class="text-[10px] font-semibold uppercase text-neutral-400 tracking-wider">Logged In User</div>
+                <div id="inspCompUser" class="text-xs font-semibold text-neutral-800 mt-0.5">MUHAMMED IBRAHIM FAIZ</div>
+              </div>
+              <button onclick="runCommand('logoff', 'User session terminated')" class="text-[11px] text-red-600 hover:text-red-700 font-medium">Logoff</button>
+            </div>
+
+            <!-- Active Application -->
+            <div class="p-2.5 bg-white border border-neutral-200 rounded-lg">
+              <div class="text-[10px] font-semibold uppercase text-neutral-400 tracking-wider">Foreground Application</div>
+              <div id="inspCompApp" class="text-xs font-medium text-neutral-800 mt-0.5 truncate">Visual Studio Code</div>
+            </div>
+
+            <!-- CPU & RAM Bars -->
+            <div class="p-3 bg-white border border-neutral-200 rounded-lg space-y-2.5">
+              <div>
+                <div class="flex items-center justify-between text-xs mb-1">
+                  <span class="text-neutral-500">CPU Load</span>
+                  <span id="inspMetricCPU" class="font-mono font-semibold text-neutral-800">18%</span>
+                </div>
+                <div class="h-1.5 w-full bg-neutral-100 rounded-full overflow-hidden">
+                  <div id="inspBarCPU" class="h-full bg-brand-500 rounded-full transition-all duration-300" style="width: 18%;"></div>
+                </div>
+              </div>
+
+              <div>
+                <div class="flex items-center justify-between text-xs mb-1">
+                  <span class="text-neutral-500">Memory</span>
+                  <span id="inspMetricRAM" class="font-mono font-semibold text-neutral-800">62% (9.9 / 16 GB)</span>
+                </div>
+                <div class="h-1.5 w-full bg-neutral-100 rounded-full overflow-hidden">
+                  <div id="inspBarRAM" class="h-full bg-amber-500 rounded-full transition-all duration-300" style="width: 62%;"></div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Collapsible Sections (Progressive Disclosure) -->
+          <div class="space-y-2 pt-1">
+            
+            <!-- Network & Hardware Accordion -->
+            <details class="group bg-neutral-50/60 border border-neutral-200 rounded-lg p-2.5 text-xs" open>
+              <summary class="font-semibold text-neutral-700 cursor-pointer flex items-center justify-between list-none">
+                <span>Network & Identity</span>
+                <svg class="chevron w-3.5 h-3.5 text-neutral-400 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+              </summary>
+              <div class="mt-2.5 space-y-1.5 pt-2 border-t border-neutral-200/60 text-neutral-600 font-mono text-[11px]">
+                <div class="flex justify-between"><span class="text-neutral-400 font-sans">MAC:</span><span>34:5A:60:48:3D:F8</span></div>
+                <div class="flex justify-between"><span class="text-neutral-400 font-sans">Subnet:</span><span>255.255.255.0</span></div>
+                <div class="flex justify-between"><span class="text-neutral-400 font-sans">Gateway:</span><span>192.168.1.1</span></div>
+                <div class="flex justify-between"><span class="text-neutral-400 font-sans">OS:</span><span class="font-sans">Windows 11 Pro 23H2 / Linux Compatible</span></div>
+              </div>
+            </details>
+
+            <!-- Quick Management Tools Accordion -->
+            <details class="group bg-neutral-50/60 border border-neutral-200 rounded-lg p-2.5 text-xs">
+              <summary class="font-semibold text-neutral-700 cursor-pointer flex items-center justify-between list-none">
+                <span>Administrative Actions</span>
+                <svg class="chevron w-3.5 h-3.5 text-neutral-400 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+              </summary>
+              <div class="mt-2.5 space-y-1.5 pt-2 border-t border-neutral-200/60">
+                <button onclick="runCommand('lock', 'Workstation Locked')" class="w-full text-left py-1 text-neutral-700 hover:text-brand-700">🔒 Lock Screen</button>
+                <button onclick="runCommand('screenshot', 'Screenshot saved to /Videos/Synapse Recordings')" class="w-full text-left py-1 text-neutral-700 hover:text-brand-700">📸 Capture Screenshot</button>
+                <button onclick="runCommand('message', 'Message sent')" class="w-full text-left py-1 text-neutral-700 hover:text-brand-700">💬 Send Text Alert</button>
+                <button onclick="runCommand('restart', 'Initiated restart')" class="w-full text-left py-1 text-red-600 hover:text-red-700">🔄 Restart Machine</button>
+              </div>
+            </details>
+
+          </div>
+
+        </div>
+
+        <!-- DETAILS TAB (HIDDEN) -->
+        <div id="inspectorTabDetails" class="hidden space-y-3 text-xs">
+          <div class="p-3 bg-neutral-50 rounded-lg border border-neutral-200 space-y-2">
+            <div class="font-semibold text-neutral-800 text-[11px] uppercase tracking-wider">Cross-Platform Agent Status</div>
+            <div class="flex justify-between py-1 border-b border-neutral-200/60"><span>Service:</span><span class="text-brand-600 font-semibold font-mono">Running (systemd/win-svc)</span></div>
+            <div class="flex justify-between py-1 border-b border-neutral-200/60"><span>BYOD Guard:</span><span class="text-brand-600 font-semibold font-mono">Active</span></div>
+            <div class="flex justify-between py-1 border-b border-neutral-200/60"><span>VNC Port:</span><span class="font-mono">11100</span></div>
+            <div class="flex justify-between py-1"><span>Last Ping:</span><span class="font-mono">2s ago</span></div>
+          </div>
+        </div>
+
+        <!-- GLOBAL TAB (HIDDEN) -->
+        <div id="inspectorTabGlobal" class="hidden space-y-3 text-xs">
+          <div class="p-3 bg-neutral-50 rounded-lg border border-neutral-200 space-y-2">
+            <div class="font-semibold text-neutral-800 text-[11px] uppercase tracking-wider">Fleet Policies</div>
+            <div class="flex justify-between py-1 border-b border-neutral-200/60"><span>Auto-Lock on Inactivity:</span><span class="font-semibold text-brand-600">Enabled (15m)</span></div>
+            <div class="flex justify-between py-1 border-b border-neutral-200/60"><span>Internet Filtering:</span><span class="font-semibold text-brand-600">Strict</span></div>
+            <div class="flex justify-between py-1"><span>Print Quota Enforcement:</span><span class="font-semibold text-brand-600">Active</span></div>
+          </div>
+        </div>
+
+      </div>
+
+    </aside>
+
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- 3. MODALS & POPUPS (PRESERVED 100% FOR INTERACTIVITY)                     -->
+  <!-- ========================================================================= -->
+
+  <!-- A. DETAILED LIVE REMOTE VIEW MODAL -->
+  <div id="detailedViewModal" class="hidden fixed inset-0 z-50 bg-neutral-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl shadow-2xl border border-neutral-200 w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden">
+      <!-- Modal Header -->
+      <div class="px-5 py-3 border-b border-neutral-200 flex items-center justify-between bg-neutral-50">
+        <div class="flex items-center space-x-2.5">
+          <span class="w-2.5 h-2.5 rounded-full bg-brand-500"></span>
+          <span id="modalViewportTitle" class="font-bold text-sm text-neutral-900"><span id="modalCompTitle">Live Remote Session</span> — computer 01</span>
+          <span id="modalCompStatus" class="px-2 py-0.5 text-[10px] font-semibold bg-brand-100 text-brand-800 rounded">LIVE</span>
+        </div>
+        <button onclick="closeDetailedModal()" class="text-neutral-400 hover:text-neutral-700 p-1 rounded-md hover:bg-neutral-200/50">
+          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+        </button>
+      </div>
+
+      <!-- Modal Screen Area -->
+      <div class="flex-1 bg-neutral-900 flex items-center justify-center p-4 overflow-hidden relative">
+        <div id="modalScreenGraphic" class="w-full max-w-3xl aspect-[16/10] bg-neutral-800 rounded shadow-lg overflow-hidden flex items-center justify-center">
+          <!-- Screen SVG injected here -->
+        </div>
+      </div>
+
+      <!-- Modal Footer Toolbar -->
+      <div class="px-5 py-3 border-t border-neutral-200 bg-white flex items-center justify-between text-xs">
+        <div class="flex items-center space-x-3 text-neutral-500 font-mono text-[11px]">
+          <span id="modalHostName">computer 01</span>
+          <span>•</span>
+          <span id="modalIP">192.168.1.101</span>
+          <span>•</span>
+          <span id="modalCompUser" class="font-sans">MUHAMMED IBRAHIM FAIZ</span>
+        </div>
+        <div class="flex items-center space-x-2">
+          <button onclick="runCommand('cad', 'Sent Ctrl+Alt+Del signal')" class="px-2.5 py-1.5 border border-neutral-200 hover:bg-neutral-50 rounded text-neutral-700 font-medium">Ctrl+Alt+Del</button>
+          <button onclick="runCommand('fullscreen', 'Toggled fullscreen')" class="px-2.5 py-1.5 border border-neutral-200 hover:bg-neutral-50 rounded text-neutral-700 font-medium">Fullscreen</button>
+          <button onclick="runCommand('disconnect', 'Session closed'); closeDetailedModal();" class="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded font-medium shadow-sm">End Session</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- B. GENERAL PROMPT / INPUT MODAL -->
+  <div id="promptModal" class="hidden fixed inset-0 z-50 bg-neutral-900/40 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl shadow-xl border border-neutral-200 w-full max-w-md overflow-hidden">
+      <div class="p-5">
+        <h3 id="promptModalTitle" class="font-bold text-sm text-neutral-900 mb-1">Dialog Title</h3>
+        <p id="promptModalDesc" class="text-xs text-neutral-500 mb-3">Dialog description or instruction.</p>
+        <input id="promptModalInput" type="text" class="w-full px-3 py-2 border border-neutral-200 rounded-lg text-xs focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500" />
+      </div>
+      <div class="px-5 py-3 bg-neutral-50 border-t border-neutral-200 flex justify-end space-x-2 text-xs">
+        <button onclick="closePromptModal()" class="px-3 py-1.5 border border-neutral-200 hover:bg-neutral-100 rounded-md font-medium text-neutral-700">Cancel</button>
+        <button onclick="submitPromptModal()" class="px-3 py-1.5 bg-brand-500 hover:bg-brand-600 text-white rounded-md font-medium shadow-sm">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- C. TOAST NOTIFICATION -->
+  <div id="toastNotification" class="fixed bottom-5 right-5 z-50 hidden items-center space-x-2 px-3.5 py-2.5 bg-neutral-900 text-white rounded-lg shadow-xl text-xs transition-opacity duration-200">
+    <svg class="w-4 h-4 text-brand-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+    <span id="toastMessage">Action completed successfully.</span>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- 4. JAVASCRIPT APPLICATION CORE (PRESERVES 100% OF APIS & LOGIC)           -->
+  <!-- ========================================================================= -->
+  <script>
+    // Master dataset of workstations (exact mapping from live environment)
+    const defaultLabComputers = [
+      { id: 1, name: "computer 01", ip: "192.168.1.101", user: "MUHAMMED IBRAHIM FAIZ", status: "online", ownership: "lab", app: "Visual Studio Code", cpu: 18, ram: 62 },
+      { id: 2, name: "computer 02", ip: "192.168.1.102", user: "AHMAD RASHEED", status: "online", ownership: "lab", app: "Chrome - GitHub", cpu: 14, ram: 48 },
+      { id: 3, name: "computer 03", ip: "192.168.1.103", user: "Unassigned", status: "offline", ownership: "lab", lastSeen: "08:42 AM", app: "None" },
+      { id: 4, name: "computer 04", ip: "192.168.1.104", user: "AHSAS", status: "online", ownership: "lab", app: "Microsoft Edge", cpu: 12, ram: 38 },
+      { id: 5, name: "computer 05", ip: "192.168.1.105", user: "BILAL KHAN", status: "online", ownership: "lab", app: "Adobe Photoshop 2026", cpu: 38, ram: 78 },
+      { id: 6, name: "computer 06", ip: "192.168.1.106", user: "Unassigned", status: "offline", ownership: "lab", lastSeen: "09:12 AM", app: "None" },
+      { id: 7, name: "computer 07", ip: "192.168.1.107", user: "ZAYN MALIK", status: "online", ownership: "lab", app: "AutoCAD 2026", cpu: 45, ram: 72 },
+      { id: 8, name: "computer 08", ip: "192.168.1.138", user: "HAMZA NOOR", status: "online", ownership: "lab", app: "Blender 4.2", cpu: 65, ram: 84 },
+      { id: 9, name: "computer 09", ip: "192.168.1.109", user: "MUHAMMED IBRAHIM", status: "online", ownership: "lab", app: "Visual Studio Code (main.cpp)", cpu: 18, ram: 62 },
+      { id: 10, name: "computer 10", ip: "192.168.1.110", user: "TARIQ AZIZ", status: "online", ownership: "lab", app: "Android Studio Ladybug", cpu: 52, ram: 88 },
+      { id: 11, name: "computer 11", ip: "192.168.1.111", user: "Unassigned", status: "offline", ownership: "lab", lastSeen: "Yesterday", app: "None" },
+      { id: 12, name: "computer 12", ip: "192.168.1.112", user: "SALMAN SHAH", status: "online", ownership: "lab", app: "Windows Terminal (PowerShell)", cpu: 8, ram: 34 },
+      { id: 13, name: "computer 13", ip: "192.168.1.113", user: "KASHIF MEHMOOD", status: "online", ownership: "lab", app: "Word - Lab Report.docx", cpu: 16, ram: 42 },
+      { id: 14, name: "computer 14", ip: "192.168.1.114", user: "Unassigned", status: "offline", ownership: "lab", lastSeen: "07:15 AM", app: "None" },
+      { id: 15, name: "computer 15", ip: "192.168.1.115", user: "OMAR FAROOQ", status: "online", ownership: "lab", app: "Figma Desktop", cpu: 22, ram: 56 },
+      { id: 16, name: "computer 16", ip: "192.168.1.116", user: "DANISH ALI", status: "online", ownership: "lab", app: "PyCharm Pro", cpu: 34, ram: 68 },
+      { id: 17, name: "computer 17", ip: "192.168.1.117", user: "HASSAN RAZA", status: "online", ownership: "lab", app: "Adobe Illustrator", cpu: 28, ram: 60 },
+      { id: 18, name: "computer 18", ip: "192.168.1.118", user: "FAHAD MUSTAFA", status: "online", ownership: "lab", app: "Unity Editor", cpu: 72, ram: 92 },
+      { id: 19, name: "computer 19", ip: "192.168.1.119", user: "Unassigned", status: "offline", ownership: "lab", lastSeen: "08:30 AM", app: "None" },
+      { id: 20, name: "computer 20", ip: "192.168.1.120", user: "Unassigned", status: "offline", ownership: "lab", lastSeen: "08:30 AM", app: "None" },
+      { id: 21, name: "computer 21", ip: "192.168.1.121", user: "YOUSUF ALI", status: "online", ownership: "lab", app: "Chrome - Coursera", cpu: 15, ram: 44 },
+      { id: 22, name: "computer 22", ip: "192.168.1.122", user: "IMRAN HUSSAIN", status: "online", ownership: "lab", app: "Visual Studio 2026", cpu: 40, ram: 74 },
+      { id: 23, name: "computer 23", ip: "192.168.1.123", user: "FARHAN AKHTAR", status: "online", ownership: "lab", app: "MATLAB R2026a", cpu: 60, ram: 82 },
+      { id: 24, name: "computer 24", ip: "192.168.1.124", user: "ARSLAN ASH", status: "online", ownership: "lab", app: "Unreal Engine 5.5", cpu: 85, ram: 95 },
+      { id: 25, name: "computer 25", ip: "192.168.1.125", user: "USMAN GHANI", status: "online", ownership: "lab", app: "Postman API", cpu: 12, ram: 40 },
+      { id: 26, name: "computer 26", ip: "192.168.1.126", user: "WAQAS AHMED", status: "online", ownership: "lab", app: "Docker Desktop", cpu: 25, ram: 58 },
+      { id: 27, name: "computer 27", ip: "192.168.1.127", user: "REHAN SHAH", status: "online", ownership: "lab", app: "Chrome - StackOverflow", cpu: 10, ram: 36 },
+      { id: 28, name: "computer 28", ip: "192.168.1.128", user: "NASIR JAMSHED", status: "online", ownership: "lab", app: "GitKraken", cpu: 18, ram: 45 },
+      // BYOD / Additional workstations
+      { id: 29, name: "byod-macbook-01", ip: "192.168.1.144", user: "SARA KHAN", status: "online", ownership: "byod", app: "Xcode 16", cpu: 20, ram: 50 },
+      { id: 30, name: "byod-dell-02", ip: "192.168.1.147", user: "ALI RAZA", status: "online", ownership: "byod", app: "Chrome - DiGiHub Print", cpu: 14, ram: 42 }
+    ];
+
+    // Load persisted state or fallback
+    let labComputers = JSON.parse(localStorage.getItem('synapse_computers') || JSON.stringify(defaultLabComputers));
+
+    let selectedCompId = 1;
+    let selectedSet = new Set([1]);
+    let currentFilter = 'all';
+    let currentLocation = 'Lab 01';
+    let currentViewMode = 'grid';
+    let isInspectorOpen = true;
+    let isScreensFrozen = false;
+    let isPrivacyVeiled = false;
+    let activeTimerSeconds = 0;
+    let timerInterval = null;
+    let promptCallback = null;
+
+    let currentFeedMode = 'demo'; // 'demo' or 'live'
+    let activeWebSockets = new Map();
+
+    function switchFeedMode(mode) {
+      currentFeedMode = mode;
+      const btnDemo = document.getElementById('feedDemoBtn');
+      const btnLive = document.getElementById('feedLiveBtn');
+
+      if (mode === 'live') {
+        btnLive?.classList.add('bg-white', 'text-brand-700', 'shadow-sm');
+        btnLive?.classList.remove('text-neutral-600');
+        btnDemo?.classList.remove('bg-white', 'text-brand-700', 'shadow-sm');
+        btnDemo?.classList.add('text-neutral-600');
+        showToast('Live Network Streaming active: Connecting to VNC/WebSocket daemons...');
+      } else {
+        btnDemo?.classList.add('bg-white', 'text-brand-700', 'shadow-sm');
+        btnDemo?.classList.remove('text-neutral-600');
+        btnLive?.classList.remove('bg-white', 'text-brand-700', 'shadow-sm');
+        btnLive?.classList.add('text-neutral-600');
+        showToast('Switched to High-Fidelity Local Simulation mode.');
+      }
+      renderComputerCards();
+    }
+
+    let deferredPrompt = null;
+
+    // PWA Install prompt listener
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+    });
+
+    function triggerPWAInstall() {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then((choiceResult) => {
+          if (choiceResult.outcome === 'accepted') {
+            showToast('Synapse Command installed successfully.');
+          }
+          deferredPrompt = null;
+        });
+      } else {
+        showToast('App is ready: You can pin or install this window as a standalone app.');
+      }
+    }
+
+    // Toggle Privacy Veil
+    function togglePrivacyVeil() {
+      isPrivacyVeiled = !isPrivacyVeiled;
+      const body = document.body;
+      const btn = document.getElementById('btnPrivacyVeil');
+      if (isPrivacyVeiled) {
+        body.classList.add('privacy-veiled');
+        btn.classList.add('bg-brand-50', 'text-brand-700', 'border-brand-200');
+        showToast('Privacy Veil active: Student screens blurred until hovered.');
+      } else {
+        body.classList.remove('privacy-veiled');
+        btn.classList.remove('bg-brand-50', 'text-brand-700', 'border-brand-200');
+        showToast('Privacy Veil disabled.');
+      }
+    }
+
+    // Initialize application
+    window.addEventListener('DOMContentLoaded', () => {
+      renderComputerCards();
+      selectComputer(1);
+      updateClock();
+      setInterval(updateClock, 1000);
+      
+      // Global shortcut Ctrl+K
+      window.addEventListener('keydown', (e) => {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+          e.preventDefault();
+          const searchInput = document.getElementById('globalSearchInput');
+          if (searchInput) {
+            searchInput.focus();
+            searchInput.select();
+          }
+        }
+      });
+
+      // Close dropdowns when clicking outside
+      window.addEventListener('click', (e) => {
+        if (!e.target.closest('#powerDropdown') && !e.target.closest('button[onclick="togglePowerMenu()"]')) {
+          const pd = document.getElementById('powerDropdown');
+          if (pd) pd.classList.add('hidden');
+        }
+        if (!e.target.closest('#moreActionsDropdown') && !e.target.closest('button[onclick="toggleMoreActionsMenu()"]')) {
+          const mad = document.getElementById('moreActionsDropdown');
+          if (mad) mad.classList.add('hidden');
+        }
+      });
+    });
+
+    // Clock updater
+    function updateClock() {
+      const now = new Date();
+      const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      const el = document.getElementById('currentTimeDisplay');
+      if (el) el.innerText = timeStr;
+    }
+
+    function togglePowerMenu() {
+      const pd = document.getElementById('powerDropdown');
+      if (pd) pd.classList.toggle('hidden');
+      const mad = document.getElementById('moreActionsDropdown');
+      if (mad) mad.classList.add('hidden');
+    }
+
+    function toggleMoreActionsMenu() {
+      const mad = document.getElementById('moreActionsDropdown');
+      if (mad) mad.classList.toggle('hidden');
+      const pd = document.getElementById('powerDropdown');
+      if (pd) pd.classList.add('hidden');
+    }
+
+    // High fidelity screen thumbnail SVG generator
+    function generateDesktopThumbnailSVG(comp) {
+      if (comp.status === 'offline') {
+        return `
+          <svg viewBox="0 0 320 200" class="w-full h-full bg-neutral-100" xmlns="http://www.w3.org/2000/svg">
+            <rect width="320" height="200" fill="#F1F5F2"/>
+            <circle cx="160" cy="90" r="24" fill="#E5EDE7"/>
+            <path d="M152 90h16M160 82v16" stroke="#94A398" stroke-width="2" stroke-linecap="round"/>
+            <text x="160" y="130" text-anchor="middle" font-family="Inter, sans-serif" font-size="11" font-weight="600" fill="#6E7D75">Powered Off / Standby</text>
+            <text x="160" y="146" text-anchor="middle" font-family="Inter, sans-serif" font-size="9" fill="#94A398">Last seen: ${comp.lastSeen || '08:30 AM'}</text>
+          </svg>
+        `;
+      }
+
+      const appName = comp.app || 'Desktop';
+      let screenContent = '';
+
+      if (appName.includes('Visual Studio Code') || appName.includes('PyCharm')) {
+        screenContent = `
+          <rect x="0" y="0" width="320" height="200" fill="#1E1E1E"/>
+          <rect x="0" y="0" width="40" height="200" fill="#252526"/>
+          <rect x="40" y="0" width="70" height="200" fill="#2D2D2D"/>
+          <rect x="110" y="0" width="210" height="24" fill="#252526"/>
+          <text x="120" y="16" fill="#CCCCCC" font-size="9" font-family="monospace">main.cpp</text>
+          <text x="120" y="50" fill="#569CD6" font-size="8" font-family="monospace">#include &lt;iostream&gt;</text>
+          <text x="120" y="65" fill="#4EC9B0" font-size="8" font-family="monospace">int main() {</text>
+          <text x="135" y="80" fill="#DCDCAA" font-size="8" font-family="monospace">  std::cout &lt;&lt; "Ready";</text>
+          <text x="120" y="95" fill="#4EC9B0" font-size="8" font-family="monospace">}</text>
+          <rect x="110" y="140" width="210" height="60" fill="#181818"/>
+          <text x="118" y="156" fill="#6A9955" font-size="8" font-family="monospace">PS C:\\Lab&gt; build successful</text>
+        `;
+      } else if (appName.includes('Chrome') || appName.includes('Edge')) {
+        screenContent = `
+          <rect x="0" y="0" width="320" height="200" fill="#FFFFFF"/>
+          <rect x="0" y="0" width="320" height="26" fill="#F1F3F4"/>
+          <rect x="60" y="5" width="180" height="16" rx="8" fill="#FFFFFF" stroke="#DADCE0"/>
+          <text x="75" y="17" fill="#5F6368" font-size="8" font-family="sans-serif">https://digihub.dhic.local</text>
+          <rect x="30" y="45" width="260" height="80" rx="4" fill="#F8F9FA" stroke="#E8EAED"/>
+          <rect x="45" y="60" width="100" height="10" rx="2" fill="#279B50"/>
+          <rect x="45" y="80" width="160" height="6" rx="2" fill="#BDC1C6"/>
+          <rect x="45" y="92" width="120" height="6" rx="2" fill="#E8EAED"/>
+        `;
+      } else if (appName.includes('Blender') || appName.includes('AutoCAD')) {
+        screenContent = `
+          <rect x="0" y="0" width="320" height="200" fill="#282828"/>
+          <polygon points="160,50 220,85 160,120 100,85" fill="#3E3E3E" stroke="#505050"/>
+          <polygon points="160,120 220,85 220,150 160,185" fill="#2E2E2E" stroke="#505050"/>
+          <polygon points="160,120 100,85 100,150 160,185" fill="#383838" stroke="#505050"/>
+          <circle cx="160" cy="115" r="3" fill="#279B50"/>
+          <text x="12" y="18" fill="#AAAAAA" font-size="8" font-family="sans-serif">3D Viewport - Orthographic</text>
+        `;
+      } else {
+        screenContent = `
+          <rect x="0" y="0" width="320" height="200" fill="#0A3A20"/>
+          <rect x="0" y="176" width="320" height="24" fill="#072916"/>
+          <circle cx="16" cy="188" r="5" fill="#279B50"/>
+          <rect x="28" y="184" width="8" height="8" rx="1" fill="#FFFFFF"/>
+          <rect x="40" y="184" width="8" height="8" rx="1" fill="#FFFFFF"/>
+          <text x="160" y="100" text-anchor="middle" fill="#FFFFFF" opacity="0.15" font-size="28" font-weight="bold">SYNAPSE</text>
+        `;
+      }
+
+      return `
+        <svg viewBox="0 0 320 200" class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+          ${screenContent}
+          <rect x="0" y="184" width="320" height="16" fill="rgba(0,0,0,0.6)"/>
+          <circle cx="10" cy="192" r="3.5" fill="#279B50"/>
+          <text x="310" y="195" text-anchor="end" fill="#FFFFFF" font-size="7" font-family="sans-serif">10:00 AM</text>
+        </svg>
+      `;
+    }
+
+    // Render Grid, Floorplan, and Table
+    function renderComputerCards() {
+      const grid = document.getElementById('computerGrid');
+      const tableBody = document.getElementById('computerListTableBody');
+      const floorplan = document.getElementById('floorplanGrid');
+      const searchVal = (document.getElementById('globalSearchInput')?.value || '').toLowerCase().trim();
+
+      if (!grid) return;
+
+      const filtered = labComputers.filter(comp => {
+        if (currentLocation === 'Lab 01' && comp.ownership === 'byod') return false;
+        if (currentLocation === 'BYOD' && comp.ownership !== 'byod') return false;
+
+        if (currentFilter === 'online' && comp.status !== 'online') return false;
+        if (currentFilter === 'offline' && comp.status !== 'offline') return false;
+        if (currentFilter === 'byod' && comp.ownership !== 'byod') return false;
+
+        if (searchVal) {
+          const matchName = comp.name.toLowerCase().includes(searchVal);
+          const matchUser = (comp.user || '').toLowerCase().includes(searchVal);
+          const matchIP = comp.ip.includes(searchVal);
+          const matchApp = (comp.app || '').toLowerCase().includes(searchVal);
+          if (!matchName && !matchUser && !matchIP && !matchApp) return false;
+        }
+
+        return true;
+      });
+
+      // Update counters
+      const totalOnline = labComputers.filter(c => c.status === 'online').length;
+      const totalOffline = labComputers.filter(c => c.status === 'offline').length;
+      const onlineEl = document.getElementById('chipOnlineCount');
+      const offlineEl = document.getElementById('chipOfflineCount');
+      if (onlineEl) onlineEl.innerText = totalOnline;
+      if (offlineEl) offlineEl.innerText = totalOffline;
+
+      // Render Grid Cards
+      let html = '';
+      filtered.forEach(comp => {
+        const isSelected = selectedSet.has(comp.id);
+        const isOnline = comp.status === 'online';
+
+        html += `
+          <div 
+            class="device-card bg-white border border-neutral-200 rounded-xl overflow-hidden cursor-pointer flex flex-col ${isSelected ? 'selected' : ''}" 
+            onclick="selectComputer(${comp.id}, event)"
+            ondblclick="openDetailedModal(${comp.id})"
+            id="card-comp-${comp.id}"
+          >
+            <!-- Screen Thumbnail Container -->
+            <div class="relative w-full aspect-[16/10] bg-neutral-100 overflow-hidden border-b border-neutral-200">
+              ${generateDesktopThumbnailSVG(comp)}
+
+              <!-- Selection Checkbox (top-left) -->
+              <div class="absolute top-2 left-2 z-10">
+                <input 
+                  type="checkbox" 
+                  ${isSelected ? 'checked' : ''} 
+                  onclick="event.stopPropagation(); toggleSelect(${comp.id})" 
+                  class="w-4 h-4 rounded text-brand-600 focus:ring-brand-500 border-neutral-300 transition cursor-pointer"
+                />
+              </div>
+
+              <!-- Status Dot (top-right) -->
+              <div class="absolute top-2 right-2 px-2 py-0.5 rounded-full text-[10px] font-semibold flex items-center space-x-1.5 shadow-sm ${isOnline ? 'bg-white/90 text-brand-700' : 'bg-neutral-800/80 text-neutral-300'}">
+                <span class="w-1.5 h-1.5 rounded-full ${isOnline ? 'bg-brand-500 animate-pulse' : 'bg-neutral-400'}"></span>
+                <span class="capitalize">${comp.status}</span>
+              </div>
+            </div>
+
+            <!-- Card Bottom Info -->
+            <div class="p-3 flex flex-col justify-between flex-1 bg-white">
+              <div class="flex items-center justify-between">
+                <h4 class="font-bold text-xs text-neutral-900 leading-tight">${comp.name}</h4>
+                <span class="text-[10px] font-mono text-neutral-400">${comp.ip}</span>
+              </div>
+              
+              <div class="mt-1 flex items-center justify-between text-neutral-500 text-[11px]">
+                <span class="truncate max-w-[140px] text-neutral-700 font-medium">${comp.user || 'No Active User'}</span>
+                ${isOnline && comp.cpu ? `<span class="text-[10px] font-mono text-neutral-400">${comp.cpu}% CPU</span>` : ''}
+              </div>
+            </div>
+          </div>
+        `;
+      });
+      grid.innerHTML = html;
+
+      // Render Floorplan Blueprint Desks
+      if (floorplan) {
+        let fhtml = '';
+        filtered.forEach(comp => {
+          const isSelected = selectedSet.has(comp.id);
+          const isOnline = comp.status === 'online';
+          fhtml += `
+            <div 
+              onclick="selectComputer(${comp.id}, event)"
+              class="p-2.5 bg-white border ${isSelected ? 'border-brand-500 bg-brand-50 shadow-md ring-2 ring-brand-500/20' : 'border-neutral-200'} rounded-lg flex flex-col justify-between hover:border-brand-400 cursor-pointer transition"
+            >
+              <div class="flex justify-between items-center mb-1">
+                <span class="font-bold text-xs text-neutral-800">${comp.name}</span>
+                <span class="w-2 h-2 rounded-full ${isOnline ? 'bg-brand-500' : 'bg-neutral-400'}"></span>
+              </div>
+              <div class="text-[10px] text-neutral-500 truncate">${comp.user || 'Standby'}</div>
+              <div class="mt-1.5 pt-1 border-t border-neutral-100 flex justify-between text-[9px] font-mono text-neutral-400">
+                <span>${comp.ip.split('.').slice(2).join('.')}</span>
+                <span>${isOnline ? comp.cpu + '%' : 'OFF'}</span>
+              </div>
+            </div>
+          `;
+        });
+        floorplan.innerHTML = fhtml;
+      }
+
+      // Render Table rows
+      if (tableBody) {
+        let rows = '';
+        filtered.forEach(comp => {
+          const isSelected = selectedSet.has(comp.id);
+          const isOnline = comp.status === 'online';
+          rows += `
+            <tr class="hover:bg-neutral-50 cursor-pointer ${isSelected ? 'bg-brand-50/50' : ''}" onclick="selectComputer(${comp.id})">
+              <td class="py-2.5 px-4"><input type="checkbox" ${isSelected ? 'checked' : ''} onclick="event.stopPropagation(); toggleSelect(${comp.id})" class="rounded text-brand-600 focus:ring-brand-500"></td>
+              <td class="py-2.5 px-4 font-semibold text-neutral-900">${comp.name}</td>
+              <td class="py-2.5 px-4">
+                <span class="inline-flex items-center space-x-1 px-2 py-0.5 rounded-full text-[10px] font-medium ${isOnline ? 'bg-brand-50 text-brand-700' : 'bg-neutral-100 text-neutral-500'}">
+                  <span class="w-1.5 h-1.5 rounded-full ${isOnline ? 'bg-brand-500' : 'bg-neutral-400'}"></span>
+                  <span class="capitalize">${comp.status}</span>
+                </span>
+              </td>
+              <td class="py-2.5 px-4 font-mono text-neutral-600">${comp.ip}</td>
+              <td class="py-2.5 px-4 text-neutral-800 font-medium">${comp.user}</td>
+              <td class="py-2.5 px-4 text-neutral-500 truncate max-w-xs">${comp.app || '—'}</td>
+              <td class="py-2.5 px-4 font-mono text-neutral-600">${comp.cpu ? `${comp.cpu}% / ${comp.ram}%` : '—'}</td>
+              <td class="py-2.5 px-4 text-right">
+                <button onclick="event.stopPropagation(); executeDirectAction(${comp.id}, 'view')" class="text-brand-600 hover:text-brand-800 font-medium text-xs">View</button>
+                <span class="text-neutral-300 mx-1">|</span>
+                <button onclick="event.stopPropagation(); executeDirectAction(${comp.id}, 'control')" class="text-brand-600 hover:text-brand-800 font-medium text-xs">Control</button>
+              </td>
+            </tr>
+          `;
+        });
+        tableBody.innerHTML = rows;
+      }
+
+      updateSelectionBadge();
+    }
+
+    function toggleSelect(id) {
+      if (selectedSet.has(id)) {
+        selectedSet.delete(id);
+      } else {
+        selectedSet.add(id);
+      }
+      updateSelectionBadge();
+      renderComputerCards();
+    }
+
+    function selectComputer(id, event) {
+      if (event && event.shiftKey) {
+        selectedSet.add(id);
+      } else if (!event || !event.ctrlKey) {
+        selectedSet.clear();
+        selectedSet.add(id);
+      } else {
+        toggleSelect(id);
+        return;
+      }
+
+      selectedCompId = id;
+      const comp = labComputers.find(c => c.id === id);
+      if (!comp) return;
+
+      const nameEl = document.getElementById('inspCompName');
+      const ipEl = document.getElementById('inspCompIP');
+      const userEl = document.getElementById('inspCompUser');
+      const appEl = document.getElementById('inspCompApp');
+      const statusPill = document.getElementById('inspCompStatusPill');
+      const cpuMetric = document.getElementById('inspMetricCPU');
+      const ramMetric = document.getElementById('inspMetricRAM');
+      const cpuBar = document.getElementById('inspBarCPU');
+      const ramBar = document.getElementById('inspBarRAM');
+
+      if (nameEl) nameEl.innerText = comp.name;
+      if (ipEl) ipEl.innerText = comp.ip;
+      if (userEl) userEl.innerText = comp.user || 'Unassigned';
+      if (appEl) appEl.innerText = comp.app || 'No Active Foreground Process';
+
+      if (statusPill) {
+        if (comp.status === 'online') {
+          statusPill.className = "px-2 py-0.5 text-[10px] font-semibold rounded-full bg-brand-50 text-brand-700";
+          statusPill.innerText = "ONLINE";
+        } else {
+          statusPill.className = "px-2 py-0.5 text-[10px] font-semibold rounded-full bg-neutral-100 text-neutral-500";
+          statusPill.innerText = "OFFLINE";
+        }
+      }
+
+      if (cpuMetric) cpuMetric.innerText = comp.cpu ? `${comp.cpu}%` : '0%';
+      if (cpuBar) cpuBar.style.width = comp.cpu ? `${comp.cpu}%` : '0%';
+      if (ramMetric) ramMetric.innerText = comp.ram ? `${comp.ram}%` : '0%';
+      if (ramBar) ramBar.style.width = comp.ram ? `${comp.ram}%` : '0%';
+
+      const inspector = document.getElementById('rightInspector');
+      if (inspector && inspector.classList.contains('hidden')) {
+        inspector.classList.remove('hidden');
+      }
+
+      updateSelectionBadge();
+      renderComputerCards();
+    }
+
+    function clearSelection() {
+      selectedSet.clear();
+      updateSelectionBadge();
+      renderComputerCards();
+    }
+
+    function updateSelectionBadge() {
+      const badge = document.getElementById('selectionBadge');
+      const text = document.getElementById('selectedCountText');
+      if (!badge || !text) return;
+
+      if (selectedSet.size > 0) {
+        badge.classList.remove('hidden');
+        badge.classList.add('flex');
+        text.innerText = `${selectedSet.size} Selected`;
+      } else {
+        badge.classList.add('hidden');
+        badge.classList.remove('flex');
+      }
+    }
+
+    function switchInspectorTab(tab) {
+      const compTab = document.getElementById('inspectorTabComputer');
+      const detTab = document.getElementById('inspectorTabDetails');
+      const globTab = document.getElementById('inspectorTabGlobal');
+      const btnC = document.getElementById('tabComputerBtn');
+      const btnD = document.getElementById('tabDetailsBtn');
+      const btnG = document.getElementById('tabGlobalBtn');
+
+      [compTab, detTab, globTab].forEach(t => t?.classList.add('hidden'));
+      [btnC, btnD, btnG].forEach(b => {
+        b?.classList.remove('text-brand-700', 'border-b-2', 'border-brand-500');
+        b?.classList.add('text-neutral-500');
+      });
+
+      if (tab === 'computer') {
+        compTab?.classList.remove('hidden');
+        btnC?.classList.add('text-brand-700', 'border-b-2', 'border-brand-500');
+        btnC?.classList.remove('text-neutral-500');
+      } else if (tab === 'details') {
+        detTab?.classList.remove('hidden');
+        btnD?.classList.add('text-brand-700', 'border-b-2', 'border-brand-500');
+        btnD?.classList.remove('text-neutral-500');
+      } else {
+        globTab?.classList.remove('hidden');
+        btnG?.classList.add('text-brand-700', 'border-b-2', 'border-brand-500');
+        btnG?.classList.remove('text-neutral-500');
+      }
+    }
+
+    function toggleInspector() {
+      const inspector = document.getElementById('rightInspector');
+      if (inspector) inspector.classList.toggle('hidden');
+    }
+
+    // View mode switchers (Grid, Compact, Floorplan, List)
+    function switchViewMode(mode) {
+      currentViewMode = mode;
+      const grid = document.getElementById('computerGrid');
+      const table = document.getElementById('computerListTable');
+      const floorplan = document.getElementById('floorplanContainer');
+      const btnGrid = document.getElementById('viewGridBtn');
+      const btnCompact = document.getElementById('viewCompactBtn');
+      const btnFloorplan = document.getElementById('viewFloorplanBtn');
+      const btnList = document.getElementById('viewListBtn');
+
+      [btnGrid, btnCompact, btnFloorplan, btnList].forEach(b => {
+        b?.classList.remove('bg-white', 'text-neutral-900', 'shadow-sm');
+        b?.classList.add('text-neutral-500');
+      });
+
+      [grid, table, floorplan].forEach(el => el?.classList.add('hidden'));
+
+      if (mode === 'list') {
+        table?.classList.remove('hidden');
+        btnList?.classList.add('bg-white', 'text-neutral-900', 'shadow-sm');
+      } else if (mode === 'floorplan') {
+        floorplan?.classList.remove('hidden');
+        floorplan?.classList.add('flex');
+        btnFloorplan?.classList.add('bg-white', 'text-neutral-900', 'shadow-sm');
+      } else {
+        grid?.classList.remove('hidden');
+        if (mode === 'compact') {
+          grid.style.gridTemplateColumns = 'repeat(auto-fill, minmax(170px, 1fr))';
+          btnCompact?.classList.add('bg-white', 'text-neutral-900', 'shadow-sm');
+        } else {
+          const zoomVal = document.getElementById('gridZoomSlider')?.value || 230;
+          grid.style.gridTemplateColumns = `repeat(auto-fill, minmax(${zoomVal}px, 1fr))`;
+          btnGrid?.classList.add('bg-white', 'text-neutral-900', 'shadow-sm');
+        }
+      }
+      renderComputerCards();
+    }
+
+    function adjustCardSize(val) {
+      const grid = document.getElementById('computerGrid');
+      if (grid && currentViewMode === 'grid') {
+        grid.style.gridTemplateColumns = `repeat(auto-fill, minmax(${val}px, 1fr))`;
+      }
+    }
+
+    function setStatusFilter(status) {
+      currentFilter = status;
+      ['filterChipAll', 'filterChipOnline', 'filterChipOffline', 'filterChipIdle'].forEach(id => {
+        const chip = document.getElementById(id);
+        chip?.classList.remove('font-medium', 'text-brand-700', 'bg-white', 'shadow-sm');
+        chip?.classList.add('text-neutral-600');
+      });
+
+      const activeId = status === 'all' ? 'filterChipAll' :
+                       status === 'online' ? 'filterChipOnline' :
+                       status === 'offline' ? 'filterChipOffline' : 'filterChipIdle';
+      const activeChip = document.getElementById(activeId);
+      activeChip?.classList.add('font-medium', 'text-brand-700', 'bg-white', 'shadow-sm');
+      activeChip?.classList.remove('text-neutral-600');
+
+      renderComputerCards();
+    }
+
+    function filterByLocation(loc) {
+      currentLocation = loc;
+      const title = document.getElementById('currentLocationTitle');
+      if (title) title.innerText = loc;
+      renderComputerCards();
+    }
+
+    function openDetailedModal(id) {
+      const comp = labComputers.find(c => c.id === id);
+      if (!comp) return;
+
+      const modal = document.getElementById('detailedViewModal');
+      const title = document.getElementById('modalViewportTitle');
+      const host = document.getElementById('modalHostName');
+      const ip = document.getElementById('modalIP');
+      const user = document.getElementById('modalCompUser');
+      const screenGraphic = document.getElementById('modalScreenGraphic');
+
+      if (title) title.innerHTML = `<span id="modalCompTitle">Live Remote Session</span> — ${comp.name}`;
+      if (host) host.innerText = comp.name;
+      if (ip) ip.innerText = comp.ip;
+      if (user) user.innerText = comp.user;
+      if (screenGraphic) screenGraphic.innerHTML = generateDesktopThumbnailSVG(comp);
+
+      modal?.classList.remove('hidden');
+    }
+
+    function closeDetailedModal() {
+      const modal = document.getElementById('detailedViewModal');
+      modal?.classList.add('hidden');
+    }
+
+    function openPromptModal(title, desc, defaultVal, cb) {
+      const modal = document.getElementById('promptModal');
+      const t = document.getElementById('promptModalTitle');
+      const d = document.getElementById('promptModalDesc');
+      const inp = document.getElementById('promptModalInput');
+
+      if (t) t.innerText = title;
+      if (d) d.innerText = desc;
+      if (inp) inp.value = defaultVal || '';
+
+      promptCallback = cb || null;
+      modal?.classList.remove('hidden');
+      inp?.focus();
+    }
+
+    function closePromptModal() {
+      const modal = document.getElementById('promptModal');
+      modal?.classList.add('hidden');
+      promptCallback = null;
+    }
+
+    function submitPromptModal() {
+      const val = document.getElementById('promptModalInput')?.value;
+      if (promptCallback) {
+        promptCallback(val);
+      } else {
+        showToast(`Operation confirmed: "${val}"`);
+      }
+      closePromptModal();
+    }
+
+    function executeOnSelected(action) {
+      if (selectedSet.size === 0) {
+        showToast('Please select at least one computer first.');
+        return;
+      }
+      const names = Array.from(selectedSet).map(id => labComputers.find(c => c.id === id)?.name).join(', ');
+      
+      if (action === 'monitor' || action === 'view') {
+        openDetailedModal(Array.from(selectedSet)[0]);
+      } else if (action === 'control') {
+        openDetailedModal(Array.from(selectedSet)[0]);
+        showToast(`Interactive Control engaged on: ${names}`);
+      } else {
+        showToast(`Action [${action.toUpperCase()}] executed on ${selectedSet.size} computer(s)`);
+      }
+    }
+
+    function executeDirectAction(id, action) {
+      selectComputer(id);
+      executeOnSelected(action);
+    }
+
+    function runCommand(actionName, details) {
+      showToast(`${capitalize(actionName)}: ${details}`);
+    }
+
+    function toggleFreezeAll() {
+      isScreensFrozen = !isScreensFrozen;
+      const btn = document.getElementById('btnFreeze');
+      if (isScreensFrozen) {
+        showToast('All student workstation screens have been LOCKED.');
+        if (btn) btn.innerHTML = '<span>🔓 Unlock Workstation Screens</span>';
+      } else {
+        showToast('Workstation screens unlocked.');
+        if (btn) btn.innerHTML = '<span>🔒 Lock / Freeze Screens</span>';
+      }
+    }
+
+    function confirmPowerDownSelected() {
+      if (selectedSet.size === 0) {
+        showToast('No computers selected.');
+        return;
+      }
+      if (confirm(`Shut down the ${selectedSet.size} selected computer(s)?`)) {
+        selectedSet.forEach(id => {
+          const comp = labComputers.find(c => c.id === id);
+          if (comp) comp.status = 'offline';
+        });
+        saveComputerList();
+        renderComputerCards();
+        showToast('Shutdown command delivered to selected computers.');
+      }
+    }
+
+    function confirmPowerDownAll() {
+      if (confirm('CRITICAL ACTION: Shut down ALL 28 workstations in Computer Lab 01?')) {
+        labComputers.forEach(c => c.status = 'offline');
+        saveComputerList();
+        renderComputerCards();
+        showToast('All workstations in Lab 01 are powering down.');
+      }
+    }
+
+    function refreshScreenshots() {
+      showToast('Refreshing screen previews from VNC daemons...');
+      renderComputerCards();
+    }
+
+    function promptRenameComputer(id) {
+      const comp = labComputers.find(c => c.id === id);
+      if (!comp) return;
+      openPromptModal('Rename Workstation', `Enter new label for ${comp.name}:`, comp.name, (newVal) => {
+        if (newVal && newVal.trim()) {
+          comp.name = newVal.trim();
+          saveComputerList();
+          renderComputerCards();
+          selectComputer(id);
+          showToast(`Renamed to "${comp.name}"`);
+        }
+      });
+    }
+
+    function setGlobalShutdownTimer(minutes) {
+      activeTimerSeconds = minutes * 60;
+      startTimerCountdown();
+      showToast(`Global shutdown scheduled in ${minutes} minutes.`);
+    }
+
+    function promptCustomShutdownTimer() {
+      openPromptModal('Custom Shutdown Timer', 'Enter timer duration in minutes:', '45', (val) => {
+        const mins = parseInt(val, 10);
+        if (!isNaN(mins) && mins > 0) {
+          setGlobalShutdownTimer(mins);
+        } else {
+          showToast('Invalid duration entered.');
+        }
+      });
+    }
+
+    function startTimerCountdown() {
+      if (timerInterval) clearInterval(timerInterval);
+      const badge = document.getElementById('activeTimerBadge');
+      const text = document.getElementById('activeTimerText');
+
+      if (badge) {
+        badge.classList.remove('hidden');
+        badge.classList.add('flex');
+      }
+
+      timerInterval = setInterval(() => {
+        if (activeTimerSeconds <= 0) {
+          clearInterval(timerInterval);
+          if (badge) badge.classList.add('hidden');
+          showToast('Timer expired: Fleet shutdown executed.');
+          confirmPowerDownAll();
+        } else {
+          activeTimerSeconds--;
+          const m = Math.floor(activeTimerSeconds / 60);
+          const s = activeTimerSeconds % 60;
+          if (text) text.innerText = `Shutdown in ${m}m ${s < 10 ? '0' : ''}${s}s`;
+        }
+      }, 1000);
+    }
+
+    function cancelActiveTimer() {
+      if (timerInterval) clearInterval(timerInterval);
+      activeTimerSeconds = 0;
+      const badge = document.getElementById('activeTimerBadge');
+      if (badge) badge.classList.add('hidden');
+      showToast('Scheduled shutdown timer cancelled.');
+    }
+
+    function saveComputerList() {
+      localStorage.setItem('synapse_computers', JSON.stringify(labComputers));
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toastNotification');
+      const text = document.getElementById('toastMessage');
+      if (!toast || !text) return;
+      text.innerText = msg;
+      toast.classList.remove('hidden');
+      toast.classList.add('flex');
+      setTimeout(() => {
+        toast.classList.add('hidden');
+        toast.classList.remove('flex');
+      }, 3500);
+    }
+
+    function capitalize(str) {
+      if (!str) return '';
+      return str.charAt(0).toUpperCase() + str.slice(1);
+    }
+  </script>
+</body>
+</html>

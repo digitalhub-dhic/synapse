@@ -1,0 +1,11 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Synapse Command
+GenericName=Endpoint Management Console
+Comment=Centralized Computer Lab & Device Management
+Exec=/opt/synapse-agent/run-synapse.sh
+Icon=/opt/synapse-agent/synapse-icon.png
+Terminal=false
+Categories=System;Network;RemoteAccess;
+StartupNotify=true

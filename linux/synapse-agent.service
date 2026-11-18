@@ -1,0 +1,21 @@
+[Unit]
+Description=Synapse Command — Linux Workstation Client Daemon
+After=network-online.target graphical.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python3 /opt/synapse-agent/synapse_linux_agent.py
+Restart=always
+RestartSec=3
+StandardOutput=journal
+StandardError=journal
+User=root
+Group=root
+
+# Environment variables for GUI interaction
+Environment="DISPLAY=:0"
+Environment="XAUTHORITY=/var/run/lightdm/root/:0"
+
+[Install]
+WantedBy=multi-user.target

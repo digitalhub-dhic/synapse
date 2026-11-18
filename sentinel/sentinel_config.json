@@ -1,0 +1,22 @@
+{
+  "enabled": true,
+  "scan_interval_seconds": 2.0,
+  "confirmation_cycles": 2,
+  "lock_cooldown_seconds": 30,
+  "detection_targets": {
+    "sports_streams": true,
+    "movies_streaming": true,
+    "video_games": true,
+    "social_media_reels": true
+  },
+  "sensitivity": "medium",
+  "whitelist_ips": [
+    "192.168.137.1",
+    "192.168.1.150",
+    "127.0.0.1"
+  ],
+  "whitelist_names": [
+    "computer-50"
+  ],
+  "play_sound": true
+}
