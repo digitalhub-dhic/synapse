@@ -23,6 +23,12 @@ TAILSCALE_SERVER = "100.99.161.43"
 user32 = ctypes.windll.user32
 kernel32 = ctypes.windll.kernel32
 
+# Single-Instance Enforcement: Prevents duplicate guard processes
+_MUTEX_NAME = "Global\\SynapseBYODGuard_SingleInstance_Mutex"
+_mutex_handle = kernel32.CreateMutexW(None, False, _MUTEX_NAME)
+if kernel32.GetLastError() == 183:  # ERROR_ALREADY_EXISTS
+    sys.exit(0)
+
 def log(msg):
     ts = time.strftime("%Y-%m-%d %H:%M:%S")
     entry = f"[{ts}] {msg}"

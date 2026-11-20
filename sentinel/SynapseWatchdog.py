@@ -27,10 +27,17 @@ import os
 import sys
 import time
 import socket
+import ctypes
 import subprocess
 import threading
 import tkinter as tk
 from tkinter import simpledialog, messagebox
+
+# Single-Instance Enforcement: Prevents duplicate watchdog processes
+_MUTEX_NAME = "Global\\SynapseWatchdog_SingleInstance_Mutex"
+_mutex_handle = ctypes.windll.kernel32.CreateMutexW(None, False, _MUTEX_NAME)
+if ctypes.windll.kernel32.GetLastError() == 183:  # ERROR_ALREADY_EXISTS
+    sys.exit(0)
 
 CONFIG_FILE = r"C:\ProgramData\DigiAgent\byod_policy.json"
 LOCK_STATE_FILE = r"C:\ProgramData\DigiAgent\kiosk_locked.state"

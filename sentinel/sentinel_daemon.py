@@ -7,6 +7,7 @@ import os
 import sys
 import time
 import json
+import ctypes
 import logging
 import threading
 import subprocess
@@ -15,6 +16,12 @@ from flask import Flask, render_template, jsonify, request, send_from_directory
 from PIL import Image
 import pygetwindow as gw
 import pyautogui
+
+# Single-Instance Enforcement: Prevents duplicate sentinel daemons
+_MUTEX_NAME = "Global\\SynapseSentinel_SingleInstance_Mutex"
+_mutex_handle = ctypes.windll.kernel32.CreateMutexW(None, False, _MUTEX_NAME)
+if ctypes.windll.kernel32.GetLastError() == 183:  # ERROR_ALREADY_EXISTS
+    sys.exit(0)
 
 sys.path.append(r"C:\SynapseAISentinel")
 from synapse_sentinel_engine import (

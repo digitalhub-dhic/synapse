@@ -1,6 +1,13 @@
 # Synapse Enterprise Silent Auto-Updater for Windows Clients (Lab & BYOD)
 $ErrorActionPreference = "SilentlyContinue"
 
+# Single-Instance Enforcement: Prevents duplicate updater processes
+$autoUpdateMutex = New-Object System.Threading.Mutex($false, "Global\SynapseAutoUpdate_SingleInstance_Mutex")
+if (-not $autoUpdateMutex.WaitOne(0, $false)) {
+    Write-Host "[*] Synapse Auto-Updater is already running. Exiting duplicate instance."
+    exit 0
+}
+
 $serverHost = "fileserver"
 if (-not (Test-Path "\\fileserver\public\Synapse\4-Auto-Updater\client_version.json")) {
     $serverHost = "192.168.1.50"
