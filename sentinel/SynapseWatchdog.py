@@ -42,7 +42,39 @@ if ctypes.windll.kernel32.GetLastError() == 183:  # ERROR_ALREADY_EXISTS
 CONFIG_FILE = r"C:\ProgramData\DigiAgent\byod_policy.json"
 LOCK_STATE_FILE = r"C:\ProgramData\DigiAgent\kiosk_locked.state"
 INSTALL_DIR = r"C:\Program Files\DigiAgent"
-MASTER_PASS = "Synapse#Master2026!"
+
+# Salted SHA-256 hash of Teacher Master Password with constant-time verification
+import hmac
+import hashlib
+PASSWORD_SALT = b"SynapseEnterpriseSalt2026"
+PASSWORD_HASH = "efa0f57bdc9955b979a271903c7ae1c79272c1298df1c17d10c929c30860c33d"
+
+def verify_master_password(candidate: str) -> bool:
+    if not candidate:
+        return False
+    cand_hash = hashlib.sha256(PASSWORD_SALT + candidate.encode('utf-8')).hexdigest()
+    return hmac.compare_digest(cand_hash, PASSWORD_HASH)
+
+# Auto-heal execution gate: Prevents thread fork-bombs and CPU spikes
+_heal_lock = threading.Lock()
+_healing_in_progress = False
+
+def trigger_auto_heal_async():
+    global _healing_in_progress
+    with _heal_lock:
+        if _healing_in_progress:
+            return
+        _healing_in_progress = True
+
+    def _worker():
+        global _healing_in_progress
+        try:
+            auto_heal_network()
+        finally:
+            with _heal_lock:
+                _healing_in_progress = False
+
+    threading.Thread(target=_worker, daemon=True).start()
 
 def log_debug(msg):
     try:
@@ -298,7 +330,7 @@ class HardenedLockUI:
 
     def teacher_override(self):
         pwd = simpledialog.askstring("Instructor Unlock", "Enter Teacher Master Password:", parent=self.root, show="*")
-        if pwd == MASTER_PASS:
+        if pwd and verify_master_password(pwd):
             self.override = True
             set_state_locked(False)
             self.dismiss()
@@ -312,8 +344,8 @@ class HardenedLockUI:
             self.dismiss()
             return
 
-        # Background healing attempt continues running quietly
-        threading.Thread(target=auto_heal_network, daemon=True).start()
+        # Single-instance guarded auto-heal
+        trigger_auto_heal_async()
 
         if self.root and self.is_active:
             self.root.after(2000, self.poll_network)

@@ -98,14 +98,14 @@ static LRESULT CALLBACK clientBlockMouseHookLL( int nCode, WPARAM wParam, LPARAM
 		const auto* p = reinterpret_cast<const MSLLHOOKSTRUCT*>( lParam );
 		if( p )
 		{
-			// Allow injected remote control events (e.g. UltraVNC / SendInput / mouse_event)
-			// LLMHF_INJECTED = 0x01, LLMHF_LOWER_IL_INJECTED = 0x02, DWEXTRA_VNC_REMOTE = 0x564e4300
-			if( ( p->flags & 0x01 ) != 0 || ( p->flags & 0x02 ) != 0 || p->dwExtraInfo == 0x564e4300 )
+			// Strictly allow ONLY teacher injected remote control events carrying the verified VNC extra info signature
+			// DWEXTRA_VNC_REMOTE = 0x564e4300
+			if( p->dwExtraInfo == 0x564e4300 )
 			{
 				return CallNextHookEx( s_clientBlockMouseHook, nCode, wParam, lParam );
 			}
 
-			// Drop all physical hardware mouse / touchpad / touchscreen movements and clicks from student
+			// Drop all physical hardware mouse movements, clicks, and local student injected input
 			return 1;
 		}
 	}
@@ -119,14 +119,14 @@ static LRESULT CALLBACK clientBlockKeyboardHookLL( int nCode, WPARAM wParam, LPA
 		const auto* p = reinterpret_cast<const KBDLLHOOKSTRUCT*>( lParam );
 		if( p )
 		{
-			// Allow injected remote control events (e.g. UltraVNC / SendInput / keybd_event)
-			// LLKHF_INJECTED = 0x10, LLKHF_LOWER_IL_INJECTED = 0x02, DWEXTRA_VNC_REMOTE = 0x564e4300
-			if( ( p->flags & 0x10 ) != 0 || ( p->flags & 0x02 ) != 0 || p->dwExtraInfo == 0x564e4300 )
+			// Strictly allow ONLY teacher injected remote control keystrokes carrying the verified VNC extra info signature
+			// DWEXTRA_VNC_REMOTE = 0x564e4300
+			if( p->dwExtraInfo == 0x564e4300 )
 			{
 				return CallNextHookEx( s_clientBlockKeyboardHook, nCode, wParam, lParam );
 			}
 
-			// Drop all physical keystrokes from student (including WinKey, Alt+Tab, Alt+F4, Ctrl+Esc, etc.)
+			// Drop all physical keystrokes and local student injected input (AHK, SendInput, keybd_event)
 			return 1;
 		}
 	}
@@ -284,21 +284,9 @@ void WindowsInputDeviceFunctions::stopOnScreenKeyboard()
 
 void WindowsInputDeviceFunctions::enableInterception()
 {
-	if( WindowsPlatformConfiguration( &VeyonCore::config() ).useInterceptionDriver() )
-	{
-		m_interceptionContext = interception_create_context();
-
-		if( m_interceptionContext )
-		{
-			interception_set_filter(m_interceptionContext,
-									interception_is_any,
-									InterceptionFilter(INTERCEPTION_FILTER_KEY_ALL) | InterceptionFilter(INTERCEPTION_FILTER_MOUSE_ALL));
-		}
-		else
-		{
-			vCritical() << "failed to create interception context";
-		}
-	}
+	// Unpumped kernel-mode interception driver queues cause IRP starvation and system freeze.
+	// Input locking is handled robustly via the authenticated low-level hook pipeline (clientBlockKeyboardHookLL / clientBlockMouseHookLL).
+	m_interceptionContext = nullptr;
 }
 
 

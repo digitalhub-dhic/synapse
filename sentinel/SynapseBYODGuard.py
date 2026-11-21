@@ -14,7 +14,19 @@ from ctypes import wintypes
 import tkinter as tk
 from tkinter import ttk
 
-MASTER_PASS = "Synapse#Master2026!"
+import hmac
+import hashlib
+
+# Salted SHA-256 hash of Teacher Master Password with constant-time verification
+PASSWORD_SALT = b"SynapseEnterpriseSalt2026"
+PASSWORD_HASH = "efa0f57bdc9955b979a271903c7ae1c79272c1298df1c17d10c929c30860c33d"
+
+def verify_master_password(candidate: str) -> bool:
+    if not candidate:
+        return False
+    cand_hash = hashlib.sha256(PASSWORD_SALT + candidate.encode('utf-8')).hexdigest()
+    return hmac.compare_digest(cand_hash, PASSWORD_HASH)
+
 LOG_FILE = r"C:\ProgramData\DigiAgent\guard.log"
 CONFIG_FILE = r"C:\ProgramData\DigiAgent\byod_policy.json"
 CLASSROOM_SERVER = "192.168.1.150"
@@ -357,7 +369,11 @@ class BulletproofLockScreen:
             try:
                 if self.top_hwnd and user32.IsWindow(self.top_hwnd):
                     fg = user32.GetForegroundWindow()
-                    if fg != self.top_hwnd:
+                    # Do not steal focus if the foreground window belongs to our own process
+                    # (e.g. Wi-Fi combobox dropdown listbox, password prompt, or popup)
+                    fg_pid = ctypes.wintypes.DWORD()
+                    user32.GetWindowThreadProcessId(fg, ctypes.byref(fg_pid))
+                    if fg != self.top_hwnd and fg_pid.value != os.getpid():
                         # DWM Snap back to lock window's virtual desktop
                         user32.SwitchToThisWindow(self.top_hwnd, True)
                         user32.SetForegroundWindow(self.top_hwnd)
@@ -535,7 +551,7 @@ class BulletproofLockScreen:
             row_tbtns.pack()
 
             def submit_teacher_pwd(event=None):
-                if entry_tpwd.get() == MASTER_PASS:
+                if entry_tpwd.get() and verify_master_password(entry_tpwd.get()):
                     log("Teacher Master Password entered. Unlocking session...")
                     self.emergency_unlocked = True
                     self.unlock()
@@ -614,13 +630,6 @@ def main():
 
     # Attach to interactive desktop
     attach_to_interactive_desktop()
-
-    # Single instance mutex
-    ERROR_ALREADY_EXISTS = 183
-    mutex = kernel32.CreateMutexW(None, True, "SynapseBYODGuard_SingleInstance_Mutex")
-    if kernel32.GetLastError() == ERROR_ALREADY_EXISTS:
-        log("Another instance of SynapseBYODGuard is already running. Exiting.")
-        sys.exit(0)
 
     time.sleep(1)
     disconn_count = 0

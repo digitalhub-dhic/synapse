@@ -10,7 +10,8 @@ echo [!] This tool requires the Instructor Master Password.
 echo.
 
 set /p PWD="Enter Instructor Password: "
-if not "%PWD%"=="Synapse#Master2026!" (
+powershell -NoProfile -ExecutionPolicy Bypass -Command "$h = (Get-FileHash -InputStream ([System.IO.MemoryStream]::new([System.Text.Encoding]::UTF8.GetBytes('SynapseEnterpriseSalt2026' + '%PWD%')))).Hash.ToLower(); if ($h -eq 'efa0f57bdc9955b979a271903c7ae1c79272c1298df1c17d10c929c30860c33d') { exit 0 } else { exit 1 }" >nul 2>&1
+if %errorlevel% neq 0 (
     color 4F
     echo.
     echo [ERROR] Access Denied: Incorrect Master Password.

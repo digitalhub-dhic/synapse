@@ -34,21 +34,19 @@ Section "MainSection" SEC01
     SetOutPath "$APPDATA\Veyon\keys\public\Digihub"
     File /oname=key "Digihub.key"
 
-    DetailPrint "Deploying Tailscale Worldwide Mesh..."
-    # 1. Pre-configure Tailscale Enterprise Registry Policies for automatic unattended login
-    WriteRegStr HKLM "SOFTWARE\Policies\Tailscale" "AuthKey" "tskey-auth-kjKVeS7etf11CNTRL-wRiNtXBt7niqQ2MZqcCcni6hE6pNWakJ"
+    DetailPrint "Configuring Secure Network Mesh..."
+    # Pre-configure Tailscale Enterprise Registry Policies (Key provisioned securely via MDM/Policy)
     WriteRegStr HKLM "SOFTWARE\Policies\Tailscale" "UnattendedMode" "always"
     WriteRegDWORD HKLM "SOFTWARE\Policies\Tailscale" "HideNetworkSettings" 1
 
-    # 2. Install MSI with TS_AUTHKEY
+    # Install MSI
     SetOutPath "$PLUGINSDIR"
     File "tailscale.msi"
-    ExecWait 'msiexec /i "$PLUGINSDIR\tailscale.msi" /quiet /norestart TS_AUTHKEY="tskey-auth-kjKVeS7etf11CNTRL-wRiNtXBt7niqQ2MZqcCcni6hE6pNWakJ"'
+    ExecWait 'msiexec /i "$PLUGINSDIR\tailscale.msi" /quiet /norestart'
 
-    # 3. Wait for service and run tailscale up --auth-key --unattended
+    # Ensure service is running
     ExecWait 'sc config Tailscale start= auto'
     ExecWait 'net start Tailscale'
-    ExecWait 'powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "for ($$i=0; $$i -lt 15; $$i++) { if ((Get-Service Tailscale -ErrorAction SilentlyContinue).Status -eq \"Running\") { break }; Start-Sleep -Seconds 1 }; & \"$PROGRAMFILES64\Tailscale\tailscale.exe\" up --auth-key=tskey-auth-kjKVeS7etf11CNTRL-wRiNtXBt7niqQ2MZqcCcni6hE6pNWakJ --unattended --accept-dns=false --accept-routes=false --timeout=30s; Stop-Process -Name \"tailscale-ipn\" -Force -ErrorAction SilentlyContinue"'
 
     # 4. Suppress the GUI popup window completely
     ExecWait 'taskkill /F /IM tailscale-ipn.exe'

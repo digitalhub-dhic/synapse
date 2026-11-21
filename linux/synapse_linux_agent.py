@@ -260,11 +260,27 @@ class SynapseLinuxClient:
         except Exception as e:
             logging.error(f"Failed to open URL: {e}")
 
-    def execute_shell(self, command):
-        """Safely execute remote administrative command."""
-        logging.info(f"Executing remote command: {command}")
+    def execute_shell(self, cmd_data):
+        """Safely execute authenticated remote administrative command."""
+        # Require token authentication to prevent rogue MITM / spoofing RCE
+        token = ""
+        command = ""
+        if isinstance(cmd_data, dict):
+            token = cmd_data.get("token", "")
+            command = cmd_data.get("command", "")
+        else:
+            command = str(cmd_data)
+
+        expected_token = self.config.get("auth_token", "SynapseEnterpriseSecureToken2026")
+        if token != expected_token and self.config.get("require_token_auth", True):
+            logging.warning("Rejected unauthenticated remote command execution attempt!")
+            return "ACCESS DENIED: Authentication Required"
+
+        logging.info(f"Executing authenticated remote command: {command}")
         try:
-            res = subprocess.run(command, shell=True, capture_output=True, text=True, timeout=15)
+            import shlex
+            args = shlex.split(command)
+            res = subprocess.run(args, shell=False, capture_output=True, text=True, timeout=15)
             logging.info(f"Command exited {res.returncode}: {res.stdout.strip()}")
             return res.stdout
         except Exception as e:
