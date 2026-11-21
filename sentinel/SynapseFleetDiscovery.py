@@ -1,7 +1,7 @@
 """
 Synapse Dynamic Fleet Auto-Discovery & Zero-Config Registration Engine v4.11.7.0 (Anti-Duplication Edition)
 Automatically discovers and enrolls ANY new computer that installs Synapse into the teacher's monitoring panel.
-Guarantees NO duplicates for lab computers or existing entries.
+Guarantees NO duplicates, tracks dynamic DHCP IP changes by MAC address, and enrolls into DIGIHUB.
 """
 
 import os
@@ -19,6 +19,7 @@ CLI_PATH = r"C:\Program Files\DigiAgent\digiagent-cli.exe"
 BEACON_UDP_PORT = 11105
 SUBNET_PREFIX = "192.168.1."
 SELF_IP = "192.168.1.150"
+TARGET_LOCATION = "DIGIHUB"
 
 # Win32 Single-Instance Mutex
 MUTEX_NAME = "Global\\SynapseFleetDiscovery_SingleInstance_Mutex"
@@ -44,33 +45,32 @@ def get_arp_mac(target_ip):
     return ""
 
 def get_registered_network_objects():
-    """Returns { 'by_name': { name.lower(): [ { ... } ] }, 'by_ip': { ip: [ { ... } ] } }"""
+    """Returns { 'by_name': dict, 'by_ip': dict, 'by_mac': dict, 'objects': list }"""
     if not os.path.exists(CLI_PATH):
-        return {"by_name": {}, "by_ip": {}}
+        return {"by_name": {}, "by_ip": {}, "by_mac": {}, "objects": []}
     try:
-        res = subprocess.run([CLI_PATH, "networkobjects", "list"], capture_output=True, text=True, timeout=10)
+        res = subprocess.run([CLI_PATH, "networkobjects", "dump"], capture_output=True, text=True, timeout=10)
         lines = res.stdout.splitlines()
-        current_loc = "DIGIHUB"
         by_name = {}
         by_ip = {}
+        by_mac = {}
+        objects = []
+
         for line in lines:
-            line_str = line.strip()
-            if line_str.startswith('Location "'):
-                m = re.match(r'Location\s+"([^"]+)"', line_str)
-                if m:
-                    current_loc = m.group(1)
-            elif line_str.startswith('Computer "'):
-                m = re.match(r'Computer\s+"([^"]+)"\s+\(host address:\s+"([^"]*)"\s+MAC address:\s+"([^"]*)"\)', line_str)
-                if m:
-                    name = m.group(1)
-                    host = m.group(2)
-                    mac = m.group(3)
+            if not line.startswith("|") or "Object UUID" in line or "---" in line:
+                continue
+            parts = [p.strip() for p in line.split("|")[1:-1]]
+            if len(parts) >= 6:
+                obj_uuid, parent_uuid, obj_type, name, host, mac = parts[:6]
+                if obj_type.lower() == "computer":
                     entry = {
+                        "uuid": obj_uuid,
+                        "parent_uuid": parent_uuid,
                         "name": name,
                         "host": host,
-                        "mac": mac,
-                        "location": current_loc
+                        "mac": mac.upper() if mac else ""
                     }
+                    objects.append(entry)
                     k_name = name.lower()
                     if k_name not in by_name:
                         by_name[k_name] = []
@@ -81,25 +81,39 @@ def get_registered_network_objects():
                             by_ip[host] = []
                         by_ip[host].append(entry)
 
-        return {"by_name": by_name, "by_ip": by_ip}
-    except Exception as e:
-        print(f"[ERR] Error listing network objects: {e}")
-        return {"by_name": {}, "by_ip": {}}
+                    if entry["mac"]:
+                        if entry["mac"] not in by_mac:
+                            by_mac[entry["mac"]] = []
+                        by_mac[entry["mac"]].append(entry)
 
-def enroll_computer(name, host, mac="", location="BYOD"):
+        return {"by_name": by_name, "by_ip": by_ip, "by_mac": by_mac, "objects": objects}
+    except Exception as e:
+        print(f"[ERR] Error dumping network objects: {e}")
+        return {"by_name": {}, "by_ip": {}, "by_mac": {}, "objects": []}
+
+def remove_object(identifier):
+    """Removes an object by name or UUID."""
+    if not os.path.exists(CLI_PATH) or not identifier:
+        return
+    try:
+        subprocess.run([CLI_PATH, "networkobjects", "remove", identifier], capture_output=True, timeout=8)
+    except Exception as e:
+        print(f"[ERR] Remove object {identifier} failed: {e}")
+
+def enroll_computer(name, host, mac="", location=TARGET_LOCATION):
     """Enrolls a computer into a specific location in DigiAgent networkobjects."""
     if not os.path.exists(CLI_PATH) or not name or not host:
         return False
 
     name_clean = name.strip()
     host_clean = host.strip()
-    mac_clean = mac.strip()
+    mac_clean = mac.strip().upper()
 
     cmd = [CLI_PATH, "networkobjects", "add", "computer", name_clean, host_clean, mac_clean, location]
     try:
         res = subprocess.run(cmd, capture_output=True, text=True, timeout=8)
         if "[OK]" in res.stdout:
-            print(f"[AUTO-ENROLL] Successfully registered new device '{name_clean}' ({host_clean}) into '{location}'!")
+            print(f"[AUTO-ENROLL] Successfully registered '{name_clean}' ({host_clean}, {mac_clean}) into '{location}'!")
             return True
         return False
     except Exception as e:
@@ -107,38 +121,77 @@ def enroll_computer(name, host, mac="", location="BYOD"):
         return False
 
 def sync_device(name, current_ip, mac=""):
-    """Registers ONLY genuinely new devices, strictly avoiding duplicates."""
+    """
+    Intelligently registers or updates computers without creating duplicates.
+    1. If MAC matches an existing entry, update IP if changed.
+    2. If IP matches an existing entry with the same name, nothing to do.
+    3. If IP matches an existing entry with a stale name, update to correct hostname.
+    4. If completely new, register into TARGET_LOCATION (DIGIHUB).
+    """
+    mac_clean = mac.strip().upper()
     registered = get_registered_network_objects()
     by_name = registered["by_name"]
     by_ip = registered["by_ip"]
+    by_mac = registered["by_mac"]
 
-    # 1. If this IP is ALREADY mapped to any computer, DO NOT create a duplicate entry!
+    # 1. Check by MAC Address first (strongest hardware identity across DHCP changes)
+    if mac_clean and mac_clean in by_mac:
+        entries = by_mac[mac_clean]
+        for entry in entries:
+            canonical_name = entry["name"]
+            # If standard lab computer (e.g. "computer 01"), preserve its lab number!
+            if canonical_name.lower().startswith("computer ") or canonical_name.lower().startswith("sub "):
+                if entry["host"] != current_ip:
+                    print(f"[LAB-IP-UPDATE] Lab station '{canonical_name}' ({mac_clean}) moved {entry['host']} -> {current_ip}")
+                    remove_object(entry["uuid"])
+                    time.sleep(0.2)
+                    enroll_computer(canonical_name, current_ip, mac_clean, TARGET_LOCATION)
+                return True
+            else:
+                # Named workstation (e.g. READINGHUB, CIVIL)
+                preferred_name = name if name and not name.startswith("BYOD-") else canonical_name
+                if entry["host"] != current_ip or entry["name"] != preferred_name:
+                    print(f"[DEVICE-SYNC] Updating '{preferred_name}' ({mac_clean}) IP: {entry['host']} -> {current_ip}")
+                    remove_object(entry["uuid"])
+                    time.sleep(0.2)
+                    enroll_computer(preferred_name, current_ip, mac_clean, TARGET_LOCATION)
+                return True
+
+    # 2. Check if IP is already registered
     if current_ip in by_ip:
-        existing_entries = by_ip[current_ip]
-        existing_names = [e["name"] for e in existing_entries]
-        # Already registered cleanly (e.g. 'computer 02' or 'READINGHUB')
+        entries = by_ip[current_ip]
+        for entry in entries:
+            # If already cleanly registered under this name or as a lab computer
+            if entry["name"].lower() == name.lower() or entry["name"].lower().startswith("computer "):
+                return False
+            # If registered under a generic/dummy name (e.g. DESKTOP-111111KOOOIP), replace with real hostname
+            if name and not name.startswith("BYOD-"):
+                print(f"[RENAME-STALE] Replacing stale entry '{entry['name']}' with real hostname '{name}' @ {current_ip}")
+                remove_object(entry["uuid"])
+                time.sleep(0.2)
+                enroll_computer(name, current_ip, mac_clean, TARGET_LOCATION)
+                return True
         return False
 
-    # 2. If name is already registered, check if its IP needs an update
+    # 3. Check by Name
     key = name.lower()
     if key in by_name:
         entries = by_name[key]
         for entry in entries:
-            old_host = entry["host"]
-            if old_host != current_ip and not old_host.isalpha():
-                print(f"[IP-UPDATE] Computer '{name}' IP moved from {old_host} -> {current_ip}. Updating...")
-                subprocess.run([CLI_PATH, "networkobjects", "remove", name], capture_output=True, timeout=8)
-                time.sleep(0.3)
-                enroll_computer(name, current_ip, mac or entry.get("mac", ""), "BYOD")
+            if entry["host"] != current_ip:
+                print(f"[IP-UPDATE] Computer '{name}' IP moved from {entry['host']} -> {current_ip}. Updating...")
+                remove_object(entry["uuid"])
+                time.sleep(0.2)
+                enroll_computer(name, current_ip, mac_clean or entry.get("mac", ""), TARGET_LOCATION)
                 return True
         return False
 
-    # 3. Genuinely new unknown device (e.g. new student laptop)
-    print(f"[NEW-DEVICE] Enrolling previously unseen device '{name}' @ {current_ip} into BYOD...")
-    enroll_computer(name, current_ip, mac, "BYOD")
+    # 4. Genuinely new unknown device (new workstation / laptop)
+    print(f"[NEW-DEVICE] Enrolling previously unseen device '{name}' @ {current_ip} into {TARGET_LOCATION}...")
+    enroll_computer(name, current_ip, mac_clean, TARGET_LOCATION)
     return True
 
-def probe_agent_port(ip, timeout=0.6):
+def probe_agent_port(ip, timeout=0.5):
     """Returns True if port 11100 (DigiAgent) is actively accepting connections."""
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.settimeout(timeout)
