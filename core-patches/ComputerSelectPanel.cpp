@@ -24,6 +24,7 @@
 
 #include <QFileDialog>
 #include <QKeyEvent>
+#include <QMouseEvent>
 #include <QMessageBox>
 #include <QLabel>
 #include <QHBoxLayout>
@@ -55,9 +56,53 @@ public:
 		return QSize( 180, 26 );
 	}
 
+	bool editorEvent( QEvent* event, QAbstractItemModel* model, const QStyleOptionViewItem& option, const QModelIndex& index ) override
+	{
+		if( !index.isValid() || index.column() != 0 )
+		{
+			return false;
+		}
+		if( event->type() == QEvent::MouseButtonRelease )
+		{
+			auto* me = static_cast<QMouseEvent*>( event );
+			if( me->button() == Qt::LeftButton )
+			{
+				int level = 0;
+				QModelIndex p = index.parent();
+				while( p.isValid() )
+				{
+					++level;
+					p = p.parent();
+				}
+				int indent = option.rect.left() + 8 + ( level * 16 );
+				const bool hasChildren = model->rowCount( index ) > 0;
+
+				QRect chevronRect( indent - 2, option.rect.top() + (option.rect.height() - 16) / 2, 18, 16 );
+				indent += 14;
+				QRect cbRect( indent - 2, option.rect.top() + (option.rect.height() - 16) / 2, 20, 16 );
+
+				if( hasChildren && chevronRect.contains( me->pos() ) )
+				{
+					if( m_treeView )
+					{
+						m_treeView->setExpanded( index, !m_treeView->isExpanded( index ) );
+					}
+					return true;
+				}
+
+				// Clicking checkbox or item label toggles check state
+				const auto curState = model->data( index, Qt::CheckStateRole ).toInt();
+				const auto newState = ( curState == Qt::Checked ) ? Qt::Unchecked : Qt::Checked;
+				model->setData( index, newState, Qt::CheckStateRole );
+				return true;
+			}
+		}
+		return QStyledItemDelegate::editorEvent( event, model, option, index );
+	}
+
 	void paint( QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index ) const override
 	{
-		if( !index.isValid() )
+		if( !index.isValid() || index.column() != 0 )
 		{
 			return;
 		}
@@ -73,13 +118,13 @@ public:
 		// 1. Draw rounded background pill
 		if( isSelected )
 		{
-			painter->setBrush( QColor(16, 52, 110) );
+			painter->setBrush( QColor(23, 52, 36) );
 			painter->setPen( Qt::NoPen );
 			painter->drawRoundedRect( rowRect, 8, 8 );
 		}
 		else if( isHovered )
 		{
-			painter->setBrush( QColor(21, 43, 84) );
+			painter->setBrush( QColor(31, 38, 48) );
 			painter->setPen( Qt::NoPen );
 			painter->drawRoundedRect( rowRect, 8, 8 );
 		}
@@ -102,38 +147,49 @@ public:
 		if( hasChildren )
 		{
 			const bool isExpanded = m_treeView ? m_treeView->isExpanded( index ) : false;
-			painter->setPen( isSelected ? QColor(59, 130, 246) : QColor(142, 166, 201) );
+			painter->setPen( isSelected ? QColor(37, 99, 235) : QColor(139, 148, 158) );
 			painter->setFont( QFont( QStringLiteral("Segoe UI"), 7, QFont::Bold ) );
 			QRect chevronRect( indent, option.rect.top() + (option.rect.height() - 16) / 2, 12, 16 );
 			painter->drawText( chevronRect, Qt::AlignCenter, isExpanded ? QStringLiteral("▼") : QStringLiteral("▶") );
 		}
 		indent += 14;
 
-		// 3. Modern Checkbox indicator for every group and computer
+		// 2.5 Checkbox for every row (Location group and Computer)
 		const auto checkStateVal = index.data( Qt::CheckStateRole );
-		const bool isChecked = checkStateVal.isValid() && ( checkStateVal.toInt() == Qt::Checked );
+		const int checkState = checkStateVal.isValid() ? checkStateVal.toInt() : static_cast<int>( Qt::Unchecked );
 		QRect cbRect( indent, option.rect.top() + (option.rect.height() - 14) / 2, 14, 14 );
+
 		painter->save();
-		painter->setRenderHint( QPainter::Antialiasing );
-		if( isChecked )
+		painter->setRenderHint( QPainter::Antialiasing, true );
+		if( checkState == Qt::Checked )
 		{
-			painter->setBrush( QColor( 0x3B, 0x82, 0xF6 ) );
-			painter->setPen( Qt::NoPen );
+			painter->setBrush( QColor( 37, 99, 235 ) );
+			painter->setPen( QColor( 59, 130, 246 ) );
 			painter->drawRoundedRect( cbRect, 3, 3 );
+
 			painter->setPen( QPen( Qt::white, 1.8, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin ) );
 			painter->drawLine( cbRect.left() + 3, cbRect.top() + 7, cbRect.left() + 6, cbRect.top() + 10 );
 			painter->drawLine( cbRect.left() + 6, cbRect.top() + 10, cbRect.left() + 11, cbRect.top() + 4 );
 		}
+		else if( checkState == Qt::PartiallyChecked )
+		{
+			painter->setBrush( QColor( 30, 41, 59 ) );
+			painter->setPen( QColor( 59, 130, 246 ) );
+			painter->drawRoundedRect( cbRect, 3, 3 );
+
+			painter->setPen( QPen( QColor( 96, 165, 250 ), 2, Qt::SolidLine, Qt::RoundCap ) );
+			painter->drawLine( cbRect.left() + 3, cbRect.top() + 7, cbRect.right() - 3, cbRect.top() + 7 );
+		}
 		else
 		{
-			painter->setBrush( QColor( 0x0E, 0x1C, 0x38 ) );
-			painter->setPen( QPen( QColor( 0x47, 0x55, 0x69 ), 1.2 ) );
+			painter->setBrush( QColor( 13, 17, 23, 200 ) );
+			painter->setPen( QPen( QColor( 80, 95, 115 ), 1.2 ) );
 			painter->drawRoundedRect( cbRect, 3, 3 );
 		}
 		painter->restore();
 		indent += 18;
 
-		// 4. Icon (Clean Outline Vector Folder for Location, Outline Monitor for Computer)
+		// 3. Icon (Clean Outline Vector Folder for Location, Outline Monitor for Computer)
 		QRectF iconRect( indent, option.rect.top() + (option.rect.height() - 16) / 2.0, 16.0, 16.0 );
 		const auto typeVal = index.data( NetworkObjectModel::TypeRole );
 		const bool isLocation = hasChildren || ( typeVal.isValid() && typeVal.value<NetworkObject::Type>() == NetworkObject::Type::Location );
@@ -179,17 +235,17 @@ public:
 
 			if( isSelected )
 			{
-				painter->setBrush( QColor(59, 130, 246) );
+				painter->setBrush( QColor(37, 99, 235) );
 				painter->setPen( Qt::NoPen );
 				painter->drawRoundedRect( badgeRect, 10, 10 );
 				painter->setPen( QColor( 0xFF, 0xFF, 0xFF ) );
 			}
 			else
 			{
-				painter->setBrush( QColor(14, 28, 56) );
-				painter->setPen( QColor(27, 54, 102) );
+				painter->setBrush( QColor(15, 23, 42) );
+				painter->setPen( QColor(42, 50, 61) );
 				painter->drawRoundedRect( badgeRect, 10, 10 );
-				painter->setPen( QColor(59, 130, 246) );
+				painter->setPen( QColor(37, 99, 235) );
 			}
 
 			painter->setFont( badgeFont );
@@ -202,7 +258,7 @@ public:
 		QRect textRect( indent, option.rect.top(), qMax( 10, rightLimit - indent ), option.rect.height() );
 		QFont textFont( QStringLiteral("Segoe UI"), 10, isSelected ? QFont::DemiBold : QFont::Medium );
 		painter->setFont( textFont );
-		painter->setPen( isSelected ? QColor(59, 130, 246) : QColor(240, 246, 255) );
+		painter->setPen( isSelected ? QColor(37, 99, 235) : QColor(230, 237, 243) );
 		painter->drawText( textRect, Qt::AlignVCenter | Qt::AlignLeft, painter->fontMetrics().elidedText( text, Qt::ElideRight, textRect.width() ) );
 
 		painter->restore();
@@ -240,7 +296,7 @@ ComputerSelectPanel::ComputerSelectPanel( ComputerManager& computerManager, QWid
 	headerLayout->setSpacing( 6 );
 
 	auto* titleText = new QLabel( tr( "Locations / Computers" ), selectHeader );
-	titleText->setStyleSheet( QStringLiteral( "font-weight: 700; font-size: 11px; color: #F0F6FF;" ) );
+	titleText->setStyleSheet( QStringLiteral( "font-weight: 700; font-size: 11px; color: #E6EDF3;" ) );
 	headerLayout->addWidget( titleText );
 	headerLayout->addStretch();
 
@@ -251,7 +307,7 @@ ComputerSelectPanel::ComputerSelectPanel( ComputerManager& computerManager, QWid
 	closeButton->setStyleSheet( QStringLiteral(
 		"QPushButton {"
 		"   background: transparent; border: none; border-radius: 4px;"
-		"   color: #8EA6C9; font-size: 11px; font-weight: bold; padding: 0px;"
+		"   color: #8B949E; font-size: 11px; font-weight: bold; padding: 0px;"
 		"}"
 		"QPushButton:hover { background: #dc2626; color: #ffffff; }"
 	) );
@@ -280,12 +336,12 @@ ComputerSelectPanel::ComputerSelectPanel( ComputerManager& computerManager, QWid
 
 		setStyleSheet( QStringLiteral(
 		"ComputerSelectPanel, QWidget#ComputerSelectPanel {"
-		"   background-color: #070E1E;"
-		"   border-right: 1px solid #122547;"
+		"   background-color: #090E1A;"
+		"   border-right: 1px solid #21262D;"
 		"}"
 		"QTreeView {"
-		"   background-color: #070E1E;"
-		"   color: #F0F6FF;"
+		"   background-color: #090E1A;"
+		"   color: #E6EDF3;"
 		"   border: none;"
 		"   outline: none;"
 		"}"
@@ -293,35 +349,35 @@ ComputerSelectPanel::ComputerSelectPanel( ComputerManager& computerManager, QWid
 		"   background: transparent;"
 		"}"
 		"QLineEdit {"
-		"   background-color: #0E1C38;"
-		"   border: 1px solid #1B3666;"
+		"   background-color: #0F172A;"
+		"   border: 1px solid #2A323D;"
 		"   border-radius: 6px;"
 		"   padding: 4px 10px;"
 		"   margin: 0px 8px;"
-		"   color: #F0F6FF;"
+		"   color: #E6EDF3;"
 		"   font-size: 11px;"
 		"}"
 		"QLineEdit:focus {"
-		"   border: 1px solid #3B82F6;"
-		"   background-color: #070E1E;"
+		"   border: 1px solid #2563EB;"
+		"   background-color: #090E1A;"
 		"}"
 		"QPushButton {"
-		"   background-color: #0E1C38;"
-		"   border: 1px solid #1B3666;"
+		"   background-color: #0F172A;"
+		"   border: 1px solid #2A323D;"
 		"   border-radius: 6px;"
 		"   margin: 0px 8px;"
-		"   color: #F0F6FF;"
+		"   color: #E6EDF3;"
 		"   font-size: 11px;"
 		"   font-weight: 500;"
 		"   padding: 4px 10px;"
 		"}"
 		"QPushButton:hover {"
-		"   background-color: #152B54;"
-		"   border-color: #3B82F6;"
-		"   color: #3B82F6;"
+		"   background-color: #1F2630;"
+		"   border-color: #2563EB;"
+		"   color: #2563EB;"
 		"}"
 	) );
-	ui->treeView->viewport()->setStyleSheet( QStringLiteral( "background-color: #070E1E;" ) );
+	ui->treeView->viewport()->setStyleSheet( QStringLiteral( "background-color: #090E1A;" ) );
 
 	// Hide table header and style tree view
 	ui->treeView->setHeaderHidden( true );
@@ -339,16 +395,11 @@ ComputerSelectPanel::ComputerSelectPanel( ComputerManager& computerManager, QWid
 	// set default sort order
 	ui->treeView->sortByColumn( 0, Qt::AscendingOrder );
 
-	connect( ui->treeView, &QTreeView::clicked, this, [this]( const QModelIndex& index ) {
-		if( !index.isValid() ) return;
-		if( index.model()->rowCount( index ) > 0 )
-		{
-			ui->treeView->setExpanded( index, !ui->treeView->isExpanded( index ) );
-		}
-		auto model = ui->treeView->model();
-		auto curState = model->data( index, Qt::CheckStateRole ).toInt();
-		model->setData( index, ( curState == Qt::Checked ) ? Qt::Unchecked : Qt::Checked, Qt::CheckStateRole );
-	} );
+	// Hide all extra columns so only Column 0 (with name, checkbox, and count) is shown
+	for( int col = 1; col < 10; ++col )
+	{
+		ui->treeView->hideColumn( col );
+	}
 
 	ui->addLocationButton->setVisible( VeyonCore::config().showCurrentLocationOnly() &&
 									   VeyonCore::config().allowAddingHiddenLocations() );
@@ -358,12 +409,11 @@ ComputerSelectPanel::ComputerSelectPanel( ComputerManager& computerManager, QWid
 	connect( ui->filterLineEdit, &QLineEdit::textChanged,
 			 this, &ComputerSelectPanel::updateFilter );
 
-	if (VeyonCore::config().expandLocations())
-	{
-		connect(m_filterProxyModel, &QAbstractItemModel::modelReset,
-				this, &ComputerSelectPanel::fetchAndExpandAll);
-		fetchAndExpandAll();
-	}
+	connect(m_filterProxyModel, &QAbstractItemModel::modelReset,
+			this, &ComputerSelectPanel::fetchAndExpandAll);
+	connect(m_filterProxyModel, &QAbstractItemModel::rowsInserted,
+			this, &ComputerSelectPanel::fetchAndExpandAll);
+	fetchAndExpandAll();
 }
 
 
