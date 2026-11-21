@@ -64,21 +64,27 @@ def capture_synapse_master():
                 except Exception:
                     pass
             x, y, w, h = target_win.left, target_win.top, target_win.width, target_win.height
-            shot = pyautogui.screenshot()
-            img_w, img_h = shot.size
-            x1 = max(0, min(x, img_w))
-            y1 = max(0, min(y, img_h))
-            x2 = max(0, min(x + w, img_w))
-            y2 = max(0, min(y + h, img_h))
-            if (x2 - x1) >= 600 and (y2 - y1) >= 400:
-                return shot.crop((x1, y1, x2, y2))
-            return shot
+            raw_shot = pyautogui.screenshot()
+            try:
+                img_w, img_h = raw_shot.size
+                x1 = max(0, min(x, img_w))
+                y1 = max(0, min(y, img_h))
+                x2 = max(0, min(x + w, img_w))
+                y2 = max(0, min(y + h, img_h))
+                if (x2 - x1) >= 600 and (y2 - y1) >= 400:
+                    return raw_shot.crop((x1, y1, x2, y2))
+                return raw_shot.copy()
+            finally:
+                raw_shot.close()
 
         # Fallback: full desktop screenshot if resolution matches master UI
-        shot = pyautogui.screenshot()
-        if shot.size[0] >= 1280:
-            return shot
-        return None
+        raw_shot = pyautogui.screenshot()
+        try:
+            if raw_shot.size[0] >= 1280:
+                return raw_shot.copy()
+            return None
+        finally:
+            raw_shot.close()
     except Exception as e:
         daemon_state["last_error"] = str(e)
         return None
@@ -93,10 +99,14 @@ def sentinel_worker():
             if cfg.get("enabled", True):
                 master_frame = capture_synapse_master()
                 if master_frame is not None:
-                    daemon_state["last_window_found"] = True
-                    daemon_state["last_scan_time"] = datetime.datetime.now().strftime("%H:%M:%S")
-                    daemon_state["scan_count"] += 1
-                    sentinel_instance.scan_cycle(master_frame)
+                    try:
+                        daemon_state["last_window_found"] = True
+                        daemon_state["last_scan_time"] = datetime.datetime.now().strftime("%H:%M:%S")
+                        daemon_state["scan_count"] += 1
+                        sentinel_instance.scan_cycle(master_frame)
+                    finally:
+                        if hasattr(master_frame, "close"):
+                            master_frame.close()
                 else:
                     daemon_state["last_window_found"] = False
             interval = max(1.0, float(cfg.get("scan_interval_seconds", 2.0)))
@@ -120,7 +130,11 @@ def index():
 def get_status():
     cfg = sentinel_instance.config
     locked_list = []
-    for ip, info in sentinel_instance.locked_hosts.items():
+    with sentinel_instance.data_lock:
+        locked_items = list(sentinel_instance.locked_hosts.items())
+        recent_viols = list(sentinel_instance.recent_violations[:25])
+
+    for ip, info in locked_items:
         comp_name = ip
         for c in sentinel_instance.computers:
             if c["ip"] == ip:
@@ -140,7 +154,7 @@ def get_status():
         "total_computers": len(sentinel_instance.computers),
         "locked_count": len(locked_list),
         "locked_computers": locked_list,
-        "recent_violations": sentinel_instance.recent_violations[:25],
+        "recent_violations": recent_viols,
         "last_scan_time": daemon_state["last_scan_time"],
         "master_window_found": daemon_state["last_window_found"],
         "scan_count": daemon_state["scan_count"],

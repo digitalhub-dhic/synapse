@@ -19,7 +19,7 @@ CLI_PATH = r"C:\Program Files\DigiAgent\digiagent-cli.exe"
 BEACON_UDP_PORT = 11105
 SUBNET_PREFIX = "192.168.1."
 SELF_IP = "192.168.1.150"
-TARGET_LOCATION = "DIGIHUB"
+TARGET_LOCATION = "BYOD"
 
 # Win32 Single-Instance Mutex
 MUTEX_NAME = "Global\\SynapseFleetDiscovery_SingleInstance_Mutex"

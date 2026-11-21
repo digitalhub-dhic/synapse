@@ -126,6 +126,8 @@ def is_classroom_connected():
         ("192.168.1.150", 445),   # Teacher Server SMB / Host
         ("192.168.1.1", 53),     # Classroom Router DNS
         ("100.99.161.43", 445),  # Teacher Mesh Server
+        ("fileserver.local", 445),
+        ("computer-50.local", 445),
     ]
     for host, port in targets:
         try:

@@ -89,14 +89,16 @@ SW_HIDE = 0
 SW_SHOW = 5
 
 def attach_to_interactive_desktop():
-    """Attaches process and thread to WinSta0\\Default to guarantee interactive GUI."""
+    """Attaches process and thread to WinSta0\\Default to guarantee interactive GUI without leaking handles."""
     try:
         hwinsta = user32.OpenWindowStationW("WinSta0", False, 0x037F)
         if hwinsta:
             user32.SetProcessWindowStation(hwinsta)
+            user32.CloseWindowStation(hwinsta)
         hdesk = user32.OpenDesktopW("Default", 0, False, 0x01FF)
         if hdesk:
             user32.SetThreadDesktop(hdesk)
+            user32.CloseDesktop(hdesk)
     except Exception as e:
         log(f"attach_to_interactive_desktop error: {e}")
 
@@ -119,15 +121,17 @@ def is_wifi_interface_connected():
     return False
 
 def can_reach_master():
-    """Tests TCP connection to Classroom LAN (192.168.1.150) or Tailscale WAN (100.99.161.43)."""
+    """Tests TCP connection to Classroom LAN (192.168.1.150), Tailscale WAN (100.99.161.43), or mDNS fallbacks."""
     targets = [
         (CLASSROOM_SERVER, 11100),
         (TAILSCALE_SERVER, 11100),
+        ("computer-50.local", 11100),
+        ("fileserver.local", 11100),
     ]
     for host, port in targets:
         try:
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            s.settimeout(0.6)
+            s.settimeout(0.5)
             s.connect((host, port))
             s.close()
             return True
@@ -579,19 +583,31 @@ class BulletproofLockScreen:
             entry_tpwd.bind("<Return>", submit_teacher_pwd)
             btn_unlock_toggle.config(command=show_teacher_box)
 
-            # Polling for auto-reconnect
+            # Non-blocking asynchronous network state checker (prevents Tkinter GUI freezing)
+            self._async_online = False
+            def bg_network_checker():
+                while self.active and not self.stop_watchdog:
+                    try:
+                        self._async_online = is_device_online() or is_teacher_released()
+                    except Exception:
+                        self._async_online = False
+                    time.sleep(0.5)
+
+            threading.Thread(target=bg_network_checker, daemon=True).start()
+
+            # Polling for auto-reconnect (non-blocking, instant response)
             def poll_status():
                 if not self.active:
                     return
-                if is_device_online() or is_teacher_released():
+                if getattr(self, '_async_online', False):
                     log("Reconnected to Classroom! Unlocking desktop...")
                     lbl_status.config(text="✅ Reconnected to Classroom! Restoring desktop...", fg="#10B981")
                     self.root.update()
-                    time.sleep(0.4)
+                    time.sleep(0.3)
                     self.unlock()
                     return
                 if self.active and self.root:
-                    self.root.after(800, poll_status)
+                    self.root.after(200, poll_status)
 
             refresh_networks()
             poll_status()

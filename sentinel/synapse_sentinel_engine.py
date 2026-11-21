@@ -90,6 +90,7 @@ class SynapseAISentinel:
         self.config = load_config()
         self.is_running = False
         self.computers = []
+        self.data_lock = threading.Lock()
         self.previous_frames = {}       # host -> np.array (gray)
         self.violation_candidates = {}   # host -> { "count": int, "reason": str, "timestamp": float }
         self.locked_hosts = {}           # host -> { "lock_time": float, "reason": str }
@@ -163,11 +164,12 @@ class SynapseAISentinel:
         """Locks ONLY the offending computer."""
         now = time.time()
         # Cooldown check
-        if ip in self.locked_hosts:
-            if now - self.locked_hosts[ip]["lock_time"] < self.config.get("lock_cooldown_seconds", 30):
-                return False
+        with self.data_lock:
+            if ip in self.locked_hosts:
+                if now - self.locked_hosts[ip]["lock_time"] < self.config.get("lock_cooldown_seconds", 30):
+                    return False
+            self.locked_hosts[ip] = {"lock_time": now, "reason": reason}
 
-        self.locked_hosts[ip] = {"lock_time": now, "reason": reason}
         logging.warning(f"🚨 LOCKING CULPRIT: [{name}] ({ip}) for {reason}")
 
         # CLI targeted lock
@@ -197,8 +199,9 @@ class SynapseAISentinel:
         try:
             cmd = [CLI_PATH, "feature", "stop", ip, "ScreenLock"]
             subprocess.run(cmd, capture_output=True, timeout=5)
-            if ip in self.locked_hosts:
-                del self.locked_hosts[ip]
+            with self.data_lock:
+                if ip in self.locked_hosts:
+                    del self.locked_hosts[ip]
             logging.info(f"🔓 Computer {ip} unlocked successfully.")
             return True
         except Exception as e:
@@ -216,7 +219,8 @@ class SynapseAISentinel:
                                      stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
                 except Exception:
                     success = False
-        self.locked_hosts.clear()
+        with self.data_lock:
+            self.locked_hosts.clear()
         logging.info("🔓 Sent unlock command to all computers.")
         return success
 
@@ -281,13 +285,18 @@ class SynapseAISentinel:
             sports_ratio = (np.count_nonzero(sports_mask) / total_pixels) * 100.0
             metrics["sports_ratio"] = sports_ratio
 
-            # 1. Fullscreen / Large Window Match
-            if sports_ratio > sports_thresh and motion_ratio > 2.2:
+            # Calculate organic texture variance in turf regions (rejects flat Excel / code editor themes)
+            turf_count = np.count_nonzero(turf_mask)
+            turf_variance = float(np.std(g[turf_mask])) if turf_count > 100 else 0.0
+            is_organic_turf = turf_variance > 9.0
+
+            # 1. Fullscreen / Large Window Match (requires organic texture)
+            if sports_ratio > sports_thresh and motion_ratio > 2.2 and is_organic_turf:
                 return True, f"Live Sports Stream ({sports_ratio:.1f}% Field Cover)", metrics
 
             # 2. Inline Feed Preview / Thumbnail / Picture-in-Picture / Split Screen
             # Even when not full-screen, an active video thumbnail or PiP has concentrated motion and field turf
-            if prev_gray is not None and motion_ratio > 1.2:
+            if prev_gray is not None and motion_ratio > 1.2 and is_organic_turf:
                 # Divide screen into 4x3 localized patches to inspect micro-regions
                 cols, rows = 4, 3
                 pw, ph = w // cols, h // rows
@@ -323,7 +332,9 @@ class SynapseAISentinel:
 
         # --- C. VIDEO GAMES (High 3D Viewport Motion & Viewport Shift) ---
         if targets.get("video_games", True):
-            if motion_ratio > game_motion_thresh and std_lum > 30:
+            # Chromatic contrast: games have rich color saturation compared to monochrome PDF/Word text scrolling
+            color_saturation = float(np.mean(np.abs(r - g) + np.abs(g - b)))
+            if motion_ratio > game_motion_thresh and std_lum > 30 and color_saturation > 18.0:
                 return True, f"Video Game / 3D Gameplay ({motion_ratio:.1f}% Viewport Motion)", metrics
 
         # --- D. MOVIES & ENTERTAINMENT STREAMING (Letterbox + Continuous Video) ---

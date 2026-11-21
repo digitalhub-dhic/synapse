@@ -109,7 +109,31 @@ public:
 		}
 		indent += 14;
 
-		// 3. Icon (Clean Outline Vector Folder for Location, Outline Monitor for Computer)
+		// 3. Modern Checkbox indicator for every group and computer
+		const auto checkStateVal = index.data( Qt::CheckStateRole );
+		const bool isChecked = checkStateVal.isValid() && ( checkStateVal.toInt() == Qt::Checked );
+		QRect cbRect( indent, option.rect.top() + (option.rect.height() - 14) / 2, 14, 14 );
+		painter->save();
+		painter->setRenderHint( QPainter::Antialiasing );
+		if( isChecked )
+		{
+			painter->setBrush( QColor( 0x3B, 0x82, 0xF6 ) );
+			painter->setPen( Qt::NoPen );
+			painter->drawRoundedRect( cbRect, 3, 3 );
+			painter->setPen( QPen( Qt::white, 1.8, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin ) );
+			painter->drawLine( cbRect.left() + 3, cbRect.top() + 7, cbRect.left() + 6, cbRect.top() + 10 );
+			painter->drawLine( cbRect.left() + 6, cbRect.top() + 10, cbRect.left() + 11, cbRect.top() + 4 );
+		}
+		else
+		{
+			painter->setBrush( QColor( 0x0E, 0x1C, 0x38 ) );
+			painter->setPen( QPen( QColor( 0x47, 0x55, 0x69 ), 1.2 ) );
+			painter->drawRoundedRect( cbRect, 3, 3 );
+		}
+		painter->restore();
+		indent += 18;
+
+		// 4. Icon (Clean Outline Vector Folder for Location, Outline Monitor for Computer)
 		QRectF iconRect( indent, option.rect.top() + (option.rect.height() - 16) / 2.0, 16.0, 16.0 );
 		const auto typeVal = index.data( NetworkObjectModel::TypeRole );
 		const bool isLocation = hasChildren || ( typeVal.isValid() && typeVal.value<NetworkObject::Type>() == NetworkObject::Type::Location );
