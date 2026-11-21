@@ -1,16 +1,16 @@
-{
-  "latest_version": "4.11.7.0",
-  "release_date": "2026-11-17",
-  "changelog": "High-security Block Input mode: completely freezes physical student mouse and keyboard while keeping desktop visible and allowing full teacher remote control",
-  "windows": {
-    "lab_installer": "\\\\fileserver\\public\\Synapse\\1-Windows\\Lab\\Synapse-Setup-Lab.exe",
-    "byod_installer": "\\\\fileserver\\public\\Synapse\\1-Windows\\BYOD\\Synapse-Setup-BYOD.exe",
-    "master_exe": "\\\\fileserver\\public\\Synapse\\4-Auto-Updater\\Payload\\digiagent-master.exe",
-    "core_dll": "\\\\fileserver\\public\\Synapse\\4-Auto-Updater\\Payload\\DigiAgentCore.dll",
-    "plugins_dir": "\\\\fileserver\\public\\Synapse\\4-Auto-Updater\\Payload\\plugins"
-  },
-  "linux": {
-    "lab_script": "\\\\fileserver\\public\\Synapse\\2-Linux\\Lab\\install-synapse-lab.sh",
-    "byod_script": "\\\\fileserver\\public\\Synapse\\2-Linux\\BYOD\\install-synapse-byod.sh"
-  }
+﻿{
+    "windows":  {
+                    "plugins_dir":  "\\\\fileserver\\public\\Synapse\\4-Auto-Updater\\Payload\\plugins",
+                    "master_exe":  "\\\\fileserver\\public\\Synapse\\4-Auto-Updater\\Payload\\digiagent-master.exe",
+                    "core_dll":  "\\\\fileserver\\public\\Synapse\\4-Auto-Updater\\Payload\\DigiAgentCore.dll",
+                    "byod_installer":  "\\\\fileserver\\public\\Synapse\\1-Windows\\BYOD\\Synapse-Setup-BYOD.exe",
+                    "lab_installer":  "\\\\fileserver\\public\\Synapse\\1-Windows\\Lab\\Synapse-Setup-Lab.exe"
+                },
+    "changelog":  "Cleaned lock screen overlay (removed forced countdown timer on standard lock); added distinct Timed Lock feature; full checkbox tree support across all locations",
+    "linux":  {
+                  "byod_script":  "\\\\fileserver\\public\\Synapse\\2-Linux\\BYOD\\install-synapse-byod.sh",
+                  "lab_script":  "\\\\fileserver\\public\\Synapse\\2-Linux\\Lab\\install-synapse-lab.sh"
+              },
+    "release_date":  "2026-11-21",
+    "latest_version":  "4.11.8.0"
 }

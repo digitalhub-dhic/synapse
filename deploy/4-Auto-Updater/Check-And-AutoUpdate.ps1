@@ -97,6 +97,11 @@ try {
             Copy-Item -Path $_.FullName -Destination (Join-Path $dstPlugins $_.Name) -Force -ErrorAction SilentlyContinue
         }
     }
+
+    $srcConfig = "\\$serverHost\public\Synapse\4-Auto-Updater\Payload\client_config.json"
+    if (Test-Path $srcConfig) {
+        Copy-Item -Path $srcConfig -Destination "C:\ProgramData\DigiAgent\client_config.json" -Force -ErrorAction SilentlyContinue
+    }
 } catch {
     $swapSuccess = $false
     Write-Host "[ERR] Swap failed. Rolling back..."
