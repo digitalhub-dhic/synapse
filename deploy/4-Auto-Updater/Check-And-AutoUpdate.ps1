@@ -129,6 +129,13 @@ Start-Service -Name "DigiAgentService" -ErrorAction SilentlyContinue
 if ($swapSuccess) {
     Set-Content -Path $localVerFile -Value $latestVersion -Force
     Write-Host "[OK] Synapse Client successfully updated to version $latestVersion!"
+
+    # Auto-Sync to GitHub if this machine hosts the repository
+    $gitSyncScript = "C:\Users\administrator\projects\synapse\sync_and_push_to_git.py"
+    if (Test-Path $gitSyncScript) {
+        Write-Host "[*] Triggering automated Git synchronization and GitHub push..."
+        Start-Process python -ArgumentList "`"$gitSyncScript`"" -WindowStyle Hidden
+    }
 } else {
     Write-Host "[ERR] Update aborted due to swap error; system rolled back safely."
 }
