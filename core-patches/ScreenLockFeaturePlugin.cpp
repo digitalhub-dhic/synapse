@@ -547,7 +547,39 @@ bool ScreenLockFeaturePlugin::handleFeatureMessage( VeyonServerInterface& server
 			{
 				dur = message.argument( Argument::Duration ).toInt();
 			}
-			savePersistentLock( true, message.featureUid(), lockText, dur );
+
+			if( message.featureUid() == m_timedLockFeature.uid() && dur > 0 )
+			{
+				// Timed locks are temporary focus sessions: NOT persistently locked across reboots!
+				savePersistentLock( false );
+
+				// Server-side master countdown timer to guarantee automatic release
+				QTimer::singleShot( dur * 1000, this, [this]() {
+					if( m_server )
+					{
+						vInfo() << "Timed lock focus session elapsed on server. Cleanly unlocking workstation.";
+						savePersistentLock( false );
+						for( const auto& uid : { m_screenLockFeature.uid(), m_freezeScreenFeature.uid(),
+												 m_lockInputDevicesFeature.uid(), m_textLockFeature.uid(),
+												 m_timedLockFeature.uid(), m_unfreezeFeature.uid() } )
+						{
+							if( m_server->featureWorkerManager().isWorkerRunning( uid ) )
+							{
+								m_server->featureWorkerManager().sendMessageToManagedSystemWorker(
+									FeatureMessage{ uid, FeatureCommand::StopLock } );
+								m_server->featureWorkerManager().stopWorker( uid );
+							}
+						}
+						VeyonCore::platform().inputDeviceFunctions().enableInputDevices();
+						VeyonCore::platform().coreFunctions().setSystemUiState( true );
+					}
+				});
+			}
+			else
+			{
+				// Standard freeze locks are persistent
+				savePersistentLock( true, message.featureUid(), lockText, 0 );
+			}
 		}
 
 		if( VeyonCore::platform().sessionFunctions().currentSessionHasUser() == false )
