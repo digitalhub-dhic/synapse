@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ==============================================================================
-# Synapse Command - Linux BYOD Student Laptop Installer v4.11.8
+# Synapse Command - Linux BYOD Student Laptop Installer v4.11.8.2
 # Self-contained installer for student laptops connecting to the classroom fleet.
 # Compatible with: Ubuntu, Debian, Linux Mint, Pop!_OS, Fedora, Arch, openSUSE
 # ==============================================================================
@@ -14,6 +14,10 @@ if [ "$EUID" -ne 0 ]; then
     echo "[!] Requesting root privileges..."
     exec sudo bash "$0" "$@"
 fi
+
+# Clean up any previously created duplicate user autostart files
+rm -f /etc/xdg/autostart/veyon-service.desktop
+killall -9 veyon-service veyon-server veyon-worker 2>/dev/null || true
 
 echo "[1/6] Detecting Linux distribution and installing client..."
 if command -v apt-get &>/dev/null; then
@@ -55,11 +59,9 @@ chmod 644 /etc/veyon/keys/public/Digihub/key
 
 echo "[3/6] Setting Authentication & Service Configuration..."
 if command -v veyon-cli &>/dev/null; then
-    veyon-cli config set Authentication/Method 1 || true
-    veyon-cli config set Authentication/KeyFileDirectories/Public "/etc/veyon/keys/public" || true
-    veyon-cli config set Network/FirewallExceptionEnabled true || true
-    # Safely configure autostart without failing under sudo if Session DBus is absent
-    veyon-cli config set Service/Autostart true >/dev/null 2>&1 || true
+    veyon-cli config set Authentication/Method 1 2>/dev/null || true
+    veyon-cli config set Authentication/KeyFileDirectories/Public "/etc/veyon/keys/public" 2>/dev/null || true
+    veyon-cli config set Network/FirewallExceptionEnabled true 2>/dev/null || true
 fi
 
 echo "[4/6] Configuring Local Firewall Rules (Port 11100 / 11400)..."
@@ -74,42 +76,37 @@ if command -v firewall-cmd &>/dev/null && systemctl is-active --quiet firewalld 
 fi
 
 echo "[5/6] Starting Synapse Service..."
-# Create XDG desktop autostart so veyon-service starts on user login
-mkdir -p /etc/xdg/autostart
-cat << 'EOF' > /etc/xdg/autostart/veyon-service.desktop
-[Desktop Entry]
-Type=Application
-Name=Veyon Service
-Comment=Synapse Classroom Client Service
-Exec=/usr/bin/veyon-service
-Icon=veyon-service
-Terminal=false
-Categories=System;
-X-GNOME-Autostart-enabled=true
+# Configure Wayland compatibility on GDM3 if present
+if [ -f /etc/gdm3/custom.conf ]; then
+    sed -i 's/^#WaylandEnable=false/WaylandEnable=false/' /etc/gdm3/custom.conf 2>/dev/null || true
+fi
+
+# Ensure systemd rate-limits and restarts cleanly without spamming tasks
+mkdir -p /etc/systemd/system/veyon.service.d
+cat << 'EOF' > /etc/systemd/system/veyon.service.d/override.conf
+[Service]
+Restart=on-failure
+RestartSec=5s
 EOF
-chmod 644 /etc/xdg/autostart/veyon-service.desktop
 
 systemctl daemon-reload >/dev/null 2>&1 || true
-for svc in veyon-service veyon; do
+
+# Start single authoritative system service
+for svc in veyon veyon-service; do
     if systemctl list-unit-files 2>/dev/null | grep -q "^$svc.service"; then
         systemctl enable "$svc.service" >/dev/null 2>&1 || true
         systemctl restart "$svc.service" >/dev/null 2>&1 || true
+        break
     fi
 done
 
-# If executed via sudo from an active desktop terminal, launch service in user session
-if [ -n "$SUDO_USER" ] && [ "$SUDO_USER" != "root" ]; then
-    SUDO_UID=$(id -u "$SUDO_USER" 2>/dev/null || true)
-    if [ -n "$SUDO_UID" ] && ! pgrep -u "$SUDO_USER" -x veyon-service >/dev/null 2>&1; then
-        sudo -u "$SUDO_USER" DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/$SUDO_UID/bus" DISPLAY="${DISPLAY:-:0}" veyon-service >/dev/null 2>&1 &
-    fi
-fi
-
 echo "[6/6] Checking Display Server (X11 / Wayland)..."
 if [ "$XDG_SESSION_TYPE" = "wayland" ]; then
-    echo "  [NOTE] Current session is Wayland."
-    echo "  For full remote screen sharing and control, log out and select"
-    echo "  'Ubuntu on Xorg' or 'GNOME on Xorg' at the login screen (gear icon)."
+    echo ""
+    echo "  [IMPORTANT] Current session is Wayland."
+    echo "  Veyon screen monitoring requires X11 (Xorg)."
+    echo "  We have configured GDM to use Xorg. Please log out, or at the"
+    echo "  login screen click the gear icon (⚙️) and select 'Ubuntu on Xorg'."
 fi
 
 # Fetch Local IP and Hostname
