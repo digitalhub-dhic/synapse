@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ==============================================================================
-# Synapse Command - Linux BYOD Student Laptop Installer v4.11.6
+# Synapse Command - Linux BYOD Student Laptop Installer v4.11.8
 # Self-contained installer for student laptops connecting to the classroom fleet.
 # Compatible with: Ubuntu, Debian, Linux Mint, Pop!_OS, Fedora, Arch, openSUSE
 # ==============================================================================
@@ -55,10 +55,11 @@ chmod 644 /etc/veyon/keys/public/Digihub/key
 
 echo "[3/6] Setting Authentication & Service Configuration..."
 if command -v veyon-cli &>/dev/null; then
-    veyon-cli config set Authentication/Method 1
-    veyon-cli config set Authentication/KeyFileDirectories/Public "/etc/veyon/keys/public"
-    veyon-cli config set Service/Autostart true
-    veyon-cli config set Network/FirewallExceptionEnabled true
+    veyon-cli config set Authentication/Method 1 || true
+    veyon-cli config set Authentication/KeyFileDirectories/Public "/etc/veyon/keys/public" || true
+    veyon-cli config set Network/FirewallExceptionEnabled true || true
+    # Safely configure autostart without failing under sudo if Session DBus is absent
+    veyon-cli config set Service/Autostart true >/dev/null 2>&1 || true
 fi
 
 echo "[4/6] Configuring Local Firewall Rules (Port 11100 / 11400)..."
@@ -73,6 +74,21 @@ if command -v firewall-cmd &>/dev/null && systemctl is-active --quiet firewalld 
 fi
 
 echo "[5/6] Starting Synapse Service..."
+# Create XDG desktop autostart so veyon-service starts on user login
+mkdir -p /etc/xdg/autostart
+cat << 'EOF' > /etc/xdg/autostart/veyon-service.desktop
+[Desktop Entry]
+Type=Application
+Name=Veyon Service
+Comment=Synapse Classroom Client Service
+Exec=/usr/bin/veyon-service
+Icon=veyon-service
+Terminal=false
+Categories=System;
+X-GNOME-Autostart-enabled=true
+EOF
+chmod 644 /etc/xdg/autostart/veyon-service.desktop
+
 systemctl daemon-reload >/dev/null 2>&1 || true
 for svc in veyon-service veyon; do
     if systemctl list-unit-files 2>/dev/null | grep -q "^$svc.service"; then
@@ -80,6 +96,14 @@ for svc in veyon-service veyon; do
         systemctl restart "$svc.service" >/dev/null 2>&1 || true
     fi
 done
+
+# If executed via sudo from an active desktop terminal, launch service in user session
+if [ -n "$SUDO_USER" ] && [ "$SUDO_USER" != "root" ]; then
+    SUDO_UID=$(id -u "$SUDO_USER" 2>/dev/null || true)
+    if [ -n "$SUDO_UID" ] && ! pgrep -u "$SUDO_USER" -x veyon-service >/dev/null 2>&1; then
+        sudo -u "$SUDO_USER" DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/$SUDO_UID/bus" DISPLAY="${DISPLAY:-:0}" veyon-service >/dev/null 2>&1 &
+    fi
+fi
 
 echo "[6/6] Checking Display Server (X11 / Wayland)..."
 if [ "$XDG_SESSION_TYPE" = "wayland" ]; then
