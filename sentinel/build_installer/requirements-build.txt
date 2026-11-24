@@ -1,0 +1,3 @@
+# Build dependencies for the Sentinel console and Windows BYOD package.
+-r ../requirements-console.txt
+PyInstaller>=6.0,<7

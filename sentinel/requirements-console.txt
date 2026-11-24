@@ -1,0 +1,7 @@
+# Python dependencies for the local Sentinel dashboard and screenshot analysis.
+# Install with a supported 64-bit Python 3.11 environment.
+Flask>=3.0,<4
+Pillow>=10.0,<13
+PyGetWindow>=0.0.9,<1
+PyAutoGUI>=0.9.54,<1
+numpy>=1.26,<3

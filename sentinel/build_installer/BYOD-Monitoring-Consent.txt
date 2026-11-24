@@ -1,0 +1,26 @@
+SYNAPSE BYOD ENROLLMENT AND MONITORING CONSENT
+
+This laptop is personally owned and will be enrolled for use in the college
+computer laboratory. Installation is optional. If you do not agree, choose
+Cancel; this laptop will not be enrolled for lab access under the BYOD policy.
+
+While the laptop is enrolled and connected to the college classroom system,
+authorized college staff can:
+
+  * view the laptop screen and take a screenshot;
+  * lock or unlock the screen and send classroom messages;
+  * start or close supported applications and use supported power/session
+    controls; and
+  * use supported file distribution and collection features.
+
+The installation also adds Synapse background components and Tailscale for
+classroom connectivity. These components and their normal Windows entries stay
+visible. Installing this software requires Windows administrator approval.
+
+The teacher console may report that a control request was sent without being
+able to confirm that the laptop applied it. Ask the instructor to verify the
+device status before relying on a release or re-enforcement request.
+
+By selecting “I Agree”, you confirm that you understand and accept classroom
+screen monitoring and the controls described above while this device is
+enrolled. You can choose “I Do Not Agree” to cancel enrollment.

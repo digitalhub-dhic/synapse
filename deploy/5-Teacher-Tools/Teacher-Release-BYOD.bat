@@ -6,7 +6,6 @@ echo ========================================================
 echo Releasing all student laptops so they can disconnect or switch Wi-Fi...
 python "C:\SynapseAISentinel\byod_fleet_manager.py" release-all
 echo.
-echo [SUCCESS] Every BYOD laptop has been released!
-echo Students can now safely disconnect, leave class, and take laptops home.
-echo No kiosk or lock screen will appear outside the classroom.
+echo Release requests were submitted.
+echo Confirm each device status in the teacher dashboard before assuming release completed.
 timeout /t 5

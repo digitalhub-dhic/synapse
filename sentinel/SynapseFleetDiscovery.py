@@ -11,6 +11,7 @@ import time
 import json
 import ctypes
 import socket
+import ipaddress
 import threading
 import subprocess
 from concurrent.futures import ThreadPoolExecutor
@@ -193,12 +194,11 @@ def sync_device(name, current_ip, mac=""):
 
 def probe_agent_port(ip, timeout=0.5):
     """Returns True if port 11100 (DigiAgent) is actively accepting connections."""
-    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    s.settimeout(timeout)
     try:
-        s.connect((ip, 11100))
-        s.close()
-        return ip, True
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            s.settimeout(timeout)
+            s.connect((ip, 11100))
+            return ip, True
     except Exception:
         return ip, False
 
@@ -242,9 +242,15 @@ def udp_beacon_listener():
             try:
                 payload = json.loads(data.decode('utf-8'))
                 hostname = payload.get("hostname")
-                ip = payload.get("ip") or addr[0]
+                # The sender address is authoritative. Never let an unauthenticated
+                # beacon claim another host's IP and rewrite that host's catalog entry.
+                ip = str(ipaddress.ip_address(addr[0]))
                 mac = payload.get("mac", "")
-                if hostname and ip:
+                host_ip = ipaddress.ip_address(ip)
+                allowed = host_ip in ipaddress.ip_network("192.168.1.0/24") or host_ip in ipaddress.ip_network("100.64.0.0/10")
+                valid_name = isinstance(hostname, str) and 1 <= len(hostname) <= 64 and re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._-]*", hostname)
+                valid_mac = isinstance(mac, str) and (not mac or re.fullmatch(r"[0-9A-Fa-f:-]{17}", mac))
+                if allowed and valid_name and valid_mac and probe_agent_port(ip)[1]:
                     sync_device(hostname, ip, mac)
             except Exception:
                 pass

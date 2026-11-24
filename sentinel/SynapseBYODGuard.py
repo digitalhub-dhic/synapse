@@ -1,6 +1,4 @@
-"""
-Synapse Hardened BYOD Wi-Fi Guard - Enterprise Bulletproof Edition
-"""
+"""Interactive BYOD Wi-Fi and classroom policy guard for Windows."""
 
 import os
 import sys
@@ -11,21 +9,34 @@ import threading
 import tempfile
 import ctypes
 from ctypes import wintypes
+from xml.sax.saxutils import escape as xml_escape
 import tkinter as tk
 from tkinter import ttk
 
 import hmac
 import hashlib
 
-# Salted SHA-256 hash of Teacher Master Password with constant-time verification
-PASSWORD_SALT = b"SynapseEnterpriseSalt2026"
-PASSWORD_HASH = "efa0f57bdc9955b979a271903c7ae1c79272c1298df1c17d10c929c30860c33d"
+# The teacher password is provisioned per installation. Never embed a shared
+# password or verifier in distributable client code.
+CREDENTIAL_FILE = r"C:\ProgramData\DigiAgent\teacher_credential.json"
+PASSWORD_ITERATIONS = 310_000
 
 def verify_master_password(candidate: str) -> bool:
     if not candidate:
         return False
-    cand_hash = hashlib.sha256(PASSWORD_SALT + candidate.encode('utf-8')).hexdigest()
-    return hmac.compare_digest(cand_hash, PASSWORD_HASH)
+    try:
+        import json
+        with open(CREDENTIAL_FILE, "r", encoding="utf-8") as credential_file:
+            credential = json.load(credential_file)
+        salt = __import__("base64").b64decode(credential["salt"], validate=True)
+        expected = __import__("base64").b64decode(credential["hash"], validate=True)
+        iterations = int(credential.get("iterations", PASSWORD_ITERATIONS))
+        if len(salt) < 16 or len(expected) != 32 or iterations < 100_000 or iterations > 2_000_000:
+            return False
+        actual = hashlib.pbkdf2_hmac("sha256", candidate.encode("utf-8"), salt, iterations)
+        return hmac.compare_digest(actual, expected)
+    except (OSError, ValueError, TypeError, KeyError, ImportError):
+        return False
 
 LOG_FILE = r"C:\ProgramData\DigiAgent\guard.log"
 CONFIG_FILE = r"C:\ProgramData\DigiAgent\byod_policy.json"
@@ -239,18 +250,25 @@ def get_scanned_wifi_networks():
 
 def connect_to_wifi(ssid, password=""):
     """Connects to a Wi-Fi network with or without password."""
-    if not ssid:
+    if not isinstance(ssid, str) or not ssid or len(ssid.encode("utf-8")) > 32 or any(ord(ch) < 32 for ch in ssid):
         return False, "Please select a Wi-Fi network."
+    if password and not isinstance(password, str):
+        return False, "The Wi-Fi password is invalid."
+    if password and not (8 <= len(password) <= 63 or (len(password) == 64 and all(ch in "0123456789abcdefABCDEF" for ch in password))):
+        return False, "WPA2 passwords must be 8–63 characters or a 64-character hexadecimal key."
 
+    tmp_path = None
     try:
         if password:
+            safe_ssid = xml_escape(ssid)
+            safe_password = xml_escape(password)
             xml = (
                 '<?xml version="1.0"?>\n'
                 '<WLANProfile xmlns="http://www.microsoft.com/networking/WLAN/profile/v1">\n'
-                f'    <name>{ssid}</name>\n'
+                f'    <name>{safe_ssid}</name>\n'
                 '    <SSIDConfig>\n'
                 '        <SSID>\n'
-                f'            <name>{ssid}</name>\n'
+                f'            <name>{safe_ssid}</name>\n'
                 '        </SSID>\n'
                 '    </SSIDConfig>\n'
                 '    <connectionType>ESS</connectionType>\n'
@@ -265,36 +283,42 @@ def connect_to_wifi(ssid, password=""):
                 '            <sharedKey>\n'
                 '                <keyType>passPhrase</keyType>\n'
                 '                <protected>false</protected>\n'
-                f'                <keyMaterial>{password}</keyMaterial>\n'
+                f'                <keyMaterial>{safe_password}</keyMaterial>\n'
                 '            </sharedKey>\n'
                 '        </security>\n'
                 '    </MSM>\n'
                 '</WLANProfile>\n'
             )
-            tmp_path = os.path.join(tempfile.gettempdir(), f"wlan_{int(time.time())}.xml")
-            with open(tmp_path, "w", encoding="utf-8") as f:
-                f.write(xml)
+            with tempfile.NamedTemporaryFile(mode="w", encoding="utf-8", suffix=".xml", delete=False) as profile_file:
+                tmp_path = profile_file.name
+                profile_file.write(xml)
 
-            subprocess.run(
+            profile_result = subprocess.run(
                 ["netsh", "wlan", "add", "profile", f"filename={tmp_path}"],
-                capture_output=True, creationflags=0x08000000
+                capture_output=True, text=True, timeout=10, creationflags=0x08000000
             )
-            try:
-                os.remove(tmp_path)
-            except Exception:
-                pass
+            if profile_result.returncode != 0:
+                return False, (profile_result.stderr or profile_result.stdout or "Windows rejected the Wi-Fi profile.").strip()
 
         res = subprocess.run(
             ["netsh", "wlan", "connect", f"name={ssid}"],
             capture_output=True, text=True, timeout=5, creationflags=0x08000000
         )
+        if res.returncode != 0:
+            return False, (res.stderr or res.stdout or "Windows rejected the Wi-Fi connection request.").strip()
         return True, f"Connecting to {ssid}..."
     except Exception as e:
         return False, str(e)
+    finally:
+        if tmp_path:
+            try:
+                os.remove(tmp_path)
+            except OSError:
+                pass
 
 
-class BulletproofLockScreen:
-    """Enterprise Lockdown Controller."""
+class BYODLockScreen:
+    """Interactive classroom lock screen, running in the student's session."""
     def __init__(self):
         self.active = False
         self.emergency_unlocked = False
@@ -637,7 +661,7 @@ class BulletproofLockScreen:
         log("Desktop unlock completed successfully.")
 
 
-guard_lock = BulletproofLockScreen()
+guard_lock = BYODLockScreen()
 
 def main():
     log("==========================================")

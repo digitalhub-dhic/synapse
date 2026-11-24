@@ -19,16 +19,15 @@ echo.
 echo  Choose how you want to run this installer:
 echo.
 echo    [1] Remote Linux Laptop over Network (Wi-Fi / LAN via SSH)
-echo    [2] Local Linux Subsystem (WSL / Ubuntu on this PC)
-echo    [3] View Instructions for Direct Execution on Linux
-echo    [4] Exit
+echo    [2] View Instructions for Direct Execution on Linux
+echo    [3] Exit
 echo.
-set /p mode="Select option [1-4] (Press Enter for 1): "
+set /p mode="Select option [1-3] (Press Enter for 1): "
 if "%mode%"=="" set mode=1
 
 if "%mode%"=="1" goto REMOTE_SSH
-if "%mode%"=="2" goto LOCAL_WSL
-if "%mode%"=="3" goto SHOW_INSTRUCTIONS
+if "%mode%"=="2" goto SHOW_INSTRUCTIONS
+if "%mode%"=="3" exit /b 0
 if "%mode%"=="4" exit /b 0
 goto REMOTE_SSH
 
@@ -57,8 +56,9 @@ if %errorlevel% neq 0 (
 )
 
 echo.
-echo [*] Copying install-synapse-byod.sh to %target_user%@%target_ip%...
-scp -o StrictHostKeyChecking=no "%~dp0install-synapse-byod.sh" %target_user%@%target_ip%:~/install-synapse-byod.sh
+echo [*] Copying installer. SSH host-key verification is required.
+echo     Ensure the trusted host key is already in your SSH known_hosts file.
+scp "%~dp0install-synapse-byod.sh" %target_user%@%target_ip%:~/install-synapse-byod.sh
 if %errorlevel% neq 0 (
     echo.
     echo [!] Failed to copy installer to remote Linux device.
@@ -69,37 +69,28 @@ if %errorlevel% neq 0 (
     pause
     exit /b 1
 )
+scp "%~dp0..\Tools\synapse-linux-check.sh" %target_user%@%target_ip%:~/synapse-linux-check.sh
+if errorlevel 1 (
+    echo [ERROR] Readiness checker copy failed; deployment package is incomplete.
+    pause
+    exit /b 1
+)
 
 echo.
 echo [*] Running: chmod +x ~/install-synapse-byod.sh ^&^& sudo ~/install-synapse-byod.sh
 echo [*] (Enter the Linux user's sudo password when prompted)
 echo --------------------------------------------------------------------
-ssh -t -o StrictHostKeyChecking=no %target_user%@%target_ip% "chmod +x ~/install-synapse-byod.sh && sudo ~/install-synapse-byod.sh"
-
-echo.
-echo ====================================================================
-echo  Installation execution finished!
-echo  Synapse Command will auto-discover and show the device under BYOD.
-echo ====================================================================
-pause
-exit /b 0
-
-:LOCAL_WSL
-echo.
-echo --------------------------------------------------------------------
-echo  LOCAL WSL / LINUX EXECUTION
-echo --------------------------------------------------------------------
-where wsl >nul 2>&1
-if %errorlevel% neq 0 (
-    echo [ERROR] Windows Subsystem for Linux (WSL) is not installed on this PC.
+ssh -t %target_user%@%target_ip% "chmod +x ~/install-synapse-byod.sh && sudo ~/install-synapse-byod.sh"
+if errorlevel 1 (
+    echo [ERROR] Remote installer failed. Resolve the SSH or install error before enrolling this device.
     pause
     exit /b 1
 )
 
-echo [*] Launching in WSL with root privileges...
-wsl -u root bash -c "cd '$(wslpath '%~dp0')' && chmod +x install-synapse-byod.sh && ./install-synapse-byod.sh"
 echo.
-echo [OK] WSL Execution complete.
+echo ====================================================================
+echo  Installer completed. Confirm Tailscale, service, and live capture in the teacher console.
+echo ====================================================================
 pause
 exit /b 0
 

@@ -12,7 +12,8 @@ import logging
 import threading
 import subprocess
 import datetime
-from flask import Flask, render_template, jsonify, request, send_from_directory
+from collections import deque
+from flask import Flask, render_template, jsonify, request, send_from_directory, abort, redirect, url_for, session
 from PIL import Image
 import pygetwindow as gw
 import pyautogui
@@ -32,8 +33,130 @@ from synapse_sentinel_engine import (
     save_config
 )
 from byod_fleet_manager import byod_manager
+from sentinel_auth import get_security_dir, load_security_files, verify_console_password
+
+try:
+    _sentinel_log_dir = get_security_dir().parent
+    _sentinel_log_dir.mkdir(parents=True, exist_ok=True)
+    logging.basicConfig(
+        filename=str(_sentinel_log_dir / "sentinel.log"),
+        level=logging.INFO,
+        format="%(asctime)s %(levelname)s %(message)s",
+    )
+except OSError:
+    logging.basicConfig(level=logging.INFO)
 
 app = Flask(__name__, template_folder=r"C:\SynapseAISentinel\templates", static_folder=r"C:\SynapseAISentinel\static")
+app.config.update(
+    SESSION_COOKIE_HTTPONLY=True,
+    SESSION_COOKIE_SAMESITE="Strict",
+    SESSION_COOKIE_SECURE=False,  # The UI is loopback-only HTTP; Secure cookies would not be sent.
+    PERMANENT_SESSION_LIFETIME=datetime.timedelta(hours=8),
+    MAX_CONTENT_LENGTH=16 * 1024,
+)
+
+CONSOLE_AUTH_READY = False
+CONSOLE_CREDENTIAL = None
+try:
+    session_secret, CONSOLE_CREDENTIAL = load_security_files()
+    app.secret_key = session_secret
+    CONSOLE_AUTH_READY = True
+except (OSError, ValueError, TypeError, KeyError) as exc:
+    logging.error("Sentinel console authentication is not configured: %s", exc)
+
+_LOGIN_FAILURES = deque()
+_LOGIN_FAILURES_LOCK = threading.Lock()
+_LOGIN_LOCKOUT_UNTIL = 0.0
+_LOGIN_FAILURE_WINDOW_SECONDS = 600
+_LOGIN_LOCKOUT_SECONDS = 900
+_LOGIN_MAX_FAILURES = 5
+
+
+@app.before_request
+def require_authenticated_local_console():
+    """Require a teacher session and same-origin control requests on loopback."""
+    if request.remote_addr not in ("127.0.0.1", "::1"):
+        abort(403)
+    if not CONSOLE_AUTH_READY:
+        return render_template("auth_setup_required.html"), 503
+
+    if request.endpoint == "login":
+        if request.method not in ("GET", "HEAD"):
+            origin = request.headers.get("Origin", "")
+            if origin.rstrip("/") != request.host_url.rstrip("/"):
+                abort(403)
+        return None
+
+    if not session.get("teacher_authenticated"):
+        if request.path.startswith("/api/"):
+            return jsonify({"success": False, "error": "Teacher login required"}), 401
+        return redirect(url_for("login"))
+
+    if request.method not in ("GET", "HEAD"):
+        origin = request.headers.get("Origin", "")
+        if origin.rstrip("/") != request.host_url.rstrip("/"):
+            abort(403)
+    return None
+
+
+@app.after_request
+def add_private_console_headers(response):
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["Referrer-Policy"] = "no-referrer"
+    response.headers["Cache-Control"] = "no-store"
+    return response
+
+
+def _login_is_locked_out():
+    global _LOGIN_LOCKOUT_UNTIL
+    now = time.monotonic()
+    with _LOGIN_FAILURES_LOCK:
+        if now < _LOGIN_LOCKOUT_UNTIL:
+            return True
+        while _LOGIN_FAILURES and now - _LOGIN_FAILURES[0] > _LOGIN_FAILURE_WINDOW_SECONDS:
+            _LOGIN_FAILURES.popleft()
+        return len(_LOGIN_FAILURES) >= _LOGIN_MAX_FAILURES
+
+
+def _record_login_failure():
+    global _LOGIN_LOCKOUT_UNTIL
+    now = time.monotonic()
+    with _LOGIN_FAILURES_LOCK:
+        while _LOGIN_FAILURES and now - _LOGIN_FAILURES[0] > _LOGIN_FAILURE_WINDOW_SECONDS:
+            _LOGIN_FAILURES.popleft()
+        _LOGIN_FAILURES.append(now)
+        if len(_LOGIN_FAILURES) >= _LOGIN_MAX_FAILURES:
+            _LOGIN_LOCKOUT_UNTIL = now + _LOGIN_LOCKOUT_SECONDS
+            _LOGIN_FAILURES.clear()
+
+
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    if session.get("teacher_authenticated"):
+        return redirect(url_for("index"))
+    if request.method == "GET":
+        return render_template("login.html", error=None)
+    if _login_is_locked_out():
+        return render_template("login.html", error="Too many failed attempts. Try again in 15 minutes."), 429
+
+    password = request.form.get("password", "")
+    if verify_console_password(password, CONSOLE_CREDENTIAL):
+        with _LOGIN_FAILURES_LOCK:
+            _LOGIN_FAILURES.clear()
+        session.clear()
+        session.permanent = True
+        session["teacher_authenticated"] = True
+        return redirect(url_for("index"))
+
+    _record_login_failure()
+    return render_template("login.html", error="Password was not accepted."), 401
+
+
+@app.route("/logout", methods=["POST"])
+def logout():
+    session.clear()
+    return redirect(url_for("login"))
 
 # State
 daemon_state = {
@@ -178,8 +301,16 @@ def update_config():
     data = request.json or {}
     cfg = sentinel_instance.config
     if "sensitivity" in data:
+        if data["sensitivity"] not in ("low", "medium", "strict"):
+            return jsonify({"success": False, "error": "Invalid sensitivity"}), 400
         cfg["sensitivity"] = data["sensitivity"]
     if "detection_targets" in data:
+        if not isinstance(data["detection_targets"], dict) or any(
+            key not in ("sports_streams", "movies_streaming", "video_games", "social_media_reels")
+            or not isinstance(value, bool)
+            for key, value in data["detection_targets"].items()
+        ):
+            return jsonify({"success": False, "error": "Invalid detection targets"}), 400
         cfg["detection_targets"] = data["detection_targets"]
     if "play_sound" in data:
         cfg["play_sound"] = bool(data["play_sound"])
@@ -192,7 +323,7 @@ def update_config():
 def unlock_host():
     data = request.json or {}
     ip = data.get("ip")
-    if not ip:
+    if not ip or byod_manager.validate_target(ip) is None:
         return jsonify({"success": False, "error": "IP required"}), 400
     res = sentinel_instance.unlock_computer(ip)
     return jsonify({"success": res, "ip": ip})
@@ -248,9 +379,12 @@ def fleet_connect_device():
 
 @app.route("/api/evidence/<path:filepath>")
 def serve_evidence(filepath):
-    # Sanitize and serve from VIOLATIONS_DIR
-    full_path = os.path.normpath(os.path.join(VIOLATIONS_DIR, filepath))
-    if not full_path.startswith(os.path.abspath(VIOLATIONS_DIR)):
+    base_path = os.path.abspath(VIOLATIONS_DIR)
+    full_path = os.path.abspath(os.path.join(base_path, filepath))
+    try:
+        if os.path.commonpath([base_path, full_path]) != base_path:
+            return "Access denied", 403
+    except ValueError:
         return "Access denied", 403
     dir_name = os.path.dirname(full_path)
     file_name = os.path.basename(full_path)

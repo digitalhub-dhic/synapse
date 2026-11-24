@@ -16,9 +16,8 @@ echo.
 echo  Target: Permanent Lab Computers (DIGIHUB Lab Workstations)
 echo  Script: install-synapse-lab.sh
 echo  Includes:
-echo    - Hardened Systemd Watchdog (synapse-agent.service)
-echo    - Anti-Tamper / Auto-Restart on Process Kill
-echo    - Background Hourly Auto-Updater Cron Job
+echo    - Packaged Veyon service and classroom key setup
+echo    - Wayland PipeWire/portal readiness checks
 echo.
 echo  Choose deployment method:
 echo    [1] Remote Lab PC over Network (Wi-Fi / LAN via SSH)
@@ -58,8 +57,9 @@ if %errorlevel% neq 0 (
 )
 
 echo.
-echo [*] Copying install-synapse-lab.sh to %target_user%@%target_ip%...
-scp -o StrictHostKeyChecking=no "%~dp0install-synapse-lab.sh" %target_user%@%target_ip%:~/install-synapse-lab.sh
+echo [*] Copying installer. SSH host-key verification is required.
+echo     Ensure the trusted host key is already in your SSH known_hosts file.
+scp "%~dp0install-synapse-lab.sh" %target_user%@%target_ip%:~/install-synapse-lab.sh
 if %errorlevel% neq 0 (
     echo.
     echo [!] Failed to copy installer to remote Lab PC.
@@ -70,17 +70,23 @@ if %errorlevel% neq 0 (
     pause
     exit /b 1
 )
+scp "%~dp0..\Tools\synapse-linux-check.sh" %target_user%@%target_ip%:~/synapse-linux-check.sh
+if errorlevel 1 (
+    echo [ERROR] Readiness checker copy failed; deployment package is incomplete.
+    pause
+    exit /b 1
+)
 
 echo.
 echo [*] Running: chmod +x ~/install-synapse-lab.sh ^&^& sudo ~/install-synapse-lab.sh
 echo [*] (Enter sudo password when prompted)
 echo --------------------------------------------------------------------
-ssh -t -o StrictHostKeyChecking=no %target_user%@%target_ip% "chmod +x ~/install-synapse-lab.sh && sudo ~/install-synapse-lab.sh"
+ssh -t %target_user%@%target_ip% "chmod +x ~/install-synapse-lab.sh && sudo ~/install-synapse-lab.sh"
 
 echo.
 echo ====================================================================
 echo  Lab workstation installation finished!
-echo  The PC is now connected and protected by Anti-Tamper.
+echo  Confirm the Veyon service and desktop capture at the workstation.
 echo ====================================================================
 pause
 exit /b 0

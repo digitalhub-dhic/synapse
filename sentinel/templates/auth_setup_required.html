@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sentinel sign-in setup required</title>
+  <style>
+    body { max-width: 42rem; margin: 12vh auto; padding: 1.5rem; color: #202c24; font: 16px/1.6 system-ui, sans-serif; }
+    main { padding: 2rem; background: #fff; border: 1px solid #dce7df; border-radius: 1rem; }
+    code { overflow-wrap: anywhere; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Teacher sign-in setup required</h1>
+    <p>The dashboard is disabled until a teacher-console password and local session key are configured.</p>
+    <p>Sign in to Windows as the teacher account and run this script in PowerShell:</p>
+    <p><code>C:\SynapseAISentinel\Set-SentinelConsolePassword.ps1</code></p>
+    <p>Then restart Sentinel and reload this page. Setup is intentionally unavailable through the web page so another local process cannot claim the first account.</p>
+  </main>
+</body>
+</html>

@@ -9,9 +9,9 @@ a = Analysis(
         ('Synapse-Setup.exe', '.'),
         ('Digihub.key', '.'),
         ('DigiAgentCore.dll', '.'),
-        ('windows-platform.dll', '.'),
-        ('remoteaccess.dll', '.'),
-        ('screenlock.dll', '.')
+        ('windows-platform.dll', 'plugins'),
+        ('remoteaccess.dll', 'plugins'),
+        ('screenlock.dll', 'plugins')
     ],
     hiddenimports=[],
     hookspath=[],

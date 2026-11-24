@@ -1,26 +1,8 @@
-"""
-Synapse Hardened BYOD Watchdog v4.0 (Zero-Bypass & Reboot-Persistent Edition)
-Key Security Enforcement:
-1. When Wi-Fi is disconnected or Airplane Mode is enabled:
-   - Does NOT immediately lock into kiosk mode.
-   - Actively auto-heals: turns OFF Airplane Mode, re-enables Wi-Fi adapters, and auto-reconnects to school Wi-Fi.
-2. If auto-reconnection succeeds:
-   - Student continues working seamlessly with ZERO kiosk interruption.
-3. If auto-reconnection fails:
-   - Enforces persistent KIOSK MODE.
-4. UNBREAKABLE RULES:
-   - Can ONLY be overcome by:
-     a) Entering the Teacher Master Password ("Synapse#Master2026!").
-     b) Reconnecting to the authorized Classroom Wi-Fi / Teacher Server.
-     c) Teacher Remote Release (Teacher-Release-BYOD.bat).
-   - CANNOT be overcome without password or classroom Wi-Fi.
-   - CANNOT be overcome by signing out, signing in, fast user switching, or restarting the PC.
-   - Persistent lock state saved to disk; immediately re-locks on boot/logon if still offline.
-5. Anti-Tamper & Anti-Deletion:
-   - Runs as SYSTEM with highest privileges across boot and logon.
-   - NTFS ACL explicitly denies Delete/Modify to standard Users.
-   - Task Manager blocked during lockout.
-   - Fast user switching disabled in Windows.
+"""Windows BYOD connectivity watchdog.
+
+This process is installed as SYSTEM to attempt classroom network recovery.
+Interactive lock UI belongs in the logged-in student's session; a SYSTEM task
+cannot reliably display UI across Windows session isolation.
 """
 
 import os
@@ -30,8 +12,6 @@ import socket
 import ctypes
 import subprocess
 import threading
-import tkinter as tk
-from tkinter import simpledialog, messagebox
 
 # Single-Instance Enforcement: Prevents duplicate watchdog processes
 _MUTEX_NAME = "Global\\SynapseWatchdog_SingleInstance_Mutex"
@@ -40,20 +20,32 @@ if ctypes.windll.kernel32.GetLastError() == 183:  # ERROR_ALREADY_EXISTS
     sys.exit(0)
 
 CONFIG_FILE = r"C:\ProgramData\DigiAgent\byod_policy.json"
-LOCK_STATE_FILE = r"C:\ProgramData\DigiAgent\kiosk_locked.state"
 INSTALL_DIR = r"C:\Program Files\DigiAgent"
 
-# Salted SHA-256 hash of Teacher Master Password with constant-time verification
+# The teacher password is provisioned per installation. Never embed a shared
+# password or verifier in distributable client code.
 import hmac
 import hashlib
-PASSWORD_SALT = b"SynapseEnterpriseSalt2026"
-PASSWORD_HASH = "efa0f57bdc9955b979a271903c7ae1c79272c1298df1c17d10c929c30860c33d"
+CREDENTIAL_FILE = r"C:\ProgramData\DigiAgent\teacher_credential.json"
+PASSWORD_ITERATIONS = 310_000
 
 def verify_master_password(candidate: str) -> bool:
     if not candidate:
         return False
-    cand_hash = hashlib.sha256(PASSWORD_SALT + candidate.encode('utf-8')).hexdigest()
-    return hmac.compare_digest(cand_hash, PASSWORD_HASH)
+    try:
+        import base64
+        import json
+        with open(CREDENTIAL_FILE, "r", encoding="utf-8") as credential_file:
+            credential = json.load(credential_file)
+        salt = base64.b64decode(credential["salt"], validate=True)
+        expected = base64.b64decode(credential["hash"], validate=True)
+        iterations = int(credential.get("iterations", PASSWORD_ITERATIONS))
+        if len(salt) < 16 or len(expected) != 32 or iterations < 100_000 or iterations > 2_000_000:
+            return False
+        actual = hashlib.pbkdf2_hmac("sha256", candidate.encode("utf-8"), salt, iterations)
+        return hmac.compare_digest(actual, expected)
+    except (OSError, ValueError, TypeError, KeyError, ImportError):
+        return False
 
 # Auto-heal execution gate: Prevents thread fork-bombs and CPU spikes
 _heal_lock = threading.Lock()
@@ -95,25 +87,6 @@ def is_teacher_released():
         except Exception:
             pass
     return False
-
-def is_state_locked():
-    """Checks persistent lock status on disk across reboots."""
-    if os.path.exists(LOCK_STATE_FILE):
-        try:
-            with open(LOCK_STATE_FILE, "r", encoding="utf-8") as f:
-                return f.read().strip() == "LOCKED"
-        except Exception:
-            pass
-    return False
-
-def set_state_locked(locked: bool):
-    """Saves persistent lock status to disk."""
-    try:
-        os.makedirs(os.path.dirname(LOCK_STATE_FILE), exist_ok=True)
-        with open(LOCK_STATE_FILE, "w", encoding="utf-8") as f:
-            f.write("LOCKED" if locked else "UNLOCKED")
-    except Exception:
-        pass
 
 def is_classroom_connected():
     """
@@ -225,155 +198,37 @@ def auto_heal_network():
     log_debug("Auto-heal could not reach classroom network.")
     return False
 
-def enforce_system_policies(locked: bool):
-    """
-    Prevents bypass via:
-    1. Task Manager (DisableTaskMgr)
-    2. Fast User Switching / Switch User (HideFastUserSwitching)
-    """
-    val = "1" if locked else "0"
-    try:
-        # Disable/Enable Task Manager
-        subprocess.run(
-            ["reg", "add", r"HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\System",
-             "/v", "DisableTaskMgr", "/t", "REG_DWORD", "/d", val, "/f"],
-            capture_output=True, timeout=2, creationflags=0x08000000
-        )
-        # Hide Fast User Switching so student cannot switch accounts
-        subprocess.run(
-            ["reg", "add", r"HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System",
-             "/v", "HideFastUserSwitching", "/t", "REG_DWORD", "/d", "1", "/f"],
-            capture_output=True, timeout=2, creationflags=0x08000000
-        )
-    except Exception:
-        pass
-
 def enforce_anti_tamper_permissions():
-    """Ensures students cannot delete, rename, or tamper with the watchdog files."""
+    """Protect client files while preserving administrator access and guard logging."""
     try:
         if os.path.exists(INSTALL_DIR):
             subprocess.run(
-                ["icacls", INSTALL_DIR, "/grant", "Users:(OI)(CI)(RX)", "/deny", "Users:(DE,WDAC,WD,AD)"],
-                capture_output=True, timeout=3, creationflags=0x08000000
+                ["icacls", INSTALL_DIR, "/inheritance:r", "/T", "/C", "/remove:d", "Users", "/grant:r",
+                 "SYSTEM:(OI)(CI)(F)", "Administrators:(OI)(CI)(F)", "Users:(OI)(CI)(RX)"],
+                capture_output=True, timeout=3, creationflags=0x08000000, check=True
             )
         data_dir = r"C:\ProgramData\DigiAgent"
         if os.path.exists(data_dir):
             subprocess.run(
-                ["icacls", data_dir, "/grant", "Users:(OI)(CI)(RX)", "/deny", "Users:(DE,WDAC,WD,AD)"],
-                capture_output=True, timeout=3, creationflags=0x08000000
+                ["icacls", data_dir, "/inheritance:r", "/T", "/C", "/remove:d", "Users", "/grant:r",
+                 "SYSTEM:(OI)(CI)(F)", "Administrators:(OI)(CI)(F)", "Users:(OI)(CI)(RX)"],
+                capture_output=True, timeout=3, creationflags=0x08000000, check=True
             )
-    except Exception:
-        pass
-
-
-class HardenedLockUI:
-    def __init__(self):
-        self.root = None
-        self.is_active = False
-        self.override = False
-
-    def display(self):
-        if self.is_active or self.override or is_teacher_released():
-            return
-        self.is_active = True
-        set_state_locked(True)
-        enforce_system_policies(True)
-
-        self.root = tk.Tk()
-        self.root.title("Synapse Classroom Lock")
-        self.root.attributes("-fullscreen", True)
-        self.root.attributes("-topmost", True)
-        self.root.configure(bg="#0B132B")
-
-        # Block all shortcuts and close attempts
-        self.root.protocol("WM_DELETE_WINDOW", lambda: None)
-        self.root.bind("<Alt-F4>", lambda e: "break")
-        self.root.bind("<Escape>", lambda e: "break")
-
-        def keep_topmost():
-            if self.is_active and self.root:
-                try:
-                    self.root.lift()
-                    self.root.attributes("-topmost", True)
-                    self.root.after(300, keep_topmost)
-                except Exception:
-                    pass
-
-        # Card container
-        card = tk.Frame(self.root, bg="#1C2541", padx=55, pady=45, relief=tk.RAISED, bd=2)
-        card.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
-
-        lbl_icon = tk.Label(card, text="🛑", font=("Segoe UI", 52), fg="#EF4444", bg="#1C2541")
-        lbl_icon.pack(pady=(0, 10))
-
-        lbl_title = tk.Label(card, text="Classroom Enforcement Active", font=("Segoe UI", 22, "bold"), fg="#FFFFFF", bg="#1C2541")
-        lbl_title.pack(pady=(0, 12))
-
-        lbl_desc = tk.Label(card,
-            text="Disconnecting from school Wi-Fi or enabling Airplane Mode is prohibited.\n\n"
-                 "This workstation is locked by instructor policy.\n"
-                 "Restarting or signing out will NOT bypass this lock.\n"
-                 "Must be unlocked by Teacher Password or reconnecting to Classroom Wi-Fi.",
-            font=("Segoe UI", 12), fg="#CBD5E1", bg="#1C2541", justify=tk.CENTER)
-        lbl_desc.pack(pady=(0, 25))
-
-        btn_unlock = tk.Button(card, text="🔑  Teacher Unlock", font=("Segoe UI", 12, "bold"),
-                               bg="#3A86FF", fg="white", activebackground="#2563EB", activeforeground="white",
-                               padx=25, pady=8, relief=tk.FLAT, cursor="hand2", command=self.teacher_override)
-        btn_unlock.pack(pady=(5, 10), fill=tk.X)
-
-        lbl_status = tk.Label(card, text="🔒 Persistent Lock • Reboots & Sign-Outs Protected",
-                              font=("Segoe UI", 9, "italic"), fg="#94A3B8", bg="#1C2541")
-        lbl_status.pack(pady=(5, 0))
-
-        keep_topmost()
-        self.poll_network()
-        self.root.mainloop()
-
-    def teacher_override(self):
-        pwd = simpledialog.askstring("Instructor Unlock", "Enter Teacher Master Password:", parent=self.root, show="*")
-        if pwd and verify_master_password(pwd):
-            self.override = True
-            set_state_locked(False)
-            self.dismiss()
-        elif pwd is not None:
-            messagebox.showerror("Access Denied", "Incorrect master password.", parent=self.root)
-
-    def poll_network(self):
-        # Auto-unlock ONLY if Teacher Released OR Verified Classroom Connection Restored
-        if is_teacher_released() or is_classroom_connected():
-            set_state_locked(False)
-            self.dismiss()
-            return
-
-        # Single-instance guarded auto-heal
-        trigger_auto_heal_async()
-
-        if self.root and self.is_active:
-            self.root.after(2000, self.poll_network)
-
-    def dismiss(self):
-        self.is_active = False
-        enforce_system_policies(False)
-        if self.root:
-            try:
-                self.root.destroy()
-            except Exception:
+            # The interactive Guard runs as the logged-in student. Give it
+            # append/write permission only to its non-sensitive diagnostic log.
+            guard_log = os.path.join(data_dir, "guard.log")
+            with open(guard_log, "a", encoding="utf-8"):
                 pass
-            self.root = None
+            subprocess.run(
+                ["icacls", guard_log, "/grant:r", "SYSTEM:(F)", "Administrators:(F)", "Users:(W)"],
+                capture_output=True, timeout=3, creationflags=0x08000000, check=True
+            )
+    except Exception as exc:
+        log_debug(f"Could not secure BYOD file permissions: {exc}")
 
-
-lock_ui = HardenedLockUI()
 
 def watchdog_worker():
     enforce_anti_tamper_permissions()
-    enforce_system_policies(False)
-
-    # REBOOT & SIGN-IN PERSISTENCE CHECK:
-    # If computer rebooted or user signed out while in locked state:
-    if is_state_locked() and not is_teacher_released() and not is_classroom_connected():
-        log_debug("Startup/Logon detected with persistent lock active. Triggering KIOSK immediately!")
-        lock_ui.display()
 
     time.sleep(3)  # Brief grace for initial network stabilization
     consecutive_offline = 0
@@ -382,9 +237,6 @@ def watchdog_worker():
         try:
             # 1. Check if teacher released device
             if is_teacher_released():
-                set_state_locked(False)
-                if lock_ui.is_active:
-                    lock_ui.dismiss()
                 time.sleep(5)
                 continue
 
@@ -397,24 +249,11 @@ def watchdog_worker():
                 healed = auto_heal_network()
                 if healed:
                     consecutive_offline = 0
-                    set_state_locked(False)
-                    if lock_ui.is_active:
-                        lock_ui.dismiss()
                 else:
-                    # If auto-heal cannot reach Classroom Server, IMMEDIATELY enter KIOSK MODE
-                    if not lock_ui.is_active:
-                        log_debug("Cannot reach classroom network. Triggering persistent KIOSK MODE.")
-                        set_state_locked(True)
-                        lock_ui.display()
+                    log_debug("Network recovery did not restore classroom connectivity; the student-session Guard handles the lock screen.")
             else:
                 consecutive_offline = 0
-                lock_ui.override = False
-                set_state_locked(False)
-                if lock_ui.is_active:
-                    lock_ui.dismiss()
 
-            # Periodic permission reinforcement
-            enforce_anti_tamper_permissions()
             time.sleep(2)
 
         except Exception as e:

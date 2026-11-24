@@ -6,16 +6,25 @@ echo ========================================================
 echo       SYNAPSE CLASSROOM CLIENT - INSTRUCTOR UNINSTALL
 echo ========================================================
 echo.
-echo [!] This tool requires the Instructor Master Password.
+net session >nul 2>&1
+if %errorlevel% neq 0 (
+    echo [INFO] Requesting Administrator Privileges...
+    powershell.exe -NoProfile -Command "Start-Process -FilePath '%~f0' -Verb RunAs"
+    exit /b
+)
+if not exist "%~dp0Verify-SynapseTeacherPassword.ps1" (
+    echo [ERROR] Per-device teacher password verifier is missing.
+    pause
+    exit /b 1
+)
+echo [!] This tool requires this device's teacher override password.
 echo.
 
-set /p PWD="Enter Instructor Password: "
-powershell -NoProfile -ExecutionPolicy Bypass -Command "$h = (Get-FileHash -InputStream ([System.IO.MemoryStream]::new([System.Text.Encoding]::UTF8.GetBytes('SynapseEnterpriseSalt2026' + '%PWD%')))).Hash.ToLower(); if ($h -eq 'efa0f57bdc9955b979a271903c7ae1c79272c1298df1c17d10c929c30860c33d') { exit 0 } else { exit 1 }" >nul 2>&1
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%~dp0Verify-SynapseTeacherPassword.ps1"
 if %errorlevel% neq 0 (
     color 4F
     echo.
-    echo [ERROR] Access Denied: Incorrect Master Password.
-    echo Unauthorized uninstallation is prohibited.
+    echo [ERROR] Access denied. The Synapse client was not removed.
     pause
     exit /b 1
 )
@@ -39,17 +48,39 @@ taskkill /F /IM digiagent-worker.exe >nul 2>&1
 taskkill /F /IM digiagent-service.exe >nul 2>&1
 sc delete DigiAgentService >nul 2>&1
 
-:: 3. Clean files and registries
+:: 3. Restore administrator access on older installs before removing files.
+for %%D in ("C:\Program Files\DigiAgent" "C:\ProgramData\DigiAgent") do (
+    if exist "%%~D" (
+        icacls "%%~D" /T /C /remove:d Users /grant:r "SYSTEM:(OI)(CI)(F)" "Administrators:(OI)(CI)(F)" >nul 2>&1
+        if errorlevel 1 (
+            echo [ERROR] Could not restore administrator access to %%~D.
+            pause
+            exit /b 1
+        )
+    )
+)
+
+:: 4. Clean files and registries
 if exist "C:\Program Files\DigiAgent" (
     rmdir /S /Q "C:\Program Files\DigiAgent" >nul 2>&1
 )
 if exist "C:\ProgramData\DigiAgent" (
     rmdir /S /Q "C:\ProgramData\DigiAgent" >nul 2>&1
 )
+if exist "C:\Program Files\DigiAgent" (
+    echo [ERROR] Synapse files remain. Complete removal from Windows Apps and Features.
+    pause
+    exit /b 1
+)
+if exist "C:\ProgramData\DigiAgent" (
+    echo [ERROR] Synapse data remains; some files may still be in use.
+    pause
+    exit /b 1
+)
 
 reg delete "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Run" /v "SynapseBYODGuard" /f >nul 2>&1
 reg delete "HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Run" /v "SynapseBYODGuard" /f >nul 2>&1
 
-echo [SUCCESS] Synapse Classroom Client has been cleanly removed.
-echo The laptop is now returned to unrestricted personal mode.
+echo [SUCCESS] Synapse components have been removed.
+echo Tailscale remains installed and visible; remove it separately only if it is not used by other applications.
 pause

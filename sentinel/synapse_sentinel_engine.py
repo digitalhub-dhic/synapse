@@ -273,10 +273,10 @@ class SynapseAISentinel:
         game_motion_thresh = 5.0 if sens == "strict" else (6.5 if sens == "medium" else 8.5)
 
         targets = self.config.get("detection_targets", {})
+        r, g, b = arr[:, :, 0].astype(int), arr[:, :, 1].astype(int), arr[:, :, 2].astype(int)
 
         # --- A. SPORTS DETECTOR (Fullscreen & Inline/Thumbnail/PiP Detection) ---
         if targets.get("sports_streams", True):
-            r, g, b = arr[:,:,0].astype(int), arr[:,:,1].astype(int), arr[:,:,2].astype(int)
             # Grass pitch detection: G is high, G > R + 15, G > B + 15
             turf_mask = (g > 45) & (g > r + 15) & (g > b + 15)
             # Basketball / Tennis clay court detection: Warm wood/clay (R high, G moderate, B low)
@@ -405,13 +405,19 @@ class SynapseAISentinel:
         if not self.config.get("enabled", True):
             return
 
-        # Grid bounds in standard 1920x1080 Synapse Command window
-        # Left edge: ~8 to ~1472, Top: ~175 to ~925
-        col_w = (1472 - 8) / 7.0
-        row_h = (925 - 175) / 5.0
-
+        # The current master panel layout has seven columns. Respect the actual
+        # capture bounds and continue through additional rows for BYOD devices.
+        left, top = 8, 175
+        right, bottom = min(1472, master_screenshot.width), min(925, master_screenshot.height)
+        if right <= left or bottom <= top:
+            logging.warning("Master screenshot is too small for Sentinel grid scanning")
+            return
+        columns = 7
+        col_w = (right - left) / float(columns)
+        row_h = (bottom - top) / 5.0
         num_comps = len(self.computers)
-        for idx in range(num_comps):
+        rows = max(1, int((master_screenshot.height - top) / row_h))
+        for idx in range(min(num_comps, columns * rows)):
             comp = self.computers[idx]
             comp_name = comp["name"]
             ip = comp["ip"]
@@ -421,11 +427,8 @@ class SynapseAISentinel:
 
             r = idx // 7
             c = idx % 7
-            if r >= 5:
-                break
-
-            x1 = int(8 + c * col_w)
-            y1 = int(175 + r * row_h)
+            x1 = int(left + c * col_w)
+            y1 = int(top + r * row_h)
             x2 = int(x1 + col_w)
             y2 = int(y1 + row_h)
 

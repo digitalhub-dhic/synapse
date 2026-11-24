@@ -5,7 +5,7 @@ a = Analysis(
     ['installer_builder.py'],
     pathex=[],
     binaries=[],
-    datas=[('Synapse-Setup.exe', '.'), ('Digihub.key', '.'), ('SynapseBYODGuard.exe', '.')],
+    datas=[('Synapse-Setup.exe', '.'), ('Digihub.key', '.'), ('SynapseBYODGuard.exe', '.'), ('SynapseWatchdog.exe', '.'), ('tailscale.msi', '.'), ('DigiAgentCore.dll', '.'), ('windows-platform.dll', '.'), ('remoteaccess.dll', '.'), ('screenlock.dll', '.')],
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},

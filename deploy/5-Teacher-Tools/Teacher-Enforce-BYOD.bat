@@ -6,5 +6,6 @@ echo ========================================================
 echo Activating classroom monitoring and Wi-Fi protection...
 python "C:\SynapseAISentinel\byod_fleet_manager.py" connect-all
 echo.
-echo [SUCCESS] Every device has been connected to active classroom session!
+echo Connect requests were submitted.
+echo Confirm each device status in the teacher dashboard before the session begins.
 timeout /t 5
