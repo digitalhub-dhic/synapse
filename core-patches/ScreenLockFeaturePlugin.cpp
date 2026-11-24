@@ -714,7 +714,7 @@ void ScreenLockFeaturePlugin::checkAndEnforcePersistentLock()
 	}
 
 	const auto lockInfo = loadPersistentLock();
-	if( !lockInfo.isLocked )
+	if( !lockInfo.isLocked || lockInfo.featureUid == m_timedLockFeature.uid() || lockInfo.duration > 0 )
 	{
 		return;
 	}

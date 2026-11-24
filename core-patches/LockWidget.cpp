@@ -91,6 +91,12 @@ LockWidget::LockWidget( Mode mode, const QPixmap& background, QWidget* parent, c
 				{
 					// Workstations automatically unlock when the timer reaches 00:00!
 					m_countdownTimer->stop();
+#ifdef Q_OS_WIN
+					ClipCursor( NULL );
+					BlockInput( FALSE );
+#endif
+					VeyonCore::platform().inputDeviceFunctions().enableInputDevices();
+					VeyonCore::platform().coreFunctions().setSystemUiState( true );
 					Q_EMIT expired();
 				}
 			}
