@@ -118,24 +118,24 @@ ComputerInspectorPanel::ComputerInspectorPanel( VeyonMaster& master, QWidget* pa
 
 void ComputerInspectorPanel::setupUi()
 {
-	setMinimumWidth( 280 );
+	setMinimumWidth( 220 );
 	setMaximumWidth( 320 );
 	setStyleSheet( QStringLiteral(
 		"ComputerInspectorPanel, QWidget#ComputerInspectorPanel {"
-		"   background-color: #070E1E;"
-		"   border-left: 1px solid #122547;"
+		"   background-color: #090E1A;"
+		"   border-left: 1px solid #21262D;"
 		"}"
 		"QScrollArea, QScrollArea > QWidget, QWidget#qt_scrollarea_viewport, QStackedWidget {"
-		"   background-color: #070E1E;"
+		"   background-color: #090E1A;"
 		"}"
-		"QScrollArea { border: none; background-color: #070E1E; }"
+		"QScrollArea { border: none; background-color: #090E1A; }"
 		"QScrollBar:vertical {"
-		"   border: none; background: #070E1E; width: 6px; margin: 0px;"
+		"   border: none; background: #090E1A; width: 6px; margin: 0px;"
 		"}"
 		"QScrollBar::handle:vertical {"
-		"   background: #0E1C38; min-height: 20px; border-radius: 3px; border: 1px solid #1B3666;"
+		"   background: #0F172A; min-height: 20px; border-radius: 3px; border: 1px solid #2A323D;"
 		"}"
-		"QScrollBar::handle:vertical:hover { background: #3B82F6; }"
+		"QScrollBar::handle:vertical:hover { background: #238636; }"
 	) );
 
 	auto* mainLayout = new QVBoxLayout( this );
@@ -145,14 +145,14 @@ void ComputerInspectorPanel::setupUi()
 	// 1. Header Frame (Exact 32px flush subheader matching simulator)
 	auto* inspectorHeader = new QFrame( this );
 	inspectorHeader->setFixedHeight( 32 );
-	inspectorHeader->setStyleSheet( QStringLiteral( "QFrame { background-color: #070E1E; border-bottom: 1px solid #122547; }" ) );
+	inspectorHeader->setStyleSheet( QStringLiteral( "QFrame { background-color: #090E1A; border-bottom: 1px solid #21262D; }" ) );
 
 	auto* headerLayout = new QHBoxLayout( inspectorHeader );
 	headerLayout->setContentsMargins( 12, 0, 12, 0 );
 	headerLayout->setSpacing( 8 );
 
 	auto* titleLabel = new QLabel( tr( "Inspector" ), inspectorHeader );
-	titleLabel->setStyleSheet( QStringLiteral( "font-size: 12px; font-weight: 700; color: #F0F6FF;" ) );
+	titleLabel->setStyleSheet( QStringLiteral( "font-size: 12px; font-weight: 700; color: #E6EDF3;" ) );
 
 	auto* subtitleLabel = new QLabel( tr( "Computer Controls" ), inspectorHeader );
 	subtitleLabel->setStyleSheet( QStringLiteral( "font-size: 10px; color: #6B7280;" ) );
@@ -172,7 +172,7 @@ void ComputerInspectorPanel::setupUi()
 	auto* navFrame = new QFrame( contentWidget );
 	navFrame->setStyleSheet( QStringLiteral(
 		"QFrame {"
-		"   background-color: #0E1C38; border: 1px solid #1B3666; border-radius: 6px; padding: 2px;"
+		"   background-color: #0F172A; border: 1px solid #2A323D; border-radius: 6px; padding: 2px;"
 		"}"
 	) );
 	auto* navLayout = new QHBoxLayout( navFrame );
@@ -213,16 +213,16 @@ void ComputerInspectorPanel::switchTab( InspectorTab tab )
 {
 	const QString activeStyle = QStringLiteral(
 		"QPushButton {"
-		"   background-color: #3B82F6; color: #ffffff; font-weight: bold; font-size: 11px;"
+		"   background-color: #238636; color: #ffffff; font-weight: bold; font-size: 11px;"
 		"   border: none; border-radius: 6px; padding: 4px 8px;"
 		"}"
 	);
 	const QString inactiveStyle = QStringLiteral(
 		"QPushButton {"
-		"   background-color: transparent; color: #8EA6C9; font-weight: 600; font-size: 11px;"
+		"   background-color: transparent; color: #8B949E; font-weight: 600; font-size: 11px;"
 		"   border: none; border-radius: 6px; padding: 4px 8px;"
 		"}"
-		"QPushButton:hover { background-color: #0E1C38; color: #F0F6FF; }"
+		"QPushButton:hover { background-color: #0F172A; color: #E6EDF3; }"
 	);
 
 	m_btnGlobal->setStyleSheet( tab == InspectorTab::Global ? activeStyle : inactiveStyle );
@@ -288,10 +288,11 @@ QWidget* ComputerInspectorPanel::createGlobalTabWidget()
 {
 	auto* scrollArea = new QScrollArea( this );
 	scrollArea->setWidgetResizable( true );
-	scrollArea->setStyleSheet( QStringLiteral( "QScrollArea, QWidget#qt_scrollarea_viewport { background-color: #070E1E; border: none; }" ) );
+	scrollArea->setHorizontalScrollBarPolicy( Qt::ScrollBarAlwaysOff );
+	scrollArea->setStyleSheet( QStringLiteral( "QScrollArea, QWidget#qt_scrollarea_viewport { background-color: #090E1A; border: none; }" ) );
 
 	auto* container = new QWidget();
-	container->setStyleSheet( QStringLiteral( "background-color: #070E1E;" ) );
+	container->setStyleSheet( QStringLiteral( "background-color: #090E1A;" ) );
 	auto* layout = new QVBoxLayout( container );
 	layout->setContentsMargins( 0, 4, 0, 4 );
 	layout->setSpacing( 10 );
@@ -308,7 +309,7 @@ QWidget* ComputerInspectorPanel::createGlobalTabWidget()
 	auto* statsCard = new QFrame( container );
 	statsCard->setStyleSheet( QStringLiteral(
 		"QFrame {"
-		"   background-color: #0E1C38; border: 1px solid #1B3666; border-radius: 8px; padding: 6px;"
+		"   background-color: #0F172A; border: 1px solid #2A323D; border-radius: 8px; padding: 6px;"
 		"}"
 	) );
 	auto* statsLayout = new QVBoxLayout( statsCard );
@@ -346,7 +347,7 @@ QWidget* ComputerInspectorPanel::createGlobalTabWidget()
 	auto* actionsCard = new QFrame( container );
 	actionsCard->setStyleSheet( QStringLiteral(
 		"QFrame {"
-		"   background-color: #0E1C38; border: 1px solid #1B3666; border-radius: 8px; padding: 6px;"
+		"   background-color: #0F172A; border: 1px solid #2A323D; border-radius: 8px; padding: 6px;"
 		"}"
 	) );
 	auto* actionsLayout = new QVBoxLayout( actionsCard );
@@ -363,10 +364,10 @@ QWidget* ComputerInspectorPanel::createGlobalTabWidget()
 		btn->setCursor( Qt::PointingHandCursor );
 		btn->setStyleSheet( QStringLiteral(
 			"QPushButton {"
-			"   background-color: #0E1C38; border: 1px solid #1B3666; border-radius: 6px;"
+			"   background-color: #0F172A; border: 1px solid #2A323D; border-radius: 6px;"
 			"   padding: 0px 8px; text-align: left;"
 			"}"
-			"QPushButton:hover { background-color: #152B54; border-color: #3B82F6; }"
+			"QPushButton:hover { background-color: #1F2630; border-color: #238636; }"
 		) );
 
 		auto* bLayout = new QHBoxLayout( btn );
@@ -427,21 +428,8 @@ void ComputerInspectorPanel::rebuildGlobalTab()
 
 	m_globalCountdownsContainer->show();
 
-	// 1. Prominent Master Batch Countdown Controller
-	m_globalCountdownsLayout->addWidget( createMasterBatchCountdownCard( m_globalCountdownsContainer ) );
-
-	// 2. Individual Computer Cards (if more than 1 computer running)
-	if( m_activeCountdowns.size() > 1 )
-	{
-		auto* subHeader = new QLabel( tr( "Individual Computer Controls (%1 Computers)" ).arg( m_activeCountdowns.size() ), m_globalCountdownsContainer );
-		subHeader->setStyleSheet( QStringLiteral( "font-size: 11px; font-weight: bold; color: #8EA6C9; padding: 6px 2px 2px 2px;" ) );
-		m_globalCountdownsLayout->addWidget( subHeader );
-
-		for( const auto& cdItem : m_activeCountdowns )
-		{
-			m_globalCountdownsLayout->addWidget( createCountdownCard( m_globalCountdownsContainer, cdItem ) );
-		}
-	}
+	// Single compact fleet operation summary card
+	m_globalCountdownsLayout->addWidget( createActiveOperationSummaryCard( m_globalCountdownsContainer ) );
 }
 
 
@@ -450,10 +438,11 @@ QWidget* ComputerInspectorPanel::createComputerTabWidget()
 {
 	auto* scrollArea = new QScrollArea( this );
 	scrollArea->setWidgetResizable( true );
-	scrollArea->setStyleSheet( QStringLiteral( "QScrollArea, QWidget#qt_scrollarea_viewport { background-color: #070E1E; border: none; }" ) );
+	scrollArea->setHorizontalScrollBarPolicy( Qt::ScrollBarAlwaysOff );
+	scrollArea->setStyleSheet( QStringLiteral( "QScrollArea, QWidget#qt_scrollarea_viewport { background-color: #090E1A; border: none; }" ) );
 
 	m_computerContentContainer = new QWidget();
-	m_computerContentContainer->setStyleSheet( QStringLiteral( "background-color: #070E1E;" ) );
+	m_computerContentContainer->setStyleSheet( QStringLiteral( "background-color: #090E1A;" ) );
 	auto* layout = new QVBoxLayout( m_computerContentContainer );
 	layout->setContentsMargins( 0, 4, 0, 4 );
 	layout->setSpacing( 10 );
@@ -491,7 +480,7 @@ void ComputerInspectorPanel::rebuildComputerTab()
 		auto* emptyCard = new QFrame( m_computerContentContainer );
 		emptyCard->setStyleSheet( QStringLiteral(
 			"QFrame {"
-			"   background-color: #0E1C38; border: 1px dashed #1B3666; border-radius: 10px; padding: 20px;"
+			"   background-color: #0F172A; border: 1px dashed #2A323D; border-radius: 10px; padding: 20px;"
 			"}"
 		) );
 		auto* eLayout = new QVBoxLayout( emptyCard );
@@ -500,26 +489,26 @@ void ComputerInspectorPanel::rebuildComputerTab()
 
 		auto* eIcon = new QLabel( QStringLiteral( "🖥" ), emptyCard );
 		eIcon->setAlignment( Qt::AlignCenter );
-		eIcon->setStyleSheet( QStringLiteral( "font-size: 36px; color: #3B82F6; border: none; padding-bottom: 4px;" ) );
+		eIcon->setStyleSheet( QStringLiteral( "font-size: 36px; color: #238636; border: none; padding-bottom: 4px;" ) );
 
 		auto* eTitle = new QLabel( tr( "No Computer Selected" ), emptyCard );
 		eTitle->setAlignment( Qt::AlignCenter );
-		eTitle->setStyleSheet( QStringLiteral( "font-size: 14px; font-weight: bold; color: #F0F6FF; border: none;" ) );
+		eTitle->setStyleSheet( QStringLiteral( "font-size: 14px; font-weight: bold; color: #E6EDF3; border: none;" ) );
 
 		auto* eDesc = new QLabel( tr( "Click on any computer in the grid to inspect its separate live controls, countdown timer, and screen telemetry." ), emptyCard );
 		eDesc->setAlignment( Qt::AlignCenter );
 		eDesc->setWordWrap( true );
-		eDesc->setStyleSheet( QStringLiteral( "font-size: 11px; color: #8EA6C9; border: none;" ) );
+		eDesc->setStyleSheet( QStringLiteral( "font-size: 11px; color: #8B949E; border: none;" ) );
 
 		auto* btnGlobalSwitch = new QPushButton( tr( "🌐 View Global Lab Stats" ), emptyCard );
 		btnGlobalSwitch->setFixedHeight( 32 );
 		btnGlobalSwitch->setCursor( Qt::PointingHandCursor );
 		btnGlobalSwitch->setStyleSheet( QStringLiteral(
 			"QPushButton {"
-			"   background-color: #3B82F6; color: #ffffff; font-weight: bold; font-size: 11px;"
+			"   background-color: #238636; color: #ffffff; font-weight: bold; font-size: 11px;"
 			"   border: none; border-radius: 6px; padding: 4px 12px; margin-top: 6px;"
 			"}"
-			"QPushButton:hover { background-color: #2563EB; }"
+			"QPushButton:hover { background-color: #238636; }"
 		) );
 		connect( btnGlobalSwitch, &QPushButton::clicked, this, [this]() { switchTab( InspectorTab::Global ); } );
 
@@ -538,24 +527,24 @@ void ComputerInspectorPanel::rebuildComputerTab()
 	{
 		auto* selectorCard = new QFrame( m_computerContentContainer );
 		selectorCard->setStyleSheet( QStringLiteral(
-			"QFrame { background-color: #0E1C38; border: 1px solid #1B3666; border-radius: 8px; padding: 4px; }"
+			"QFrame { background-color: #0F172A; border: 1px solid #2A323D; border-radius: 8px; padding: 4px; }"
 		) );
 		auto* sLayout = new QHBoxLayout( selectorCard );
 		sLayout->setContentsMargins( 6, 4, 6, 4 );
 
 		auto* sLbl = new QLabel( tr( "Inspect:" ), selectorCard );
-		sLbl->setStyleSheet( QStringLiteral( "font-size: 11px; font-weight: bold; color: #8EA6C9; border: none;" ) );
+		sLbl->setStyleSheet( QStringLiteral( "font-size: 11px; font-weight: bold; color: #8B949E; border: none;" ) );
 
 		m_computerSelectorCombo = new QComboBox( selectorCard );
 		m_computerSelectorCombo->setFixedHeight( 28 );
 		m_computerSelectorCombo->setStyleSheet( QStringLiteral(
 			"QComboBox {"
-			"   background-color: #0E1C38; border: 1px solid #1B3666; border-radius: 6px;"
-			"   color: #F0F6FF; font-size: 11px; font-weight: 600; padding: 2px 8px;"
+			"   background-color: #0F172A; border: 1px solid #2A323D; border-radius: 6px;"
+			"   color: #E6EDF3; font-size: 11px; font-weight: 600; padding: 2px 8px;"
 			"}"
 			"QComboBox::drop-down { border: none; width: 20px; }"
 			"QComboBox QAbstractItemView {"
-			"   background-color: #0E1C38; color: #F0F6FF; selection-background-color: #3B82F6; border: 1px solid #1B3666;"
+			"   background-color: #0F172A; color: #E6EDF3; selection-background-color: #238636; border: 1px solid #2A323D;"
 			"}"
 		) );
 
@@ -615,13 +604,13 @@ void ComputerInspectorPanel::rebuildComputerTab()
 		// Group info card
 		auto* grpCard = new QFrame( m_computerContentContainer );
 		grpCard->setStyleSheet( QStringLiteral(
-			"QFrame { background-color: #0E1C38; border: 1px solid #1B3666; border-radius: 10px; padding: 10px; }"
+			"QFrame { background-color: #0F172A; border: 1px solid #2A323D; border-radius: 10px; padding: 10px; }"
 		) );
 		auto* gLayout = new QVBoxLayout( grpCard );
 		auto* gTitle = new QLabel( tr( "Batch Control: %1 Computers" ).arg( targets.size() ), grpCard );
-		gTitle->setStyleSheet( QStringLiteral( "font-size: 13px; font-weight: bold; color: #F0F6FF; border: none;" ) );
+		gTitle->setStyleSheet( QStringLiteral( "font-size: 13px; font-weight: bold; color: #E6EDF3; border: none;" ) );
 		auto* gSub = new QLabel( tr( "Any action taken here applies simultaneously to all selected computers." ), grpCard );
-		gSub->setStyleSheet( QStringLiteral( "font-size: 11px; color: #8EA6C9; border: none;" ) );
+		gSub->setStyleSheet( QStringLiteral( "font-size: 11px; color: #8B949E; border: none;" ) );
 		gLayout->addWidget( gTitle );
 		gLayout->addWidget( gSub );
 		m_computerContentLayout->addWidget( grpCard );
@@ -645,10 +634,10 @@ void ComputerInspectorPanel::rebuildComputerTab()
 
 	const QString actionBtnStyle = QStringLiteral(
 		"QPushButton {"
-		"   background: #0E1C38; border: 1px solid #1B3666; border-radius: 6px;"
-		"   font-size: 11px; font-weight: 500; color: #F0F6FF; padding: 4px 6px; min-height: 26px;"
+		"   background: #0F172A; border: 1px solid #2A323D; border-radius: 6px;"
+		"   font-size: 11px; font-weight: 500; color: #E6EDF3; padding: 4px 6px; min-height: 26px;"
 		"}"
-		"QPushButton:hover { background: #152B54; border-color: #3B82F6; }"
+		"QPushButton:hover { background: #1F2630; border-color: #238636; }"
 	);
 	for( auto* b : { btnWOL, btnReboot, btnPowerDown, btnTimed } )
 	{
@@ -669,27 +658,30 @@ void ComputerInspectorPanel::rebuildComputerTab()
 	m_computerContentLayout->addWidget( powerCard );
 
 	// 4. Freeze & Screen Lock Card
-	auto* freezeCard = createActionHubCard( m_computerContentContainer, tr( "Freeze & Screen Lock" ), QStringLiteral( "#3B82F6" ) );
+	auto* freezeCard = createActionHubCard( m_computerContentContainer, tr( "Freeze & Screen Lock" ), QStringLiteral( "#238636" ) );
 	auto* freezeGrid = new QGridLayout();
 	freezeGrid->setSpacing( 6 );
 
 	auto* btnFreeze = new QPushButton( tr( "❄️ Freeze Screen" ), freezeCard );
+	auto* btnTimedLock = new QPushButton( tr( "⏱️ Timed Lock" ), freezeCard );
 	auto* btnInputLock = new QPushButton( tr( "🔒 Lock Inputs Only" ), freezeCard );
 	auto* btnUnfreeze = new QPushButton( tr( "🟢 Unfreeze" ), freezeCard );
 
-	for( auto* b : { btnFreeze, btnInputLock, btnUnfreeze } )
+	for( auto* b : { btnFreeze, btnTimedLock, btnInputLock, btnUnfreeze } )
 	{
 		b->setStyleSheet( actionBtnStyle );
 		b->setCursor( Qt::PointingHandCursor );
 	}
 
 	connect( btnFreeze, &QPushButton::clicked, this, [this, targets]() { executeFeatureByName( QStringLiteral("ScreenLock"), targets ); } );
+	connect( btnTimedLock, &QPushButton::clicked, this, [this, targets]() { executeFeatureByName( QStringLiteral("TimedLock"), targets ); } );
 	connect( btnInputLock, &QPushButton::clicked, this, [this, targets]() { executeFeatureByName( QStringLiteral("InputDevicesLock"), targets ); } );
 	connect( btnUnfreeze, &QPushButton::clicked, this, [this, targets]() { executeFeatureByName( QStringLiteral("UnfreezeScreen"), targets ); } );
 
 	freezeGrid->addWidget( btnFreeze, 0, 0 );
-	freezeGrid->addWidget( btnInputLock, 0, 1 );
-	freezeGrid->addWidget( btnUnfreeze, 1, 0, 1, 2 );
+	freezeGrid->addWidget( btnTimedLock, 0, 1 );
+	freezeGrid->addWidget( btnInputLock, 1, 0 );
+	freezeGrid->addWidget( btnUnfreeze, 1, 1 );
 	qobject_cast<QVBoxLayout*>( freezeCard->layout() )->addLayout( freezeGrid );
 	m_computerContentLayout->addWidget( freezeCard );
 
@@ -716,7 +708,7 @@ void ComputerInspectorPanel::rebuildComputerTab()
 	m_computerContentLayout->addWidget( remoteCard );
 
 	// 6. Classroom Tools Card
-	auto* toolsCard = createActionHubCard( m_computerContentContainer, tr( "Classroom Tools" ), QStringLiteral( "#3B82F6" ) );
+	auto* toolsCard = createActionHubCard( m_computerContentContainer, tr( "Classroom Tools" ), QStringLiteral( "#2563EB" ) );
 	auto* toolsGrid = new QGridLayout();
 	toolsGrid->setSpacing( 6 );
 
@@ -750,10 +742,11 @@ QWidget* ComputerInspectorPanel::createDetailsTabWidget()
 {
 	auto* scrollArea = new QScrollArea( this );
 	scrollArea->setWidgetResizable( true );
-	scrollArea->setStyleSheet( QStringLiteral( "QScrollArea, QWidget#qt_scrollarea_viewport { background-color: #070E1E; border: none; }" ) );
+	scrollArea->setHorizontalScrollBarPolicy( Qt::ScrollBarAlwaysOff );
+	scrollArea->setStyleSheet( QStringLiteral( "QScrollArea, QWidget#qt_scrollarea_viewport { background-color: #090E1A; border: none; }" ) );
 
 	auto* container = new QWidget();
-	container->setStyleSheet( QStringLiteral( "background-color: #070E1E;" ) );
+	container->setStyleSheet( QStringLiteral( "background-color: #090E1A;" ) );
 	auto* layout = new QVBoxLayout( container );
 	layout->setContentsMargins( 0, 4, 0, 4 );
 	layout->setSpacing( 10 );
@@ -761,19 +754,19 @@ QWidget* ComputerInspectorPanel::createDetailsTabWidget()
 	// Telemetry Card
 	auto* telemCard = new QFrame( container );
 	telemCard->setStyleSheet( QStringLiteral(
-		"QFrame { background-color: #0E1C38; border: 1px solid #1B3666; border-radius: 10px; padding: 12px; }"
+		"QFrame { background-color: #0F172A; border: 1px solid #2A323D; border-radius: 10px; padding: 12px; }"
 	) );
 	auto* tLayout = new QVBoxLayout( telemCard );
 	tLayout->setSpacing( 8 );
 
 	auto* tTitle = new QLabel( tr( "Synapse Command Engine" ), telemCard );
-	tTitle->setStyleSheet( QStringLiteral( "font-size: 13px; font-weight: bold; color: #F0F6FF; border: none;" ) );
+	tTitle->setStyleSheet( QStringLiteral( "font-size: 13px; font-weight: bold; color: #E6EDF3; border: none;" ) );
 	tLayout->addWidget( tTitle );
 
-	auto addDetailRow = [&]( const QString& key, const QString& val, const QString& color = QStringLiteral( "#8EA6C9" ) ) {
+	auto addDetailRow = [&]( const QString& key, const QString& val, const QString& color = QStringLiteral( "#8B949E" ) ) {
 		auto* row = new QHBoxLayout();
 		auto* kLbl = new QLabel( key, telemCard );
-		kLbl->setStyleSheet( QStringLiteral( "font-size: 11px; color: #8EA6C9; border: none;" ) );
+		kLbl->setStyleSheet( QStringLiteral( "font-size: 11px; color: #8B949E; border: none;" ) );
 		auto* vLbl = new QLabel( val, telemCard );
 		vLbl->setAlignment( Qt::AlignRight | Qt::AlignVCenter );
 		vLbl->setStyleSheet( QStringLiteral( "font-size: 11px; font-weight: 600; color: %1; border: none;" ).arg( color ) );
@@ -783,12 +776,12 @@ QWidget* ComputerInspectorPanel::createDetailsTabWidget()
 		tLayout->addLayout( row );
 	};
 
-	addDetailRow( tr( "Version" ), QStringLiteral( "4.11.3 (x86_64)" ), QStringLiteral( "#3B82F6" ) );
-	addDetailRow( tr( "Security State" ), tr( "Shield Active" ), QStringLiteral( "#3B82F6" ) );
-	addDetailRow( tr( "UDP Auto-Discovery" ), tr( "Port 11400 (Active)" ), QStringLiteral( "#3B82F6" ) );
-	addDetailRow( tr( "TaskMgr Shield" ), tr( "Enforced on Shutdown" ), QStringLiteral( "#3B82F6" ) );
-	addDetailRow( tr( "AutoEndTasks" ), tr( "Enabled (Registry Force)" ), QStringLiteral( "#3B82F6" ) );
-	addDetailRow( tr( "Subnet Probe Sweep" ), tr( "Every 15 Seconds" ), QStringLiteral( "#8EA6C9" ) );
+	addDetailRow( tr( "Version" ), QStringLiteral( "4.11.3 (x86_64)" ), QStringLiteral( "#238636" ) );
+	addDetailRow( tr( "Security State" ), tr( "Shield Active" ), QStringLiteral( "#2563EB" ) );
+	addDetailRow( tr( "UDP Auto-Discovery" ), tr( "Port 11400 (Active)" ), QStringLiteral( "#2563EB" ) );
+	addDetailRow( tr( "TaskMgr Shield" ), tr( "Enforced on Shutdown" ), QStringLiteral( "#238636" ) );
+	addDetailRow( tr( "AutoEndTasks" ), tr( "Enabled (Registry Force)" ), QStringLiteral( "#2563EB" ) );
+	addDetailRow( tr( "Subnet Probe Sweep" ), tr( "Every 15 Seconds" ), QStringLiteral( "#8B949E" ) );
 
 	layout->addWidget( telemCard );
 	layout->addStretch( 1 );
@@ -887,32 +880,73 @@ void ComputerInspectorPanel::cancelAllCountdowns()
 
 QWidget* ComputerInspectorPanel::createMasterBatchCountdownCard( QWidget* parent )
 {
+	return createActiveOperationSummaryCard( parent );
+}
+
+
+
+QWidget* ComputerInspectorPanel::createActiveOperationSummaryCard( QWidget* parent )
+{
 	auto* card = new QFrame( parent );
 	card->setStyleSheet( QStringLiteral(
 		"QFrame {"
-		"   background: qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0 #23120b, stop:1 #381a0e);"
-		"   border: 2px solid #ea580c; border-radius: 10px; padding: 6px;"
+		"   background-color: #0F172A;"
+		"   border: 1px solid #2A323D;"
+		"   border-radius: 8px;"
+		"   padding: 2px;"
 		"}"
 	) );
 
 	auto* layout = new QVBoxLayout( card );
-	layout->setContentsMargins( 12, 10, 12, 10 );
-	layout->setSpacing( 8 );
+	layout->setContentsMargins( 10, 8, 10, 8 );
+	layout->setSpacing( 6 );
 
+	// Row 1: Header - Title and In-Progress Status Tag
 	auto* headerRow = new QHBoxLayout();
-	headerRow->setSpacing( 6 );
+	headerRow->setSpacing( 4 );
 
-	auto* iconLabel = new QLabel( QStringLiteral( "⚡⏱" ), card );
-	iconLabel->setStyleSheet( QStringLiteral( "font-size: 16px; background: transparent; border: none;" ) );
+	auto* titleLbl = new QLabel( tr( "POWER DOWN" ), card );
+	titleLbl->setStyleSheet( QStringLiteral(
+		"font-size: 11px; font-weight: 700; color: #E6EDF3; letter-spacing: 0.5px; border: none; background: transparent;"
+	) );
 
-	const int numComputers = m_activeCountdowns.size();
-	auto* titleLbl = new QLabel( tr( "ALL LAB COMPUTERS TIMER (%1 Active)" ).arg( numComputers ), card );
-	titleLbl->setStyleSheet( QStringLiteral( "font-size: 12px; font-weight: 800; color: #fdba74; letter-spacing: 0.5px; background: transparent; border: none;" ) );
+	auto* statusTag = new QLabel( tr( "● Active" ), card );
+	statusTag->setStyleSheet( QStringLiteral(
+		"font-size: 9px; font-weight: 600; color: #F59E0B; background-color: #261B0E; border: 1px solid #78350F; border-radius: 4px; padding: 1px 5px;"
+	) );
 
-	headerRow->addWidget( iconLabel );
-	headerRow->addWidget( titleLbl, 1 );
+	headerRow->addWidget( titleLbl );
+	headerRow->addStretch( 1 );
+	headerRow->addWidget( statusTag );
 	layout->addLayout( headerRow );
 
+	// Divider
+	auto* div1 = new QFrame( card );
+	div1->setFrameShape( QFrame::HLine );
+	div1->setStyleSheet( QStringLiteral( "background-color: #1E293B; max-height: 1px; border: none;" ) );
+	layout->addWidget( div1 );
+
+	// Row 2: Overview metrics: Count and Pending
+	auto* metricsRow = new QHBoxLayout();
+	metricsRow->setSpacing( 4 );
+
+	const int numComputers = m_activeCountdowns.size();
+	auto* countLbl = new QLabel( tr( "%1 computers" ).arg( numComputers ), card );
+	countLbl->setStyleSheet( QStringLiteral(
+		"font-size: 11px; font-weight: 600; color: #E2E8F0; border: none; background: transparent;"
+	) );
+
+	auto* pendingLbl = new QLabel( tr( "● %1 pending" ).arg( numComputers ), card );
+	pendingLbl->setStyleSheet( QStringLiteral(
+		"font-size: 10px; font-weight: 500; color: #F59E0B; border: none; background: transparent;"
+	) );
+
+	metricsRow->addWidget( countLbl );
+	metricsRow->addStretch( 1 );
+	metricsRow->addWidget( pendingLbl );
+	layout->addLayout( metricsRow );
+
+	// Row 3: Countdown Time + remaining label
 	int minRemaining = 999999;
 	int maxTotal = 1;
 	for( const auto& item : m_activeCountdowns )
@@ -926,80 +960,160 @@ QWidget* ComputerInspectorPanel::createMasterBatchCountdownCard( QWidget* parent
 						 .arg( minRemaining / 60, 2, 10, QLatin1Char('0') )
 						 .arg( minRemaining % 60, 2, 10, QLatin1Char('0') );
 
-	auto* timeLbl = new QLabel( timeStr, card );
-	timeLbl->setAlignment( Qt::AlignCenter );
-	timeLbl->setStyleSheet( QStringLiteral( "font-size: 28px; font-weight: 900; color: #fbbf24; background: transparent; border: none; margin: 2px 0px;" ) );
-	layout->addWidget( timeLbl );
+	auto* timeRow = new QHBoxLayout();
+	timeRow->setSpacing( 6 );
 
+	auto* timeLbl = new QLabel( timeStr, card );
+	timeLbl->setStyleSheet( QStringLiteral(
+		"font-size: 20px; font-weight: 700; color: #F8FAFC; border: none; background: transparent; font-family: monospace;"
+	) );
+
+	auto* remLbl = new QLabel( tr( "remaining" ), card );
+	remLbl->setStyleSheet( QStringLiteral(
+		"font-size: 11px; color: #94A3B8; border: none; background: transparent; padding-top: 4px;"
+	) );
+
+	timeRow->addWidget( timeLbl );
+	timeRow->addWidget( remLbl );
+	timeRow->addStretch( 1 );
+	layout->addLayout( timeRow );
+
+	// Row 4: Progress Bar
 	auto* pBar = new QProgressBar( card );
-	pBar->setFixedHeight( 8 );
+	pBar->setFixedHeight( 4 );
 	pBar->setTextVisible( false );
 	pBar->setStyleSheet( QStringLiteral(
 		"QProgressBar {"
-		"   background-color: #371e11; border: 1px solid #9a3412; border-radius: 4px;"
+		"   background-color: #1E293B; border: none; border-radius: 2px;"
 		"}"
 		"QProgressBar::chunk {"
-		"   background-color: #f97316; border-radius: 3px;"
+		"   background-color: #F59E0B; border-radius: 2px;"
 		"}"
 	) );
 	pBar->setMaximum( maxTotal );
 	pBar->setValue( maxTotal - minRemaining );
 	layout->addWidget( pBar );
 
-	// Action buttons: Row 1 - Batch Adjust (-5m, -1m, +1m, +5m)
-	auto* row1 = new QHBoxLayout();
-	row1->setSpacing( 4 );
+	// Row 5: Action Controls
+	// Time adjustments row: [-1m] [+1m]
+	auto* adjRow = new QHBoxLayout();
+	adjRow->setSpacing( 4 );
 
-	auto* btnM5 = new QPushButton( tr( "⏬ -5m" ), card );
-	auto* btnM1 = new QPushButton( tr( "➖ -1m" ), card );
-	auto* btnP1 = new QPushButton( tr( "➕ +1m" ), card );
-	auto* btnP5 = new QPushButton( tr( "⏫ +5m" ), card );
+	auto* btnM1 = new QPushButton( tr( "-1m" ), card );
+	auto* btnP1 = new QPushButton( tr( "+1m" ), card );
 
-	const QString batchBtnStyle = QStringLiteral(
+	const QString adjBtnStyle = QStringLiteral(
 		"QPushButton {"
-		"   background-color: #3b1d11; color: #ffedd5; font-weight: bold; font-size: 11px;"
-		"   border: 1px solid #c2410c; border-radius: 6px; padding: 4px 6px;"
+		"   background-color: #1E293B; color: #E2E8F0; font-size: 11px; font-weight: 500;"
+		"   border: 1px solid #334155; border-radius: 5px; padding: 3px 6px; min-height: 24px;"
 		"}"
-		"QPushButton:hover { background-color: #572615; border-color: #fb923c; color: #ffffff; }"
+		"QPushButton:hover { background-color: #334155; border-color: #475569; color: #FFFFFF; }"
 	);
 
-	for( auto* b : { btnM5, btnM1, btnP1, btnP5 } )
+	for( auto* b : { btnM1, btnP1 } )
 	{
-		b->setFixedHeight( 30 );
-		b->setStyleSheet( batchBtnStyle );
+		b->setStyleSheet( adjBtnStyle );
 		b->setCursor( Qt::PointingHandCursor );
 	}
+	btnM1->setToolTip( tr( "Reduce countdown by 1 minute on all computers" ) );
+	btnP1->setToolTip( tr( "Add 1 minute to countdown on all computers" ) );
 
-	btnM5->setToolTip( tr( "Reduce countdown by 5 minutes on ALL active computers" ) );
-	btnM1->setToolTip( tr( "Reduce countdown by 1 minute on ALL active computers" ) );
-	btnP1->setToolTip( tr( "Add 1 minute to countdown on ALL active computers" ) );
-	btnP5->setToolTip( tr( "Add 5 minutes to countdown on ALL active computers" ) );
-
-	connect( btnM5, &QPushButton::clicked, this, [this]() { adjustAllCountdowns( -300 ); } );
 	connect( btnM1, &QPushButton::clicked, this, [this]() { adjustAllCountdowns( -60 ); } );
 	connect( btnP1, &QPushButton::clicked, this, [this]() { adjustAllCountdowns( 60 ); } );
-	connect( btnP5, &QPushButton::clicked, this, [this]() { adjustAllCountdowns( 300 ); } );
 
-	row1->addWidget( btnM5 );
-	row1->addWidget( btnM1 );
-	row1->addWidget( btnP1 );
-	row1->addWidget( btnP5 );
-	layout->addLayout( row1 );
+	adjRow->addWidget( btnM1 );
+	adjRow->addWidget( btnP1 );
+	layout->addLayout( adjRow );
 
-	// Action buttons: Row 2 - Cancel All
-	auto* btnCancelAll = new QPushButton( tr( "❌ Cancel / Revert All Timers" ), card );
-	btnCancelAll->setFixedHeight( 30 );
+	// Destructive Cancel Button
+	auto* btnCancelAll = new QPushButton( tr( "Cancel Operation" ), card );
 	btnCancelAll->setCursor( Qt::PointingHandCursor );
 	btnCancelAll->setStyleSheet( QStringLiteral(
 		"QPushButton {"
-		"   background-color: #dc2626; color: #ffffff; font-weight: bold; font-size: 11px;"
-		"   border: none; border-radius: 6px; padding: 4px 10px;"
+		"   background-color: #DC2626; color: #FFFFFF; font-weight: 600; font-size: 11px;"
+		"   border: none; border-radius: 5px; padding: 4px 8px; min-height: 26px;"
 		"}"
-		"QPushButton:hover { background-color: #b91c1c; }"
+		"QPushButton:hover { background-color: #B91C1C; }"
 	) );
-	btnCancelAll->setToolTip( tr( "Instantly cancel and revert countdown for all active computers in the lab" ) );
+	btnCancelAll->setToolTip( tr( "Cancel power down and abort shutdown on all computers" ) );
 	connect( btnCancelAll, &QPushButton::clicked, this, [this]() { cancelAllCountdowns(); } );
 	layout->addWidget( btnCancelAll );
+
+	// Divider before Selected Computers
+	auto* div2 = new QFrame( card );
+	div2->setFrameShape( QFrame::HLine );
+	div2->setStyleSheet( QStringLiteral( "background-color: #1E293B; max-height: 1px; border: none; margin-top: 4px;" ) );
+	layout->addWidget( div2 );
+
+	// Subheader: SELECTED COMPUTERS
+	auto* compHeaderRow = new QHBoxLayout();
+	compHeaderRow->setSpacing( 4 );
+
+	auto* selTitle = new QLabel( tr( "SELECTED COMPUTERS" ), card );
+	selTitle->setStyleSheet( QStringLiteral(
+		"font-size: 10px; font-weight: 700; color: #8B949E; letter-spacing: 0.5px; border: none; background: transparent;"
+	) );
+
+	auto* selCount = new QLabel( tr( "%1 selected" ).arg( numComputers ), card );
+	selCount->setStyleSheet( QStringLiteral(
+		"font-size: 10px; color: #64748B; border: none; background: transparent;"
+	) );
+
+	compHeaderRow->addWidget( selTitle );
+	compHeaderRow->addStretch( 1 );
+	compHeaderRow->addWidget( selCount );
+	layout->addLayout( compHeaderRow );
+
+	// Compact scrollable list for computers
+	auto* listScroll = new QScrollArea( card );
+	listScroll->setWidgetResizable( true );
+	listScroll->setHorizontalScrollBarPolicy( Qt::ScrollBarAlwaysOff );
+	listScroll->setStyleSheet( QStringLiteral(
+		"QScrollArea { background-color: #0B1120; border: 1px solid #1E293B; border-radius: 5px; }"
+		"QWidget#qt_scrollarea_viewport { background-color: #0B1120; }"
+		"QScrollBar:vertical { background: #0B1120; width: 6px; margin: 0; }"
+		"QScrollBar::handle:vertical { background: #334155; border-radius: 3px; min-height: 14px; }"
+		"QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical { height: 0; }"
+	) );
+	listScroll->setMaximumHeight( 150 );
+
+	auto* listContainer = new QWidget();
+	listContainer->setStyleSheet( QStringLiteral( "background-color: #0B1120;" ) );
+	auto* listLayout = new QVBoxLayout( listContainer );
+	listLayout->setContentsMargins( 6, 4, 6, 4 );
+	listLayout->setSpacing( 2 );
+
+	for( const auto& cdItem : m_activeCountdowns )
+	{
+		auto* rowWidget = new QWidget( listContainer );
+		auto* rowLayout = new QHBoxLayout( rowWidget );
+		rowLayout->setContentsMargins( 2, 2, 2, 2 );
+		rowLayout->setSpacing( 4 );
+
+		// Clean computer name (strip "Shut Down: " prefix if present)
+		QString cName = cdItem.title;
+		if( cName.startsWith( QStringLiteral( "Shut Down: " ) ) )
+		{
+			cName = cName.mid( 11 );
+		}
+		if( cName.isEmpty() )
+		{
+			cName = cdItem.key;
+		}
+
+		auto* nameLbl = new QLabel( cName, rowWidget );
+		nameLbl->setStyleSheet( QStringLiteral( "font-size: 11px; color: #CBD5E1; border: none; background: transparent;" ) );
+
+		auto* statLbl = new QLabel( tr( "Pending" ), rowWidget );
+		statLbl->setStyleSheet( QStringLiteral( "font-size: 10px; color: #F59E0B; border: none; background: transparent;" ) );
+
+		rowLayout->addWidget( nameLbl, 1 );
+		rowLayout->addWidget( statLbl );
+		listLayout->addWidget( rowWidget );
+	}
+	listLayout->addStretch( 1 );
+	listScroll->setWidget( listContainer );
+	layout->addWidget( listScroll );
 
 	// Register in m_countdownUiMap with special key "__master_batch__"
 	auto& uiList = m_countdownUiMap[QStringLiteral( "__master_batch__" )];
@@ -1007,7 +1121,7 @@ QWidget* ComputerInspectorPanel::createMasterBatchCountdownCard( QWidget* parent
 		std::remove_if( uiList.begin(), uiList.end(),
 						[]( const CountdownUiSet& s ) { return s.timeLabel.isNull(); } ),
 		uiList.end() );
-	uiList.append( { titleLbl, timeLbl, pBar } );
+	uiList.append( { pendingLbl, timeLbl, pBar } );
 
 	return card;
 }
@@ -1019,81 +1133,119 @@ QWidget* ComputerInspectorPanel::createCountdownCard( QWidget* parent, const Cou
 	auto* card = new QFrame( parent );
 	card->setStyleSheet( QStringLiteral(
 		"QFrame {"
-		"   background: qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0 #1f140e, stop:1 #2a180f);"
-		"   border: 1px solid #9a3412; border-radius: 8px; padding: 6px;"
+		"   background-color: #0F172A;"
+		"   border: 1px solid #2A323D;"
+		"   border-radius: 8px;"
+		"   padding: 2px;"
 		"}"
 	) );
 
 	auto* layout = new QVBoxLayout( card );
-	layout->setContentsMargins( 12, 10, 12, 10 );
-	layout->setSpacing( 8 );
+	layout->setContentsMargins( 10, 8, 10, 8 );
+	layout->setSpacing( 6 );
 
+	// Header: Computer name & Status
 	auto* headerRow = new QHBoxLayout();
-	headerRow->setSpacing( 6 );
+	headerRow->setSpacing( 4 );
 
-	auto* iconLabel = new QLabel( QStringLiteral( "⏳" ), card );
-	iconLabel->setStyleSheet( QStringLiteral( "font-size: 15px; background: transparent; border: none;" ) );
+	QString titleText = item.title;
+	if( titleText.isEmpty() )
+	{
+		titleText = tr( "Power Down" );
+	}
+	auto* titleLbl = new QLabel( titleText, card );
+	titleLbl->setStyleSheet( QStringLiteral(
+		"font-size: 11px; font-weight: 700; color: #E6EDF3; letter-spacing: 0.5px; border: none; background: transparent;"
+	) );
 
-	auto* titleLbl = new QLabel( item.title.isEmpty() ? tr( "Active Operation Countdown" ) : item.title, card );
-	titleLbl->setStyleSheet( QStringLiteral( "font-size: 12px; font-weight: bold; color: #fb923c; background: transparent; border: none;" ) );
+	auto* statusTag = new QLabel( tr( "● Pending" ), card );
+	statusTag->setStyleSheet( QStringLiteral(
+		"font-size: 9px; font-weight: 600; color: #F59E0B; background-color: #261B0E; border: 1px solid #78350F; border-radius: 4px; padding: 1px 5px;"
+	) );
 
-	headerRow->addWidget( iconLabel );
 	headerRow->addWidget( titleLbl, 1 );
+	headerRow->addWidget( statusTag );
 	layout->addLayout( headerRow );
 
+	// Divider
+	auto* div = new QFrame( card );
+	div->setFrameShape( QFrame::HLine );
+	div->setStyleSheet( QStringLiteral( "background-color: #1E293B; max-height: 1px; border: none;" ) );
+	layout->addWidget( div );
+
+	// Time Row
 	const auto timeStr = QStringLiteral( "%1:%2" )
 						 .arg( item.remainingSeconds / 60, 2, 10, QLatin1Char('0') )
 						 .arg( item.remainingSeconds % 60, 2, 10, QLatin1Char('0') );
 
-	auto* timeLbl = new QLabel( timeStr, card );
-	timeLbl->setAlignment( Qt::AlignCenter );
-	timeLbl->setStyleSheet( QStringLiteral( "font-size: 26px; font-weight: 800; color: #fbbf24; background: transparent; border: none; margin: 2px 0px;" ) );
-	layout->addWidget( timeLbl );
+	auto* timeRow = new QHBoxLayout();
+	timeRow->setSpacing( 6 );
 
+	auto* timeLbl = new QLabel( timeStr, card );
+	timeLbl->setStyleSheet( QStringLiteral(
+		"font-size: 18px; font-weight: 700; color: #F8FAFC; border: none; background: transparent; font-family: monospace;"
+	) );
+
+	auto* remLbl = new QLabel( tr( "remaining" ), card );
+	remLbl->setStyleSheet( QStringLiteral(
+		"font-size: 11px; color: #94A3B8; border: none; background: transparent; padding-top: 2px;"
+	) );
+
+	timeRow->addWidget( timeLbl );
+	timeRow->addWidget( remLbl );
+	timeRow->addStretch( 1 );
+	layout->addLayout( timeRow );
+
+	// Progress bar
 	auto* pBar = new QProgressBar( card );
-	pBar->setFixedHeight( 8 );
+	pBar->setFixedHeight( 4 );
 	pBar->setTextVisible( false );
 	pBar->setStyleSheet( QStringLiteral(
 		"QProgressBar {"
-		"   background-color: #371e11; border: 1px solid #7c2d12; border-radius: 4px;"
+		"   background-color: #1E293B; border: none; border-radius: 2px;"
 		"}"
 		"QProgressBar::chunk {"
-		"   background-color: #ea580c; border-radius: 3px;"
+		"   background-color: #F59E0B; border-radius: 2px;"
 		"}"
 	) );
-	pBar->setMaximum( item.totalSeconds );
+	pBar->setMaximum( qMax( 1, item.totalSeconds ) );
 	pBar->setValue( item.totalSeconds - item.remainingSeconds );
 	layout->addWidget( pBar );
 
-	// Action buttons: -1 Min, +1 Min, Revert / Cancel
+	// Buttons: [-1m] [+1m]
 	auto* btnRow = new QHBoxLayout();
-	btnRow->setSpacing( 6 );
+	btnRow->setSpacing( 4 );
 
-	auto* btnDec = new QPushButton( tr( "-1 Min" ), card );
-	auto* btnInc = new QPushButton( tr( "+1 Min" ), card );
-	auto* btnCancel = new QPushButton( tr( "Cancel" ), card );
-
-	btnDec->setFixedHeight( 28 );
-	btnInc->setFixedHeight( 28 );
-	btnCancel->setFixedHeight( 28 );
+	auto* btnDec = new QPushButton( tr( "-1m" ), card );
+	auto* btnInc = new QPushButton( tr( "+1m" ), card );
 
 	const QString btnSubStyle = QStringLiteral(
 		"QPushButton {"
-		"   background-color: #291811; color: #fed7aa; font-weight: bold; font-size: 11px;"
-		"   border: 1px solid #7c2d12; border-radius: 5px; padding: 2px 8px;"
+		"   background-color: #1E293B; color: #E2E8F0; font-size: 11px; font-weight: 500;"
+		"   border: 1px solid #334155; border-radius: 5px; padding: 3px 6px; min-height: 24px;"
 		"}"
-		"QPushButton:hover { background-color: #431f12; border-color: #ea580c; }"
+		"QPushButton:hover { background-color: #334155; border-color: #475569; color: #FFFFFF; }"
 	);
 	btnDec->setStyleSheet( btnSubStyle );
 	btnInc->setStyleSheet( btnSubStyle );
+	btnDec->setCursor( Qt::PointingHandCursor );
+	btnInc->setCursor( Qt::PointingHandCursor );
 
+	btnRow->addWidget( btnDec );
+	btnRow->addWidget( btnInc );
+	layout->addLayout( btnRow );
+
+	// Cancel button
+	auto* btnCancel = new QPushButton( tr( "Cancel" ), card );
+	btnCancel->setCursor( Qt::PointingHandCursor );
 	btnCancel->setStyleSheet( QStringLiteral(
 		"QPushButton {"
-		"   background-color: #dc2626; color: white; font-weight: bold; font-size: 11px;"
-		"   border: none; border-radius: 5px; padding: 2px 10px;"
+		"   background-color: #DC2626; color: #FFFFFF; font-weight: 600; font-size: 11px;"
+		"   border: none; border-radius: 5px; padding: 4px 8px; min-height: 26px;"
 		"}"
-		"QPushButton:hover { background-color: #b91c1c; }"
+		"QPushButton:hover { background-color: #B91C1C; }"
 	) );
+	layout->addWidget( btnCancel );
 
 	const QString itemKey = item.key;
 	const auto targets = item.targets;
@@ -1108,10 +1260,7 @@ QWidget* ComputerInspectorPanel::createCountdownCard( QWidget* parent, const Cou
 			it.totalSeconds += 60;
 			if( itemKey == QStringLiteral("global") || targets.isEmpty() )
 			{
-				if( adjCb )
-				{
-					adjCb( it.remainingSeconds );
-				}
+				if( adjCb ) adjCb( it.remainingSeconds );
 			}
 			else
 			{
@@ -1139,10 +1288,7 @@ QWidget* ComputerInspectorPanel::createCountdownCard( QWidget* parent, const Cou
 			it.remainingSeconds = qMax( 1, it.remainingSeconds - 60 );
 			if( itemKey == QStringLiteral("global") || targets.isEmpty() )
 			{
-				if( adjCb )
-				{
-					adjCb( it.remainingSeconds );
-				}
+				if( adjCb ) adjCb( it.remainingSeconds );
 			}
 			else
 			{
@@ -1197,233 +1343,6 @@ QWidget* ComputerInspectorPanel::createCountdownCard( QWidget* parent, const Cou
 		}
 	} );
 
-		btnRow->addWidget( btnDec );
-	btnRow->addWidget( btnInc );
-	btnRow->addWidget( btnCancel );
-	layout->addLayout( btnRow );
-
-	// Row 2: Customized Time Decrease Button
-	auto* customRow = new QHBoxLayout();
-	customRow->setSpacing( 4 );
-
-	auto* btnCustomDec = new QPushButton( tr( "⏱ Custom... ▾" ), card );
-	btnCustomDec->setFixedHeight( 26 );
-	btnCustomDec->setStyleSheet( QStringLiteral(
-		"QPushButton {"
-		"   background-color: #291811; color: #fdba74; font-weight: bold; font-size: 10px;"
-		"   border: 1px solid #9a3412; border-radius: 5px; padding: 2px 8px;"
-		"}"
-		"QPushButton:hover { background-color: #431f12; border-color: #ea580c; color: #ffffff; }"
-	) );
-	btnCustomDec->setCursor( Qt::PointingHandCursor );
-	btnCustomDec->setToolTip( tr( "Decrease countdown by a customized number of minutes or seconds" ) );
-
-	connect( btnCustomDec, &QPushButton::clicked, this, [this, btnCustomDec, itemKey, targets, adjCb]() {
-		auto* menu = new QMenu( btnCustomDec );
-		menu->setStyleSheet( QStringLiteral(
-			"QMenu { background-color: #0E1C38; border: 1px solid #1B3666; border-radius: 6px; padding: 4px; color: #E2E8F0; }"
-			"QMenu::item { padding: 6px 20px; font-size: 11px; border-radius: 4px; }"
-			"QMenu::item:selected { background-color: #ea580c; color: #ffffff; }"
-		) );
-
-		auto addDecAction = [&]( const QString& label, int seconds ) {
-			menu->addAction( label, this, [=, this]() {
-				if( m_activeCountdowns.contains( itemKey ) )
-				{
-					auto& it = m_activeCountdowns[itemKey];
-					it.remainingSeconds = qMax( 1, it.remainingSeconds - seconds );
-					if( itemKey == QStringLiteral("global") || targets.isEmpty() )
-					{
-						if( adjCb ) adjCb( it.remainingSeconds );
-					}
-					else
-					{
-						for( const auto& feat : m_master.allFeatures() )
-						{
-							if( feat.name().compare( QStringLiteral("PowerDownDelayed"), Qt::CaseInsensitive ) == 0 )
-							{
-								VeyonCore::featureManager().controlFeature( feat.uid(), FeatureProviderInterface::Operation::Start,
-									{{QStringLiteral("shutdownTimeout"), it.remainingSeconds},
-									 {QStringLiteral("ShutdownTimeout"), it.remainingSeconds},
-									 {QStringLiteral("cancel"), false},
-									 {QStringLiteral("Cancel"), false}}, targets );
-								break;
-							}
-						}
-					}
-					updateCountdownDisplay();
-				}
-			} );
-		};
-
-		addDecAction( tr( "➖ 15 Seconds" ), 15 );
-		addDecAction( tr( "➖ 30 Seconds" ), 30 );
-		addDecAction( tr( "➖ 2 Minutes" ), 120 );
-		addDecAction( tr( "➖ 5 Minutes" ), 300 );
-		addDecAction( tr( "➖ 10 Minutes" ), 600 );
-		menu->addSeparator();
-
-		menu->addAction( tr( "✏️ Enter Custom Time (Seconds)..." ), this, [=, this]() {
-			bool ok = false;
-			int sec = QInputDialog::getInt( this, tr( "Decrease Countdown" ),
-										   tr( "Enter seconds to decrease (e.g. 30, 45, 90, 180):" ),
-										   30, 1, 7200, 5, &ok );
-			if( ok && sec > 0 )
-			{
-				if( m_activeCountdowns.contains( itemKey ) )
-				{
-					auto& it = m_activeCountdowns[itemKey];
-					it.remainingSeconds = qMax( 1, it.remainingSeconds - sec );
-					if( itemKey == QStringLiteral("global") || targets.isEmpty() )
-					{
-						if( adjCb ) adjCb( it.remainingSeconds );
-					}
-					else
-					{
-						for( const auto& feat : m_master.allFeatures() )
-						{
-							if( feat.name().compare( QStringLiteral("PowerDownDelayed"), Qt::CaseInsensitive ) == 0 )
-							{
-								VeyonCore::featureManager().controlFeature( feat.uid(), FeatureProviderInterface::Operation::Start,
-									{{QStringLiteral("shutdownTimeout"), it.remainingSeconds},
-									 {QStringLiteral("ShutdownTimeout"), it.remainingSeconds},
-									 {QStringLiteral("cancel"), false},
-									 {QStringLiteral("Cancel"), false}}, targets );
-								break;
-							}
-						}
-					}
-					updateCountdownDisplay();
-				}
-			}
-		} );
-
-		menu->addAction( tr( "✏️ Enter Custom Time (Minutes)..." ), this, [=, this]() {
-			bool ok = false;
-			int mins = QInputDialog::getInt( this, tr( "Decrease Countdown" ),
-											tr( "Enter minutes to decrease:" ),
-											2, 1, 120, 1, &ok );
-			if( ok && mins > 0 )
-			{
-				const int sec = mins * 60;
-				if( m_activeCountdowns.contains( itemKey ) )
-				{
-					auto& it = m_activeCountdowns[itemKey];
-					it.remainingSeconds = qMax( 1, it.remainingSeconds - sec );
-					if( itemKey == QStringLiteral("global") || targets.isEmpty() )
-					{
-						if( adjCb ) adjCb( it.remainingSeconds );
-					}
-					else
-					{
-						for( const auto& feat : m_master.allFeatures() )
-						{
-							if( feat.name().compare( QStringLiteral("PowerDownDelayed"), Qt::CaseInsensitive ) == 0 )
-							{
-								VeyonCore::featureManager().controlFeature( feat.uid(), FeatureProviderInterface::Operation::Start,
-									{{QStringLiteral("shutdownTimeout"), it.remainingSeconds},
-									 {QStringLiteral("ShutdownTimeout"), it.remainingSeconds},
-									 {QStringLiteral("cancel"), false},
-									 {QStringLiteral("Cancel"), false}}, targets );
-								break;
-							}
-						}
-					}
-					updateCountdownDisplay();
-				}
-			}
-		} );
-
-		menu->exec( btnCustomDec->mapToGlobal( QPoint( 0, btnCustomDec->height() ) ) );
-		menu->deleteLater();
-	} );
-
-	customRow->addWidget( btnCustomDec );
-	layout->addLayout( customRow );
-
-	if( m_activeCountdowns.size() > 1 )
-	{
-		auto* allRow = new QHBoxLayout();
-		allRow->setSpacing( 4 );
-
-		auto* btnAllDec = new QPushButton( tr( "🌐 -1 Min (All)" ), card );
-		auto* btnAllInc = new QPushButton( tr( "🌐 +1 Min (All)" ), card );
-
-		const QString btnAllStyle = QStringLiteral(
-			"QPushButton {"
-			"   background-color: #3b1d11; color: #fed7aa; font-weight: bold; font-size: 10px;"
-			"   border: 1px dashed #c2410c; border-radius: 4px; padding: 3px 6px;"
-			"}"
-			"QPushButton:hover { background-color: #572615; border-color: #ea580c; color: #ffffff; }"
-		);
-
-		btnAllDec->setFixedHeight( 24 );
-		btnAllInc->setFixedHeight( 24 );
-		btnAllDec->setStyleSheet( btnAllStyle );
-		btnAllInc->setStyleSheet( btnAllStyle );
-		btnAllDec->setToolTip( tr( "Reduce countdown by 1 minute on ALL active computers" ) );
-		btnAllInc->setToolTip( tr( "Add 1 minute countdown on ALL active computers" ) );
-
-		connect( btnAllDec, &QPushButton::clicked, this, [this]() { adjustAllCountdowns( -60 ); } );
-		connect( btnAllInc, &QPushButton::clicked, this, [this]() { adjustAllCountdowns( 60 ); } );
-
-		auto* btnAllCustomDec = new QPushButton( tr( "🌐 Custom (All)... ▾" ), card );
-		btnAllCustomDec->setFixedHeight( 24 );
-		btnAllCustomDec->setStyleSheet( btnAllStyle );
-		btnAllCustomDec->setToolTip( tr( "Decrease countdown on ALL active computers by customized time" ) );
-		connect( btnAllCustomDec, &QPushButton::clicked, this, [this, btnAllCustomDec]() {
-			auto* menu = new QMenu( btnAllCustomDec );
-			menu->setStyleSheet( QStringLiteral(
-				"QMenu { background-color: #0E1C38; border: 1px solid #1B3666; border-radius: 6px; padding: 4px; color: #E2E8F0; }"
-				"QMenu::item { padding: 6px 20px; font-size: 11px; border-radius: 4px; }"
-				"QMenu::item:selected { background-color: #c2410c; color: #ffffff; }"
-			) );
-
-			auto addAllAction = [&]( const QString& label, int seconds ) {
-				menu->addAction( label, this, [=, this]() {
-					adjustAllCountdowns( -seconds );
-				} );
-			};
-
-			addAllAction( tr( "➖ 15 Seconds (All)" ), 15 );
-			addAllAction( tr( "➖ 30 Seconds (All)" ), 30 );
-			addAllAction( tr( "➖ 2 Minutes (All)" ), 120 );
-			addAllAction( tr( "➖ 5 Minutes (All)" ), 300 );
-			addAllAction( tr( "➖ 10 Minutes (All)" ), 600 );
-			menu->addSeparator();
-
-			menu->addAction( tr( "✏️ Enter Custom Seconds (All)..." ), this, [=, this]() {
-				bool ok = false;
-				int sec = QInputDialog::getInt( this, tr( "Decrease All Countdowns" ),
-											   tr( "Enter seconds to decrease on ALL computers:" ),
-											   30, 1, 7200, 5, &ok );
-				if( ok && sec > 0 )
-				{
-					adjustAllCountdowns( -sec );
-				}
-			} );
-
-			menu->addAction( tr( "✏️ Enter Custom Minutes (All)..." ), this, [=, this]() {
-				bool ok = false;
-				int mins = QInputDialog::getInt( this, tr( "Decrease All Countdowns" ),
-												tr( "Enter minutes to decrease on ALL computers:" ),
-												2, 1, 120, 1, &ok );
-				if( ok && mins > 0 )
-				{
-					adjustAllCountdowns( -( mins * 60 ) );
-				}
-			} );
-
-			menu->exec( btnAllCustomDec->mapToGlobal( QPoint( 0, btnAllCustomDec->height() ) ) );
-			menu->deleteLater();
-		} );
-
-		allRow->addWidget( btnAllDec );
-		allRow->addWidget( btnAllInc );
-		allRow->addWidget( btnAllCustomDec );
-		layout->addLayout( allRow );
-	}
-
 	// Remove dead UI pointers for this key
 	auto& uiList = m_countdownUiMap[itemKey];
 	uiList.erase(
@@ -1441,7 +1360,7 @@ QWidget* ComputerInspectorPanel::createMachineInfoCard( QWidget* parent, const C
 {
 	auto* card = new QFrame( parent );
 	card->setStyleSheet( QStringLiteral(
-		"QFrame { background-color: #0E1C38; border: 1px solid #1B3666; border-radius: 10px; padding: 10px;"
+		"QFrame { background-color: #0F172A; border: 1px solid #2A323D; border-radius: 10px; padding: 10px;"
 		"}"
 	) );
 
@@ -1454,12 +1373,12 @@ QWidget* ComputerInspectorPanel::createMachineInfoCard( QWidget* parent, const C
 	topRow->setSpacing( 6 );
 
 	auto* nameLbl = new QLabel( controlInterface ? controlInterface->computerName() : tr( "Unknown Machine" ), card );
-	nameLbl->setStyleSheet( QStringLiteral( "font-size: 14px; font-weight: bold; color: #F0F6FF; border: none;" ) );
+	nameLbl->setStyleSheet( QStringLiteral( "font-size: 14px; font-weight: bold; color: #E6EDF3; border: none;" ) );
 
 	const bool isConnected = controlInterface && controlInterface->state() == ComputerControlInterface::State::Connected;
 	auto* statusBadge = new QLabel( isConnected ? tr( "● Online" ) : tr( "○ Offline" ), card );
 	statusBadge->setStyleSheet( isConnected
-		? QStringLiteral( "background: rgba(52, 211, 153, 0.15); color: #3B82F6; font-size: 10px; font-weight: bold; padding: 2px 8px; border-radius: 4px; border: 1px solid #3B82F6;" )
+		? QStringLiteral( "background: rgba(52, 211, 153, 0.15); color: #2563EB; font-size: 10px; font-weight: bold; padding: 2px 8px; border-radius: 4px; border: 1px solid #2563EB;" )
 		: QStringLiteral( "background: rgba(248, 113, 113, 0.15); color: #F87171; font-size: 10px; font-weight: bold; padding: 2px 8px; border-radius: 4px; border: 1px solid #F87171;" ) );
 
 	topRow->addWidget( nameLbl );
@@ -1473,14 +1392,14 @@ QWidget* ComputerInspectorPanel::createMachineInfoCard( QWidget* parent, const C
 		const auto hostAddrStr = controlInterface->computer().hostAddress().isNull()
 			? controlInterface->computer().hostName() : controlInterface->computer().hostAddress().toString();
 		auto* ipLbl = new QLabel( tr( "Host IP: %1" ).arg( hostAddrStr ), card );
-		ipLbl->setStyleSheet( QStringLiteral( "font-size: 11px; color: #8EA6C9; border: none;" ) );
+		ipLbl->setStyleSheet( QStringLiteral( "font-size: 11px; color: #8B949E; border: none;" ) );
 		layout->addWidget( ipLbl );
 
 		const QString user = controlInterface->userFullName().isEmpty()
 			? controlInterface->userLoginName() : controlInterface->userFullName();
 		const QString userDisplay = user.isEmpty() ? tr( "[No logged-in user]" ) : user;
 		auto* userLbl = new QLabel( tr( "Logged User: %1" ).arg( userDisplay ), card );
-		userLbl->setStyleSheet( QStringLiteral( "font-size: 11px; color: #F0F6FF; font-weight: 500; border: none;" ) );
+		userLbl->setStyleSheet( QStringLiteral( "font-size: 11px; color: #E6EDF3; font-weight: 500; border: none;" ) );
 		userLbl->setWordWrap( false );
 		userLbl->setMaximumWidth( 290 );
 		userLbl->setSizePolicy( QSizePolicy::Ignored, QSizePolicy::Preferred );
@@ -1498,7 +1417,7 @@ QWidget* ComputerInspectorPanel::createActionHubCard( QWidget* parent, const QSt
 {
 	auto* card = new QFrame( parent );
 	card->setStyleSheet( QStringLiteral(
-		"QFrame { background-color: #0E1C38; border: 1px solid #1B3666; border-radius: 8px; padding: 4px; }"
+		"QFrame { background-color: #0F172A; border: 1px solid #2A323D; border-radius: 8px; padding: 4px; }"
 	) );
 
 	auto* layout = new QVBoxLayout( card );
@@ -1843,7 +1762,7 @@ void ComputerInspectorPanel::updateCountdownDisplay()
 			{
 				if( !uiSet.titleLabel.isNull() )
 				{
-					uiSet.titleLabel->setText( tr( "ALL LAB COMPUTERS TIMER (%1 Active)" ).arg( m_activeCountdowns.size() ) );
+					uiSet.titleLabel->setText( tr( "● %1 pending" ).arg( m_activeCountdowns.size() ) );
 				}
 				if( !uiSet.timeLabel.isNull() )
 				{
@@ -1919,8 +1838,22 @@ void ComputerInspectorPanel::executeFeatureByName( const QString& featureName, c
 	{
 		canonicalName = QStringLiteral("DistributeFiles");
 	}
+	else if( featureName.compare( QStringLiteral("timedlock"), Qt::CaseInsensitive ) == 0 ||
+			 featureName.compare( QStringLiteral("focussession"), Qt::CaseInsensitive ) == 0 )
+	{
+		canonicalName = QStringLiteral("TimedLock");
+	}
 
-	for( const auto& feat : m_master.allFeatures() )
+	FeatureList searchFeatures = m_master.allFeatures();
+	for( const auto& feat : VeyonCore::featureManager().features() )
+	{
+		if( !searchFeatures.contains( feat ) )
+		{
+			searchFeatures.append( feat );
+		}
+	}
+
+	for( const auto& feat : searchFeatures )
 	{
 		if( feat.name().compare( canonicalName, Qt::CaseInsensitive ) == 0 ||
 			feat.displayName().compare( canonicalName, Qt::CaseInsensitive ) == 0 )
@@ -1930,7 +1863,7 @@ void ComputerInspectorPanel::executeFeatureByName( const QString& featureName, c
 		}
 	}
 
-	for( const auto& feat : m_master.allFeatures() )
+	for( const auto& feat : searchFeatures )
 	{
 		if( feat.name().contains( canonicalName, Qt::CaseInsensitive ) ||
 			feat.displayName().contains( canonicalName, Qt::CaseInsensitive ) )
