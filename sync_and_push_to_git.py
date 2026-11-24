@@ -29,9 +29,9 @@ SYNC_MAPPINGS = [
      os.path.join(REPO_DIR, r"core-patches\ComputerInspectorPanel.cpp")),
     (os.path.join(BUILD_SRC_ROOT, r"master\src\CheckableItemProxyModel.cpp"),
      os.path.join(REPO_DIR, r"core-patches\CheckableItemProxyModel.cpp")),
-    (os.path.join(BUILD_SRC_ROOT, r"core\src\WindowsInputDeviceFunctions.cpp"),
+    (os.path.join(BUILD_SRC_ROOT, r"plugins\platform\windows\WindowsInputDeviceFunctions.cpp"),
      os.path.join(REPO_DIR, r"core-patches\WindowsInputDeviceFunctions.cpp")),
-    (os.path.join(BUILD_SRC_ROOT, r"core\src\WindowsInputDeviceFunctions.h"),
+    (os.path.join(BUILD_SRC_ROOT, r"plugins\platform\windows\WindowsInputDeviceFunctions.h"),
      os.path.join(REPO_DIR, r"core-patches\WindowsInputDeviceFunctions.h")),
     (os.path.join(PROGRAM_FILES, "custom_theme.qss"),
      os.path.join(REPO_DIR, r"core-patches\custom_theme.qss")),
@@ -59,8 +59,10 @@ def run_cmd(cmd_list, cwd=REPO_DIR):
         return p.stdout.strip()
     except subprocess.CalledProcessError as e:
         print(f"[ERR] Command failed: {' '.join(cmd_list)}")
-        print(f"Stdout: {e.stdout}")
-        print(f"Stderr: {e.stderr}")
+        if e.stdout:
+            print(f"Stdout: {e.stdout.strip()}")
+        if e.stderr:
+            print(f"Stderr: {e.stderr.strip()}")
         return None
 
 def sync_files():
@@ -68,8 +70,19 @@ def sync_files():
     for src, dst in SYNC_MAPPINGS:
         if os.path.exists(src):
             os.makedirs(os.path.dirname(dst), exist_ok=True)
-            # Check if destination exists and differs
-            if not os.path.exists(dst) or os.path.getmtime(src) > os.path.getmtime(dst):
+            # Compare contents
+            should_copy = False
+            if not os.path.exists(dst):
+                should_copy = True
+            else:
+                try:
+                    with open(src, 'rb') as f1, open(dst, 'rb') as f2:
+                        if f1.read() != f2.read():
+                            should_copy = True
+                except Exception:
+                    should_copy = True
+            
+            if should_copy:
                 shutil.copy2(src, dst)
                 copied += 1
                 print(f"[SYNC] Copied: {src} -> {dst}")
@@ -78,24 +91,27 @@ def sync_files():
     return copied
 
 def get_latest_version():
-    ver_file = os.path.join(REPO_DIR, r"deploy\4-Auto-Updater\client_version.json")
-    if os.path.exists(ver_file):
-        try:
-            with open(ver_file, 'r', encoding='utf-8') as f:
-                data = json.load(f)
-                return data.get('latest_version', 'latest'), data.get('changelog', '')
-        except Exception:
-            pass
+    candidates = [
+        os.path.join(SERVER_SHARE, r"4-Auto-Updater\client_version.json"),
+        os.path.join(REPO_DIR, r"deploy\4-Auto-Updater\client_version.json"),
+    ]
+    for c in candidates:
+        if os.path.exists(c):
+            try:
+                with open(c, 'r', encoding='utf-8-sig', errors='ignore') as f:
+                    data = json.load(f)
+                    return data.get('latest_version', 'latest'), data.get('changelog', '')
+            except Exception as e:
+                print(f"[WARN] Error reading version from {c}: {e}")
     return "update", ""
 
 def commit_and_push():
-    # Check status
     status = run_cmd(["git", "status", "--porcelain"])
     if not status:
-        print("[OK] Git working directory is already clean. Nothing to commit.")
+        print("[OK] Git working directory is clean. No app changes to push.")
         return False
 
-    print("[*] Detected uncommitted modifications in repository:")
+    print("[*] Detected modifications in Synapse Git Repository:")
     print(status)
 
     version, changelog = get_latest_version()
@@ -123,7 +139,7 @@ def commit_and_push():
         return False
 
 def main():
-    print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Starting Synapse Git Auto-Sync...")
+    print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Checking Synapse app updates for Git...")
     sync_files()
     commit_and_push()
 
