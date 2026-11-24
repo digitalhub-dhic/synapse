@@ -10,18 +10,48 @@ import time
 import subprocess
 from datetime import datetime
 
+BUILD_SRC_ROOT = r"C:\Users\administrator\Documents\Codex\2026-10-06\c-users-administrator-documents-veyon-4\work\DigiAgent-build"
+
 WATCH_TARGETS = [
+    # Server payloads & auto-updater
     r"\\192.168.1.50\public\Synapse\4-Auto-Updater\client_version.json",
     r"\\192.168.1.50\public\Synapse\4-Auto-Updater\Check-And-AutoUpdate.ps1",
     r"\\192.168.1.50\public\Synapse\4-Auto-Updater\Payload\DigiAgentCore.dll",
     r"\\192.168.1.50\public\Synapse\4-Auto-Updater\Payload\plugins\screenlock.dll",
+    r"\\192.168.1.50\public\Synapse\4-Auto-Updater\Payload\plugins\powercontrol.dll",
     r"\\192.168.1.50\public\Synapse\4-Auto-Updater\Payload\digiagent-master.exe",
+
+    # Installed app binaries and QSS
+    r"C:\Program Files\DigiAgent\digiagent-master.exe",
     r"C:\Program Files\DigiAgent\DigiAgentCore.dll",
+    r"C:\Program Files\DigiAgent\plugins\powercontrol.dll",
+    r"C:\Program Files\DigiAgent\plugins\screenlock.dll",
     r"C:\Program Files\DigiAgent\custom_theme.qss",
-    r"C:\Users\administrator\Documents\Codex\2026-10-06\c-users-administrator-documents-veyon-4\work\DigiAgent-build\core\src\LockWidget.cpp",
-    r"C:\Users\administrator\Documents\Codex\2026-10-06\c-users-administrator-documents-veyon-4\work\DigiAgent-build\plugins\screenlock\ScreenLockFeaturePlugin.cpp",
-    r"C:\Users\administrator\Documents\Codex\2026-10-06\c-users-administrator-documents-veyon-4\work\DigiAgent-build\master\src\ComputerSelectPanel.cpp",
-    r"C:\Users\administrator\Documents\Codex\2026-10-06\c-users-administrator-documents-veyon-4\work\DigiAgent-build\master\src\ComputerInspectorPanel.cpp",
+    r"C:\Program Files\DigiAgent\synapse_white_green.qss",
+
+    # Key build source files
+    os.path.join(BUILD_SRC_ROOT, r"core\src\LockWidget.cpp"),
+    os.path.join(BUILD_SRC_ROOT, r"core\src\LockWidget.h"),
+    os.path.join(BUILD_SRC_ROOT, r"plugins\screenlock\ScreenLockFeaturePlugin.cpp"),
+    os.path.join(BUILD_SRC_ROOT, r"plugins\screenlock\ScreenLockFeaturePlugin.h"),
+    os.path.join(BUILD_SRC_ROOT, r"plugins\powercontrol\PowerDownTimeInputDialog.cpp"),
+    os.path.join(BUILD_SRC_ROOT, r"plugins\powercontrol\PowerDownTimeInputDialog.h"),
+    os.path.join(BUILD_SRC_ROOT, r"plugins\powercontrol\PowerControlFeaturePlugin.cpp"),
+    os.path.join(BUILD_SRC_ROOT, r"plugins\powercontrol\PowerControlFeaturePlugin.h"),
+    os.path.join(BUILD_SRC_ROOT, r"master\src\ComputerSelectPanel.cpp"),
+    os.path.join(BUILD_SRC_ROOT, r"master\src\ComputerSelectPanel.h"),
+    os.path.join(BUILD_SRC_ROOT, r"master\src\ComputerInspectorPanel.cpp"),
+    os.path.join(BUILD_SRC_ROOT, r"master\src\ComputerInspectorPanel.h"),
+    os.path.join(BUILD_SRC_ROOT, r"master\src\CheckableItemProxyModel.cpp"),
+    os.path.join(BUILD_SRC_ROOT, r"master\src\CheckableItemProxyModel.h"),
+    os.path.join(BUILD_SRC_ROOT, r"master\src\ComputerItemDelegate.cpp"),
+    os.path.join(BUILD_SRC_ROOT, r"master\src\ComputerItemDelegate.h"),
+    os.path.join(BUILD_SRC_ROOT, r"master\src\ComputerMonitoringView.cpp"),
+    os.path.join(BUILD_SRC_ROOT, r"master\src\ComputerMonitoringView.h"),
+    os.path.join(BUILD_SRC_ROOT, r"master\src\MainWindow.cpp"),
+    os.path.join(BUILD_SRC_ROOT, r"master\src\MainWindow.h"),
+    os.path.join(BUILD_SRC_ROOT, r"plugins\platform\windows\WindowsInputDeviceFunctions.cpp"),
+    os.path.join(BUILD_SRC_ROOT, r"plugins\platform\windows\WindowsInputDeviceFunctions.h"),
 ]
 
 SYNC_SCRIPT = r"C:\Users\administrator\projects\synapse\sync_and_push_to_git.py"
