@@ -1,16 +1,16 @@
 {
+    "latest_version": "4.11.9.0",
+    "release_date": "2026-11-26",
+    "changelog": "Enterprise Refinement: Compact Global Power Down operation card (no horizontal scrollbar / zero repetition), refined modal confirmation with dynamic computer count, separated standard lock from timed focus session with countdown display, enhanced toolbar semantic grouping, and hardened zero-duplicate fleet discovery",
     "windows": {
-        "plugins_dir": "\\\\fileserver\\public\\Synapse\\4-Auto-Updater\\Payload\\plugins",
-        "master_exe": "\\\\fileserver\\public\\Synapse\\4-Auto-Updater\\Payload\\digiagent-master.exe",
-        "core_dll": "\\\\fileserver\\public\\Synapse\\4-Auto-Updater\\Payload\\DigiAgentCore.dll",
         "byod_installer": "\\\\fileserver\\public\\Synapse\\1-Windows\\BYOD\\Synapse-Setup-BYOD.exe",
-        "lab_installer": "\\\\fileserver\\public\\Synapse\\1-Windows\\Lab\\Synapse-Setup-Lab.exe"
+        "lab_installer": "\\\\fileserver\\public\\Synapse\\1-Windows\\Lab\\Synapse-Setup-Lab.exe",
+        "core_dll": "\\\\fileserver\\public\\Synapse\\4-Auto-Updater\\Payload\\DigiAgentCore.dll",
+        "master_exe": "\\\\fileserver\\public\\Synapse\\4-Auto-Updater\\Payload\\digiagent-master.exe",
+        "plugins_dir": "\\\\fileserver\\public\\Synapse\\4-Auto-Updater\\Payload\\plugins"
     },
-    "changelog": "UI design overhaul: Synapse Command header branding, compact top chrome, unified #2563EB enterprise blue active states, top-pinned tree search bar, distinct tri-state checkbox, quiet Connecting & Display Blank card states, and Inspector Global Quick Controls",
     "linux": {
         "byod_script": "\\\\fileserver\\public\\Synapse\\2-Linux\\BYOD\\install-synapse-byod.sh",
         "lab_script": "\\\\fileserver\\public\\Synapse\\2-Linux\\Lab\\install-synapse-lab.sh"
-    },
-    "release_date": "2026-11-26",
-    "latest_version": "4.11.8.8"
+    }
 }
