@@ -25,6 +25,7 @@
 #pragma once
 
 #include <QModelIndexList>
+#include <QPersistentModelIndex>
 #include <QWidget>
 
 class QSortFilterProxyModel;
