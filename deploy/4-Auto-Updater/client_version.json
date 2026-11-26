@@ -6,11 +6,11 @@
         "byod_installer": "\\\\fileserver\\public\\Synapse\\1-Windows\\BYOD\\Synapse-Setup-BYOD.exe",
         "lab_installer": "\\\\fileserver\\public\\Synapse\\1-Windows\\Lab\\Synapse-Setup-Lab.exe"
     },
-    "changelog": "Phase 2 fixes: fixed Locations/Computers close button, QPixmapCache frame key churn, 250ms debounced count updates with real Idle calculation, Inspector confirmation dialogs, CheckableItemProxyModel reset safety, and thread-safe SynapseFleetDiscovery",
+    "changelog": "Phase 3 UI modernization: WCAG AA selection/status colors, visible tree search bar, 4-pane splitter restoration, cross-platform QSS loader, and QSS !important cleanup",
     "linux": {
         "byod_script": "\\\\fileserver\\public\\Synapse\\2-Linux\\BYOD\\install-synapse-byod.sh",
         "lab_script": "\\\\fileserver\\public\\Synapse\\2-Linux\\Lab\\install-synapse-lab.sh"
     },
     "release_date": "2026-11-26",
-    "latest_version": "4.11.8.3"
+    "latest_version": "4.11.8.4"
 }

@@ -176,18 +176,18 @@ def _sync_device_impl(name, current_ip, mac=""):
     if key in by_name:
         return False
 
-    # 4. Genuinely new unknown external device (check that it's not in lab static range)
+    # 4. Genuinely new unknown device
+    assigned_location = TARGET_LOCATION
     if current_ip.startswith("192.168.1."):
         try:
             last_octet = int(current_ip.split(".")[-1])
             if 101 <= last_octet <= 140 or last_octet in (145, 146, 148, 150):
-                print(f"[SKIP-LAB] IP {current_ip} belongs to DIGIHUB lab range. Skipping BYOD enrollment.")
-                return False
+                assigned_location = "DIGIHUB"
         except ValueError:
             pass
 
-    print(f"[NEW-DEVICE] Enrolling previously unseen device '{name}' @ {current_ip} into {TARGET_LOCATION}...")
-    enroll_computer(name, current_ip, mac_clean, TARGET_LOCATION)
+    print(f"[NEW-DEVICE] Enrolling newly discovered device '{name}' @ {current_ip} into '{assigned_location}'...")
+    enroll_computer(name, current_ip, mac_clean, assigned_location)
     return True
 
 def probe_agent_port(ip, timeout=0.5):
