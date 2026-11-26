@@ -124,13 +124,13 @@ public:
 		// 1. Draw rounded background pill
 		if( isSelected )
 		{
-			painter->setBrush( QColor(30, 41, 59) );
-			painter->setPen( QPen( QColor(56, 189, 248), 1 ) );
+			painter->setBrush( QColor(23, 37, 84) ); // #172554 WCAG AA selection
+			painter->setPen( QPen( QColor(59, 130, 246), 1 ) );
 			painter->drawRoundedRect( rowRect, 6, 6 );
 		}
 		else if( isHovered )
 		{
-			painter->setBrush( QColor(31, 38, 48) );
+			painter->setBrush( QColor(22, 32, 50) ); // #162032 elevated hover
 			painter->setPen( Qt::NoPen );
 			painter->drawRoundedRect( rowRect, 6, 6 );
 		}
