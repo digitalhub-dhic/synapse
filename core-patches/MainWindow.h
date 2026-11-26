@@ -30,6 +30,7 @@
 #include "VeyonMasterInterface.h"
 
 class QButtonGroup;
+class QTcpServer;
 class QToolButton;
 
 class VeyonMaster;
