@@ -29,6 +29,7 @@
 
 #include "ComputerControlListModel.h"
 #include "ComputerItemDelegate.h"
+#include "ComputerMonitoringView.h"
 #include "FeatureManager.h"
 #include "VeyonMaster.h"
 
