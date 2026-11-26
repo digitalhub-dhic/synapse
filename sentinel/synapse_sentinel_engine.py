@@ -22,6 +22,8 @@ import logging
 import datetime
 import subprocess
 import threading
+import shutil
+import urllib.request
 from PIL import Image, ImageDraw, ImageFont, ImageChops, ImageStat
 import numpy as np
 
@@ -477,7 +479,7 @@ class SynapseAISentinel:
     #          SENTINEL SCAN LOOP
     # ==========================================
 
-    def publish_live_alert(self, name, ip, reason, evidence_path, confidence=0.75, status="ALERT"):
+    def publish_live_alert(self, name, ip, reason, evidence_path, confidence=0.75, status="ALERT", screenshot_error=None):
         """Writes live alert for Synapse Command bellBtn 1-click teacher review."""
         entry = {
             "timestamp": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
@@ -488,6 +490,8 @@ class SynapseAISentinel:
             "evidence_image": evidence_path,
             "status": status
         }
+        if screenshot_error:
+            entry["screenshot_error"] = screenshot_error
         self.save_audit_entry(entry)
         self.play_alert_sound()
         try:
@@ -501,6 +505,33 @@ class SynapseAISentinel:
                 json.dump(alerts[:25], f, indent=2)
         except Exception as e:
             logging.error(f"Failed to write live alerts: {e}")
+
+    def capture_existing_screenshot(self, ip, name, reason):
+        """Ask Synapse Command to run its built-in Screenshot feature for one host."""
+        payload = json.dumps({"ip": ip}).encode("utf-8")
+        request = urllib.request.Request(
+            "http://127.0.0.1:11410/screenshot",
+            data=payload,
+            headers={"Content-Type": "application/json"},
+            method="POST",
+        )
+        try:
+            with urllib.request.urlopen(request, timeout=15) as response:
+                result = json.loads(response.read().decode("utf-8"))
+            if result.get("ok") and result.get("screenshot_path"):
+                source_path = result["screenshot_path"]
+                today = datetime.datetime.now().strftime("%Y-%m-%d")
+                daily_dir = os.path.join(VIOLATIONS_DIR, today)
+                os.makedirs(daily_dir, exist_ok=True)
+                safe_name = "".join(ch if ch.isalnum() or ch in "-_" else "_" for ch in name)
+                safe_reason = "".join(ch if ch.isalnum() or ch in "-_" else "_" for ch in reason)[:48]
+                timestamp = datetime.datetime.now().strftime("%H%M%S_%f")
+                evidence_path = os.path.join(daily_dir, f"AI_REVIEW_{timestamp}_{safe_name}_{ip.replace('.', '-')}_{safe_reason}.png")
+                shutil.copy2(source_path, evidence_path)
+                return evidence_path, None
+            return "", result.get("error", "Screenshot feature did not return a saved image")
+        except Exception as e:
+            return "", str(e)
 
     def scan_direct_frames(self, frames_list):
         """Processes direct per-computer framebuffers from veyon-master (no 7x5 crop)."""
@@ -531,14 +562,18 @@ class SynapseAISentinel:
 
                 required_cycles = self.config.get("confirmation_cycles", 2)
                 if cand["count"] >= required_cycles:
-                    evidence_path = self.save_evidence_image(comp_name, ip, reason, frame_img)
+                    # Use the same master-side Screenshot feature exposed by the
+                    # computer context menu. Never send the captured image off-prem.
+                    evidence_path, capture_error = self.capture_existing_screenshot(ip, comp_name, reason)
+                    if capture_error:
+                        logging.error(f"Built-in Screenshot failed for {comp_name} ({ip}): {capture_error}")
                     conf = metrics.get("confidence", 0.78)
                     if self.config.get("auto_freeze", False):
                         self.lock_computer(comp_name, ip, reason, evidence_path)
-                        self.publish_live_alert(comp_name, ip, reason, evidence_path, conf, "LOCKED")
+                        self.publish_live_alert(comp_name, ip, reason, evidence_path, conf, "LOCKED", capture_error)
                     else:
                         logging.warning(f"🔔 AI ALERT (Review): [{comp_name}] ({ip}) -> {reason}")
-                        self.publish_live_alert(comp_name, ip, reason, evidence_path, conf, "ALERT")
+                        self.publish_live_alert(comp_name, ip, reason, evidence_path, conf, "ALERT", capture_error)
                     del self.violation_candidates[ip]
             else:
                 if ip in self.violation_candidates:

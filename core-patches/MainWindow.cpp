@@ -46,6 +46,7 @@
 #include <QSet>
 #include <QSplitter>
 #include <QDateTime>
+#include <QDir>
 #include <QTimer>
 
 #include "AboutDialog.h"
@@ -60,6 +61,7 @@
 #include "ComputerSelectPanel.h"
 #include "ScreenshotManagementPanel.h"
 #include "FeatureManager.h"
+#include "Filesystem.h"
 #include "MonitoringMode.h"
 #include "NetworkObjectDirectory.h"
 #include "NetworkObjectDirectoryManager.h"
@@ -1526,8 +1528,126 @@ void MainWindow::startSentinelFeedServer()
 		{
 			auto* sock = m_sentinelFeedServer->nextPendingConnection();
 			connect( sock, &QTcpSocket::readyRead, this, [this, sock]() {
-				const QByteArray req = sock->readAll();
-				if( !req.contains( "GET /frames" ) )
+				QByteArray req = sock->property( "sentinelHttpRequest" ).toByteArray();
+				req += sock->readAll();
+				sock->setProperty( "sentinelHttpRequest", req );
+				if( req.size() > 4096 )
+				{
+					sock->write( "HTTP/1.1 413 Payload Too Large\r\nContent-Length: 0\r\nConnection: close\r\n\r\n" );
+					sock->disconnectFromHost();
+					return;
+				}
+				const auto headerEnd = req.indexOf( "\r\n\r\n" );
+				if( headerEnd < 0 )
+				{
+					return;
+				}
+				const QByteArray headers = req.left( headerEnd );
+				const QByteArray body = req.mid( headerEnd + 4 );
+				int contentLength = 0;
+				for( const auto& line : headers.split( '\n' ) )
+				{
+					if( line.trimmed().toLower().startsWith( "content-length:" ) )
+					{
+						contentLength = line.mid( line.indexOf( ':' ) + 1 ).trimmed().toInt();
+					}
+				}
+				if( contentLength < 0 || contentLength > 1024 )
+				{
+					sock->write( "HTTP/1.1 413 Payload Too Large\r\nContent-Length: 0\r\nConnection: close\r\n\r\n" );
+					sock->disconnectFromHost();
+					return;
+				}
+				if( body.size() < contentLength )
+				{
+					return;
+				}
+
+				auto sendJson = [sock]( int status, const QByteArray& statusText, const QJsonObject& object ) {
+					const QByteArray responseBody = QJsonDocument( object ).toJson( QJsonDocument::Compact );
+					sock->write( "HTTP/1.1 " + QByteArray::number( status ) + " " + statusText + "\r\nContent-Type: application/json\r\nContent-Length: "
+						+ QByteArray::number( responseBody.size() ) + "\r\nConnection: close\r\n\r\n" + responseBody );
+					sock->disconnectFromHost();
+				};
+
+				const auto requestLine = headers.left( headers.indexOf( '\n' ) ).trimmed();
+				if( requestLine.startsWith( "POST /screenshot " ) )
+				{
+					QJsonParseError parseError;
+					const auto requestDoc = QJsonDocument::fromJson( body.left( contentLength ), &parseError );
+					const QString requestedIp = requestDoc.object().value( QStringLiteral("ip") ).toString().trimmed();
+					if( parseError.error != QJsonParseError::NoError || !requestDoc.isObject() || requestedIp.isEmpty() )
+					{
+						sendJson( 400, "Bad Request", {{QStringLiteral("ok"), false}, {QStringLiteral("error"), QStringLiteral("Expected JSON with a computer IP")}} );
+						return;
+					}
+
+					ComputerControlInterface::Pointer target;
+					for( const auto& ci : m_master.allComputerControlInterfaces() )
+					{
+						if( ci && ci->state() == ComputerControlInterface::State::Connected &&
+							ci->computer().hostAddress().toString() == requestedIp )
+						{
+							target = ci;
+							break;
+						}
+					}
+					if( !target )
+					{
+						sendJson( 404, "Not Found", {{QStringLiteral("ok"), false}, {QStringLiteral("error"), QStringLiteral("Computer is not connected")}} );
+						return;
+					}
+
+					const QString screenshotDir = VeyonCore::filesystem().screenshotDirectoryPath();
+					const QString hostMarker = QStringLiteral("_") + target->computer().hostName() + QStringLiteral("_");
+					QDateTime latestBefore;
+					const QFileInfoList existing = QDir( screenshotDir ).entryInfoList( { QStringLiteral("*.png") }, QDir::Files, QDir::Time );
+					for( const auto& file : existing )
+					{
+						if( file.fileName().contains( hostMarker, Qt::CaseInsensitive ) )
+						{
+							latestBefore = file.lastModified();
+							break;
+						}
+					}
+
+					bool screenshotFeatureFound = false;
+					for( const auto& feature : VeyonCore::featureManager().features() )
+					{
+						if( feature.name().compare( QStringLiteral("Screenshot"), Qt::CaseInsensitive ) == 0 )
+						{
+							screenshotFeatureFound = true;
+							VeyonCore::featureManager().controlFeature(
+								feature.uid(), FeatureProviderInterface::Operation::Start, {}, { target } );
+							break;
+						}
+					}
+					if( !screenshotFeatureFound )
+					{
+						sendJson( 503, "Service Unavailable", {{QStringLiteral("ok"), false}, {QStringLiteral("error"), QStringLiteral("Screenshot feature is unavailable")}} );
+						return;
+					}
+
+					QString screenshotPath;
+					const QFileInfoList captured = QDir( screenshotDir ).entryInfoList( { QStringLiteral("*.png") }, QDir::Files, QDir::Time );
+					for( const auto& file : captured )
+					{
+						if( file.fileName().contains( hostMarker, Qt::CaseInsensitive ) &&
+							(!file.lastModified().isValid() || !latestBefore.isValid() || file.lastModified() > latestBefore) )
+						{
+							screenshotPath = file.absoluteFilePath();
+							break;
+						}
+					}
+					if( screenshotPath.isEmpty() )
+					{
+						sendJson( 500, "Internal Server Error", {{QStringLiteral("ok"), false}, {QStringLiteral("error"), QStringLiteral("Screenshot feature ran but saved file could not be found")}} );
+						return;
+					}
+					sendJson( 200, "OK", {{QStringLiteral("ok"), true}, {QStringLiteral("screenshot_path"), screenshotPath}} );
+					return;
+				}
+				if( !requestLine.startsWith( "GET /frames " ) )
 				{
 					sock->write( "HTTP/1.1 404 Not Found\r\nContent-Length: 0\r\nConnection: close\r\n\r\n" );
 					sock->disconnectFromHost();
