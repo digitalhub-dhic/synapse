@@ -558,31 +558,50 @@ bool ScreenLockFeaturePlugin::handleFeatureMessage( VeyonServerInterface& server
 				// Timed locks are temporary focus sessions: NOT persistently locked across reboots!
 				savePersistentLock( false );
 
-				// Server-side master countdown timer to guarantee automatic release
-				QTimer::singleShot( dur * 1000, this, [this]() {
-					if( m_server )
+				// Invalidate any prior timed lock timer before arming a new generation
+				const quint64 gen = ++m_lockGeneration;
+				if( m_timedLockTimer == nullptr )
+				{
+					m_timedLockTimer = new QTimer( this );
+					m_timedLockTimer->setSingleShot( true );
+				}
+				else
+				{
+					m_timedLockTimer->stop();
+					m_timedLockTimer->disconnect( this );
+				}
+
+				connect( m_timedLockTimer, &QTimer::timeout, this, [this, gen]() {
+					if( gen != m_lockGeneration || m_server.isNull() )
 					{
-						vInfo() << "Timed lock focus session elapsed on server. Cleanly unlocking workstation.";
-						savePersistentLock( false );
-						for( const auto& uid : { m_screenLockFeature.uid(), m_freezeScreenFeature.uid(),
-												 m_lockInputDevicesFeature.uid(), m_textLockFeature.uid(),
-												 m_timedLockFeature.uid(), m_unfreezeFeature.uid() } )
-						{
-							if( m_server->featureWorkerManager().isWorkerRunning( uid ) )
-							{
-								m_server->featureWorkerManager().sendMessageToManagedSystemWorker(
-									FeatureMessage{ uid, FeatureCommand::StopLock } );
-								m_server->featureWorkerManager().stopWorker( uid );
-							}
-						}
-						VeyonCore::platform().inputDeviceFunctions().enableInputDevices();
-						VeyonCore::platform().coreFunctions().setSystemUiState( true );
+						return;
 					}
+					vInfo() << "Timed lock focus session elapsed on server. Cleanly unlocking workstation.";
+					savePersistentLock( false );
+					for( const auto& uid : { m_screenLockFeature.uid(), m_freezeScreenFeature.uid(),
+											 m_lockInputDevicesFeature.uid(), m_textLockFeature.uid(),
+											 m_timedLockFeature.uid(), m_unfreezeFeature.uid() } )
+					{
+						if( m_server->featureWorkerManager().isWorkerRunning( uid ) )
+						{
+							m_server->featureWorkerManager().sendMessageToManagedSystemWorker(
+								FeatureMessage{ uid, FeatureCommand::StopLock } );
+							m_server->featureWorkerManager().stopWorker( uid );
+						}
+					}
+					VeyonCore::platform().inputDeviceFunctions().enableInputDevices();
+					VeyonCore::platform().coreFunctions().setSystemUiState( true );
 				});
+				m_timedLockTimer->start( dur * 1000 );
 			}
 			else
 			{
-				// Standard freeze locks are persistent
+				// Standard freeze locks cancel any pending timed-lock timer
+				++m_lockGeneration;
+				if( m_timedLockTimer )
+				{
+					m_timedLockTimer->stop();
+				}
 				savePersistentLock( true, message.featureUid(), lockText, 0 );
 			}
 		}

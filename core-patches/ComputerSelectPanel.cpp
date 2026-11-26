@@ -461,7 +461,8 @@ void ComputerSelectPanel::addLocation()
 void ComputerSelectPanel::removeLocation()
 {
 	auto model = m_computerManager.computerTreeModel();
-	const auto index = ui->treeView->selectionModel()->currentIndex();
+	const auto proxyIndex = ui->treeView->selectionModel()->currentIndex();
+	const auto index = m_filterProxyModel->mapToSource( proxyIndex );
 
 	if( index.isValid() &&
 		model->data( index, NetworkObjectModel::TypeRole ).value<NetworkObject::Type>() == NetworkObject::Type::Location )
