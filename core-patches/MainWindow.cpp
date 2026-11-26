@@ -719,6 +719,7 @@ MainWindow::MainWindow( VeyonMaster &masterCore, QWidget* parent ) :
 		if( on ) {
 			pillOnline->setChecked( false );
 			pillOffline->setChecked( false );
+			ui->computerMonitoringWidget->setFilterOfflineComputers( false );
 			ui->computerMonitoringWidget->setFilterPoweredOnComputers( false );
 			ui->filterPoweredOnComputersButton->setChecked( false );
 		}
@@ -727,6 +728,7 @@ MainWindow::MainWindow( VeyonMaster &masterCore, QWidget* parent ) :
 		if( on ) {
 			pillAll->setChecked( false );
 			pillOffline->setChecked( false );
+			ui->computerMonitoringWidget->setFilterOfflineComputers( false );
 			ui->computerMonitoringWidget->setFilterPoweredOnComputers( true );
 			ui->filterComputersWithLoggedOnUsersButton->setChecked( false );
 		}
@@ -736,6 +738,7 @@ MainWindow::MainWindow( VeyonMaster &masterCore, QWidget* parent ) :
 			pillAll->setChecked( false );
 			pillOnline->setChecked( false );
 			ui->computerMonitoringWidget->setFilterPoweredOnComputers( false );
+			ui->computerMonitoringWidget->setFilterOfflineComputers( true );
 		}
 	} );
 
