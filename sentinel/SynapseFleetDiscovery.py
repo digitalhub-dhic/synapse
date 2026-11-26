@@ -114,12 +114,22 @@ def enroll_computer(name, host, mac="", location=TARGET_LOCATION):
     host_clean = host.strip()
     mac_clean = mac.strip().upper()
 
-    # Pre-check: Ensure this host address does not already exist in networkobjects
+    # Pre-check: Ensure this host address does not already exist in any location
     reg = get_registered_network_objects()
     for existing in reg.get("objects", []):
         if existing.get("host", "").strip().lower() == host_clean.lower():
-            print(f"[SKIP-DUPLICATE] Host {host_clean} already registered as '{existing.get('name')}'. Skipping add.")
+            print(f"[SKIP-DUPLICATE] Host {host_clean} already registered as '{existing.get('name')}' in location {existing.get('parent_uuid')}. Skipping add.")
             return False
+
+    # Never add lab IPs (192.168.1.101 - 192.168.1.140) into BYOD
+    if location == "BYOD" and host_clean.startswith("192.168.1."):
+        try:
+            last_octet = int(host_clean.split(".")[-1])
+            if 101 <= last_octet <= 140 or last_octet in (145, 146, 148, 150):
+                print(f"[SKIP-LAB-IP] Host {host_clean} is a DIGIHUB lab workstation IP. Refusing to add into BYOD.")
+                return False
+        except ValueError:
+            pass
 
     cmd = [CLI_PATH, "networkobjects", "add", "computer", name_clean, host_clean, mac_clean, location]
     try:
@@ -141,10 +151,9 @@ def sync_device(name, current_ip, mac=""):
 def _sync_device_impl(name, current_ip, mac=""):
     """
     Intelligently registers or updates computers without creating duplicates.
-    1. If MAC matches an existing entry, update IP if changed.
-    2. If IP matches an existing entry with the same name, nothing to do.
-    3. If IP matches an existing entry with a stale name, update to correct hostname.
-    4. If completely new, register into TARGET_LOCATION (DIGIHUB).
+    1. If IP is already registered in ANY location, do nothing!
+    2. If MAC matches an existing entry, do nothing unless IP changed.
+    3. If genuinely new device and NOT a lab computer IP, enroll into BYOD.
     """
     mac_clean = mac.strip().upper()
     registered = get_registered_network_objects()
@@ -152,59 +161,31 @@ def _sync_device_impl(name, current_ip, mac=""):
     by_ip = registered["by_ip"]
     by_mac = registered["by_mac"]
 
-    # 1. Check by MAC Address first (strongest hardware identity across DHCP changes)
-    if mac_clean and mac_clean in by_mac:
-        entries = by_mac[mac_clean]
-        for entry in entries:
-            canonical_name = entry["name"]
-            # If standard lab computer (e.g. "computer 01"), preserve its lab number!
-            if canonical_name.lower().startswith("computer ") or canonical_name.lower().startswith("sub "):
-                if entry["host"] != current_ip:
-                    print(f"[LAB-IP-UPDATE] Lab station '{canonical_name}' ({mac_clean}) moved {entry['host']} -> {current_ip}")
-                    remove_object(entry["uuid"])
-                    time.sleep(0.2)
-                    enroll_computer(canonical_name, current_ip, mac_clean, TARGET_LOCATION)
-                return True
-            else:
-                # Named workstation (e.g. READINGHUB, CIVIL)
-                preferred_name = name if name and not name.startswith("BYOD-") else canonical_name
-                if entry["host"] != current_ip or entry["name"] != preferred_name:
-                    print(f"[DEVICE-SYNC] Updating '{preferred_name}' ({mac_clean}) IP: {entry['host']} -> {current_ip}")
-                    remove_object(entry["uuid"])
-                    time.sleep(0.2)
-                    enroll_computer(preferred_name, current_ip, mac_clean, TARGET_LOCATION)
-                return True
-
-    # 2. Check if IP is already registered
+    # 1. Check if IP is ALREADY registered anywhere in the fleet
     if current_ip in by_ip:
-        entries = by_ip[current_ip]
-        for entry in entries:
-            # If already cleanly registered under this name or as a lab computer
-            if entry["name"].lower() == name.lower() or entry["name"].lower().startswith("computer "):
-                return False
-            # If registered under a generic/dummy name (e.g. DESKTOP-111111KOOOIP), replace with real hostname
-            if name and not name.startswith("BYOD-"):
-                print(f"[RENAME-STALE] Replacing stale entry '{entry['name']}' with real hostname '{name}' @ {current_ip}")
-                remove_object(entry["uuid"])
-                time.sleep(0.2)
-                enroll_computer(name, current_ip, mac_clean, TARGET_LOCATION)
-                return True
+        # IP already exists in directory - never duplicate!
+        return False
+
+    # 2. Check if MAC is already registered
+    if mac_clean and mac_clean in by_mac:
+        # Hardware already registered - never create a duplicate entry
         return False
 
     # 3. Check by Name
     key = name.lower()
     if key in by_name:
-        entries = by_name[key]
-        for entry in entries:
-            if entry["host"] != current_ip:
-                print(f"[IP-UPDATE] Computer '{name}' IP moved from {entry['host']} -> {current_ip}. Updating...")
-                remove_object(entry["uuid"])
-                time.sleep(0.2)
-                enroll_computer(name, current_ip, mac_clean or entry.get("mac", ""), TARGET_LOCATION)
-                return True
         return False
 
-    # 4. Genuinely new unknown device (new workstation / laptop)
+    # 4. Genuinely new unknown external device (check that it's not in lab static range)
+    if current_ip.startswith("192.168.1."):
+        try:
+            last_octet = int(current_ip.split(".")[-1])
+            if 101 <= last_octet <= 140 or last_octet in (145, 146, 148, 150):
+                print(f"[SKIP-LAB] IP {current_ip} belongs to DIGIHUB lab range. Skipping BYOD enrollment.")
+                return False
+        except ValueError:
+            pass
+
     print(f"[NEW-DEVICE] Enrolling previously unseen device '{name}' @ {current_ip} into {TARGET_LOCATION}...")
     enroll_computer(name, current_ip, mac_clean, TARGET_LOCATION)
     return True
