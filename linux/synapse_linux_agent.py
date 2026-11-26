@@ -89,8 +89,32 @@ def get_primary_mac():
         logging.debug(f"Error reading MAC: {e}")
     return "UNKNOWN"
 
+def get_active_gui_session():
+    """Return (user, uid, session_type, display) for the active desktop session."""
+    try:
+        out = subprocess.check_output(["loginctl", "list-sessions", "--no-legend"], text=True, stderr=subprocess.DEVNULL)
+        for line in out.strip().splitlines():
+            parts = line.split()
+            if len(parts) >= 3:
+                sid, uid, user = parts[0], parts[1], parts[2]
+                if user not in ("root", "gdm", "lightdm", "sddm"):
+                    stype = "x11"
+                    display = os.environ.get("DISPLAY", ":0")
+                    try:
+                        info = subprocess.check_output(["loginctl", "show-session", sid, "-p", "Type", "-p", "Display"], text=True, stderr=subprocess.DEVNULL)
+                        for iline in info.splitlines():
+                            if iline.startswith("Type="):
+                                stype = iline.split("=", 1)[1].strip() or "x11"
+                            elif iline.startswith("Display=") and iline.split("=", 1)[1].strip():
+                                display = iline.split("=", 1)[1].strip()
+                    except Exception:
+                        pass
+                    return user, uid, stype, display
+    except Exception:
+        pass
+    return get_active_gui_user(), "", "x11", os.environ.get("DISPLAY", ":0")
+
 def get_active_gui_user():
-    """Detect the real logged-in desktop GUI user (not root service account)."""
     try:
         # 1. Try loginctl
         out = subprocess.check_output(["loginctl", "list-sessions", "--no-legend"], text=True, stderr=subprocess.DEVNULL)
@@ -251,17 +275,20 @@ class SynapseLinuxClient:
             logging.warning(f"Rejected unsafe URL scheme: {url_str}")
             return
         logging.info(f"Opening URL: {url_str}")
-        user = get_active_gui_user()
-        display = os.environ.get("DISPLAY", ":0")
+        user, uid, _stype, display = get_active_gui_session()
         env = os.environ.copy()
         env["DISPLAY"] = display
+        if uid:
+            env["XDG_RUNTIME_DIR"] = f"/run/user/{uid}"
+            env["DBUS_SESSION_BUS_ADDRESS"] = f"unix:path=/run/user/{uid}/bus"
 
         try:
             # Run as GUI user using su or runuser if we are root
-            if user and user != "root":
+            if user and user not in ("root", "Unassigned"):
                 safe_url = shlex.quote(url_str)
                 safe_display = shlex.quote(display)
-                subprocess.Popen(["su", "-", user, "-c", f"DISPLAY={safe_display} xdg-open {safe_url}"], stderr=subprocess.DEVNULL)
+                dbus_prefix = f"XDG_RUNTIME_DIR=/run/user/{uid} DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/{uid}/bus " if uid else ""
+                subprocess.Popen(["su", "-", user, "-c", f"{dbus_prefix}DISPLAY={safe_display} xdg-open {safe_url}"], stderr=subprocess.DEVNULL)
             else:
                 subprocess.Popen(["xdg-open", url_str], env=env, stderr=subprocess.DEVNULL)
         except Exception as e:

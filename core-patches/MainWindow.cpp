@@ -232,7 +232,7 @@ MainWindow::MainWindow( VeyonMaster &masterCore, QWidget* parent ) :
 				offlineCount++;
 				if( offlineCount <= 8 )
 				{
-					const QString name = ci->computerName().isEmpty() ? ci->computer().hostAddress() : ci->computerName();
+					const QString name = ci->computerName().isEmpty() ? ci->computer().hostAddress().toString() : ci->computerName();
 					menu->addAction( tr( "Offline: %1" ).arg( name ) );
 				}
 			}
