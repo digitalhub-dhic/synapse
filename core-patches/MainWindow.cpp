@@ -974,6 +974,16 @@ MainWindow::MainWindow( VeyonMaster &masterCore, QWidget* parent ) :
 			}
 			bDot->setVisible( offline > 0 || hasAiAlerts );
 		}
+		if (auto* rDot = findChild<QLabel*>( QStringLiteral("readyDot") ))
+		{
+			rDot->setStyleSheet( online > 0
+				? QStringLiteral("color: #22C55E; font-size: 11px;")
+				: QStringLiteral("color: #F59E0B; font-size: 11px;") );
+		}
+		if (auto* rText = findChild<QLabel*>( QStringLiteral("readyText") ))
+		{
+			rText->setText( tr( "Fleet: %1/%2 Online" ).arg( online ).arg( total ) );
+		}
 		countBadge->setText( tr( "%1 Computers  •  %2 Online  •  %3 Offline  •  %4 Idle" ).arg( total ).arg( online ).arg( offline ).arg( idle ) );
 	};
 	connect( countsTimer, &QTimer::timeout, this, updateCounts );

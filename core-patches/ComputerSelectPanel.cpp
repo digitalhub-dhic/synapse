@@ -179,11 +179,11 @@ public:
 		}
 		else if( checkState == Qt::PartiallyChecked )
 		{
-			painter->setBrush( QColor( 30, 41, 59 ) );
-			painter->setPen( QColor( 59, 130, 246 ) );
+			painter->setBrush( QColor( 23, 37, 84 ) );
+			painter->setPen( QPen( QColor( 96, 165, 250 ), 1.4 ) );
 			painter->drawRoundedRect( cbRect, 3, 3 );
 
-			painter->setPen( QPen( QColor( 96, 165, 250 ), 2, Qt::SolidLine, Qt::RoundCap ) );
+			painter->setPen( QPen( Qt::white, 2.2, Qt::SolidLine, Qt::RoundCap ) );
 			painter->drawLine( cbRect.left() + 3, cbRect.top() + 7, cbRect.right() - 3, cbRect.top() + 7 );
 		}
 		else
