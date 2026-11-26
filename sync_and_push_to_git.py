@@ -67,6 +67,10 @@ SYNC_MAPPINGS = [
      os.path.join(REPO_DIR, r"core-patches\MainWindow.cpp")),
     (os.path.join(BUILD_SRC_ROOT, r"master\src\MainWindow.h"),
      os.path.join(REPO_DIR, r"core-patches\MainWindow.h")),
+    (os.path.join(BUILD_SRC_ROOT, r"master\src\MainToolBar.cpp"),
+     os.path.join(REPO_DIR, r"core-patches\MainToolBar.cpp")),
+    (os.path.join(BUILD_SRC_ROOT, r"master\src\MainToolBar.h"),
+     os.path.join(REPO_DIR, r"core-patches\MainToolBar.h")),
 
     # Windows Platform Plugin
     (os.path.join(BUILD_SRC_ROOT, r"plugins\platform\windows\WindowsInputDeviceFunctions.cpp"),

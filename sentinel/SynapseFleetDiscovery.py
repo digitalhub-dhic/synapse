@@ -97,6 +97,11 @@ def remove_object(identifier):
         return
     try:
         subprocess.run([CLI_PATH, "networkobjects", "remove", identifier], capture_output=True, timeout=8)
+        clean_id = identifier.strip("{}")
+        if clean_id != identifier:
+            subprocess.run([CLI_PATH, "networkobjects", "remove", clean_id], capture_output=True, timeout=8)
+        else:
+            subprocess.run([CLI_PATH, "networkobjects", "remove", f"{{{clean_id}}}"], capture_output=True, timeout=8)
     except Exception as e:
         print(f"[ERR] Remove object {identifier} failed: {e}")
 
@@ -108,6 +113,13 @@ def enroll_computer(name, host, mac="", location=TARGET_LOCATION):
     name_clean = name.strip()
     host_clean = host.strip()
     mac_clean = mac.strip().upper()
+
+    # Pre-check: Ensure this host address does not already exist in networkobjects
+    reg = get_registered_network_objects()
+    for existing in reg.get("objects", []):
+        if existing.get("host", "").strip().lower() == host_clean.lower():
+            print(f"[SKIP-DUPLICATE] Host {host_clean} already registered as '{existing.get('name')}'. Skipping add.")
+            return False
 
     cmd = [CLI_PATH, "networkobjects", "add", "computer", name_clean, host_clean, mac_clean, location]
     try:
