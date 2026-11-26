@@ -116,14 +116,14 @@ MainWindow::MainWindow( VeyonMaster &masterCore, QWidget* parent ) :
 	m_headerToolBar->setObjectName( QStringLiteral("headerToolBar") );
 	m_headerToolBar->setMovable( false );
 	m_headerToolBar->setFloatable( false );
-	m_headerToolBar->setFixedHeight( 56 );
+	m_headerToolBar->setFixedHeight( 46 );
 	addToolBar( Qt::TopToolBarArea, m_headerToolBar );
 	addToolBarBreak( Qt::TopToolBarArea );
 
 	auto* logo = new QLabel( m_headerToolBar );
-	logo->setFixedSize( 32, 32 );
+	logo->setFixedSize( 30, 30 );
 	logo->setAlignment( Qt::AlignCenter );
-	QPixmap logoPix( 22, 22 );
+	QPixmap logoPix( 20, 20 );
 	logoPix.fill( Qt::transparent );
 	{
 		QPainter lp( &logoPix );
@@ -131,8 +131,8 @@ MainWindow::MainWindow( VeyonMaster &masterCore, QWidget* parent ) :
 		lp.setBrush( Qt::white );
 		lp.setPen( Qt::NoPen );
 		QPolygonF bolt;
-		bolt << QPointF( 11, 2 ) << QPointF( 4, 10 ) << QPointF( 9, 10 )
-		     << QPointF( 8, 18 ) << QPointF( 16, 8 ) << QPointF( 11, 8 );
+		bolt << QPointF( 10, 2 ) << QPointF( 4, 10 ) << QPointF( 9, 10 )
+		     << QPointF( 8, 17 ) << QPointF( 15, 8 ) << QPointF( 10, 8 );
 		lp.drawPolygon( bolt );
 	}
 	logo->setPixmap( logoPix );
@@ -143,12 +143,13 @@ MainWindow::MainWindow( VeyonMaster &masterCore, QWidget* parent ) :
 
 	auto* titleWidget = new QWidget( m_headerToolBar );
 	auto* titleLayout = new QVBoxLayout( titleWidget );
-	titleLayout->setContentsMargins( 8, 0, 0, 0 );
-	titleLayout->setSpacing( 2 );
-	auto* appTitle = new QLabel( QStringLiteral("Computer Monitoring"), titleWidget );
-	appTitle->setStyleSheet( QStringLiteral("font-size: 14px; font-weight: 700; color: #FFFFFF; letter-spacing: 0.2px;") );
-	auto* appSub = new QLabel( QStringLiteral("Manage  •  Monitor  •  Control"), titleWidget );
-	appSub->setStyleSheet( QStringLiteral("font-size: 10px; font-weight: 500; color: #8B9CB5; letter-spacing: 0.2px;") );
+	titleLayout->setContentsMargins( 8, 2, 0, 2 );
+	titleLayout->setSpacing( 1 );
+	auto* appTitle = new QLabel( QStringLiteral("Synapse Command"), titleWidget );
+	appTitle->setMinimumHeight( 18 );
+	appTitle->setStyleSheet( QStringLiteral("font-size: 13px; font-weight: 700; color: #F1F5F9; letter-spacing: 0.2px;") );
+	auto* appSub = new QLabel( QStringLiteral("Fleet Monitoring  •  Classroom Control"), titleWidget );
+	appSub->setStyleSheet( QStringLiteral("font-size: 10px; font-weight: 500; color: #94A3B8; letter-spacing: 0.2px;") );
 	titleLayout->addWidget( appTitle );
 	titleLayout->addWidget( appSub );
 
