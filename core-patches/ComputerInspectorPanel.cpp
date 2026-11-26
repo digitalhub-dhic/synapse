@@ -288,7 +288,7 @@ void ComputerInspectorPanel::updateQuickStats()
 	{
 		const auto& sel = m_selectedInterfaces.first();
 		if( m_detailTargetVal ) m_detailTargetVal->setText( sel->computerName().isEmpty() ? tr("Unknown") : sel->computerName() );
-		if( m_detailIpVal ) m_detailIpVal->setText( sel->computer().hostAddress() );
+		if( m_detailIpVal ) m_detailIpVal->setText( sel->computer().hostAddress().toString() );
 		if( m_detailUserVal ) m_detailUserVal->setText( sel->userLoginName().isEmpty() ? tr("None (Logon Screen)") : sel->userLoginName() );
 		if( m_detailStateVal ) m_detailStateVal->setText( sel->state() == ComputerControlInterface::State::Connected ? tr("Online (VNC Live)") : tr("Offline") );
 		if( m_detailScreensVal ) m_detailScreensVal->setText( QString::number( qMax( 1, sel->screens().size() ) ) );
