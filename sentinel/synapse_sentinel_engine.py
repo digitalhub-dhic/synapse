@@ -49,8 +49,9 @@ console.setLevel(logging.INFO)
 logging.getLogger().addHandler(console)
 
 DEFAULT_CONFIG = {
-    "enabled": True,
+    "enabled": False,  # Fail closed; monitoring requires an explicit teacher change.
     "auto_freeze": False,  # Safe default: alert & save evidence first; teacher freezes with 1 click
+    "legacy_heuristics_enabled": False,
     "scan_interval_seconds": 2.0,
     "confirmation_cycles": 2,  # Must be seen across 2 checks to avoid false positives
     "lock_cooldown_seconds": 30,  # Don't re-lock host within 30s
@@ -171,6 +172,10 @@ class SynapseAISentinel:
 
     def lock_computer(self, name, ip, reason, evidence_path):
         """Locks ONLY the offending computer."""
+        if not self.config.get("auto_freeze", False):
+            logging.warning("Sentinel lock blocked because auto_freeze is disabled.")
+            return False
+
         now = time.time()
         # Cooldown check
         with self.data_lock:
@@ -342,6 +347,10 @@ class SynapseAISentinel:
                     return True, f"AI review candidate: {best_label}", metrics
             except Exception as e:
                 logging.debug(f"ONNX inference fallback: {e}")
+
+        # Legacy motion/color heuristics are disabled unless explicitly enabled.
+        if not self.config.get("legacy_heuristics_enabled", False):
+            return False, None, metrics
 
         # --- A. SPORTS DETECTOR (Fullscreen & Inline/Thumbnail/PiP Detection) ---
         if targets.get("sports_streams", True):

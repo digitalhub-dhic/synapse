@@ -116,12 +116,12 @@ MainWindow::MainWindow( VeyonMaster &masterCore, QWidget* parent ) :
 	m_headerToolBar->setObjectName( QStringLiteral("headerToolBar") );
 	m_headerToolBar->setMovable( false );
 	m_headerToolBar->setFloatable( false );
-	m_headerToolBar->setFixedHeight( 46 );
+	m_headerToolBar->setFixedHeight( 52 );
 	addToolBar( Qt::TopToolBarArea, m_headerToolBar );
 	addToolBarBreak( Qt::TopToolBarArea );
 
 	auto* logo = new QLabel( m_headerToolBar );
-	logo->setFixedSize( 30, 30 );
+	logo->setFixedSize( 32, 32 );
 	logo->setAlignment( Qt::AlignCenter );
 	QPixmap logoPix( 20, 20 );
 	logoPix.fill( Qt::transparent );
@@ -142,14 +142,17 @@ MainWindow::MainWindow( VeyonMaster &masterCore, QWidget* parent ) :
 	) );
 
 	auto* titleWidget = new QWidget( m_headerToolBar );
+	titleWidget->setMinimumSize( 240, 40 );
+	titleWidget->setSizePolicy( QSizePolicy::Preferred, QSizePolicy::Fixed );
 	auto* titleLayout = new QVBoxLayout( titleWidget );
-	titleLayout->setContentsMargins( 8, 2, 0, 2 );
-	titleLayout->setSpacing( 1 );
+	titleLayout->setContentsMargins( 10, 3, 0, 3 );
+	titleLayout->setSpacing( 2 );
 	auto* appTitle = new QLabel( QStringLiteral("Synapse Command"), titleWidget );
-	appTitle->setMinimumHeight( 18 );
-	appTitle->setStyleSheet( QStringLiteral("font-size: 13px; font-weight: 700; color: #F1F5F9; letter-spacing: 0.2px;") );
+	appTitle->setFixedHeight( 18 );
+	appTitle->setStyleSheet( QStringLiteral("font-size: 13px; font-weight: 700; color: #F1F5F9; letter-spacing: 0.2px; background: transparent;") );
 	auto* appSub = new QLabel( QStringLiteral("Fleet Monitoring  •  Classroom Control"), titleWidget );
-	appSub->setStyleSheet( QStringLiteral("font-size: 10px; font-weight: 500; color: #94A3B8; letter-spacing: 0.2px;") );
+	appSub->setFixedHeight( 14 );
+	appSub->setStyleSheet( QStringLiteral("font-size: 10px; font-weight: 500; color: #94A3B8; letter-spacing: 0.2px; background: transparent;") );
 	titleLayout->addWidget( appTitle );
 	titleLayout->addWidget( appSub );
 
