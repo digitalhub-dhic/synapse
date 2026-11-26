@@ -412,16 +412,19 @@ QSize ComputerItemDelegate::sizeHint(const QStyleOptionViewItem& option, const Q
 	Q_UNUSED(index);
 
 	int w = 240;
-	const auto master = VeyonCore::instance()->findChild<VeyonMaster*>();
-	if (master)
+	if (!m_master)
 	{
-		w = master->computerControlListModel().computerScreenSize().width();
+		m_master = VeyonCore::instance()->findChild<VeyonMaster*>();
+	}
+	if (m_master)
+	{
+		w = m_master->computerControlListModel().computerScreenSize().width();
 	}
 	if (w <= 0)
 	{
 		w = 230;
 	}
-	w = qBound(180, w, 360);
+	w = qBound(MinimumComputerScreenSize, w, MaximumComputerScreenSize);
 	const int h = int((w - 12) * 9.0 / 16.0) + 64;
 	return QSize(w, h);
 }
