@@ -264,7 +264,7 @@ public:
 		QRect textRect( indent, option.rect.top(), qMax( 10, rightLimit - indent ), option.rect.height() );
 		QFont textFont( QStringLiteral("Segoe UI"), 10, isSelected ? QFont::DemiBold : QFont::Medium );
 		painter->setFont( textFont );
-		painter->setPen( isSelected ? QColor(37, 99, 235) : QColor(230, 237, 243) );
+		painter->setPen( isSelected ? QColor(248, 250, 252) : QColor(230, 237, 243) );
 		painter->drawText( textRect, Qt::AlignVCenter | Qt::AlignLeft, painter->fontMetrics().elidedText( text, Qt::ElideRight, textRect.width() ) );
 
 		painter->restore();

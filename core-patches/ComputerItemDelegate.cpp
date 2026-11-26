@@ -64,14 +64,14 @@ void ComputerItemDelegate::paint(QPainter* painter, const QStyleOptionViewItem& 
 
 	if (isSelected)
 	{
-		painter->fillPath(cardPath, QColor(23, 52, 36));
-		painter->setPen(QPen(QColor(37, 99, 235), 2.0));
+		painter->fillPath(cardPath, QColor(30, 41, 59));
+		painter->setPen(QPen(QColor(56, 189, 248), 1.5));
 		painter->drawPath(cardPath);
 	}
 	else if (isHovered)
 	{
 		painter->fillPath(cardPath, QColor(31, 38, 48));
-		painter->setPen(QPen(QColor(37, 99, 235), 1.5));
+		painter->setPen(QPen(QColor(56, 189, 248), 1.0));
 		painter->drawPath(cardPath);
 	}
 	else
