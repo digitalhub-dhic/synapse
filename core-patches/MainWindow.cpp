@@ -807,6 +807,8 @@ MainWindow::MainWindow( VeyonMaster &masterCore, QWidget* parent ) :
 	densityGroup->addButton( btnLive, 320 );
 
 	connect( densityGroup, &QButtonGroup::idClicked, this, [this]( int size ) {
+		ui->autoAdjustComputerIconSizeButton->setChecked( false );
+		ui->computerMonitoringWidget->setAutoAdjustIconSize( false );
 		ui->computerMonitoringWidget->setComputerScreenSize( size );
 	} );
 
@@ -815,11 +817,16 @@ MainWindow::MainWindow( VeyonMaster &masterCore, QWidget* parent ) :
 	densityLayout->addWidget( btnLive );
 	subHeaderLayout->addWidget( densityWidget );
 
+	auto* countsTimer = new QTimer( this );
+	countsTimer->setSingleShot( true );
+	countsTimer->setInterval( 250 );
+
 	auto updateCounts = [this, countBadge]() {
 		const auto* model = ui->computerMonitoringWidget->model();
 		const int total = model ? model->rowCount() : 0;
 		int online = 0;
 		int offline = 0;
+		int idle = 0;
 		if (model)
 		{
 			for (int r = 0; r < total; ++r)
@@ -829,6 +836,10 @@ MainWindow::MainWindow( VeyonMaster &masterCore, QWidget* parent ) :
 				if (ci && ci->state() == ComputerControlInterface::State::Connected)
 				{
 					online++;
+					if (ci->userLoginName().trimmed().isEmpty())
+					{
+						idle++;
+					}
 				}
 				else
 				{
@@ -836,15 +847,22 @@ MainWindow::MainWindow( VeyonMaster &masterCore, QWidget* parent ) :
 				}
 			}
 		}
-		countBadge->setText( tr( "%1 Computers  •  %2 Online  •  %3 Offline  •  0 Idle" ).arg( total ).arg( online ).arg( offline ) );
+		countBadge->setText( tr( "%1 Computers  •  %2 Online  •  %3 Offline  •  %4 Idle" ).arg( total ).arg( online ).arg( offline ).arg( idle ) );
+	};
+	connect( countsTimer, &QTimer::timeout, this, updateCounts );
+	auto scheduleCountsUpdate = [countsTimer]() {
+		if( !countsTimer->isActive() )
+		{
+			countsTimer->start();
+		}
 	};
 	updateCounts();
 	if (ui->computerMonitoringWidget->model())
 	{
-		connect( ui->computerMonitoringWidget->model(), &QAbstractItemModel::rowsInserted, this, updateCounts );
-		connect( ui->computerMonitoringWidget->model(), &QAbstractItemModel::rowsRemoved, this, updateCounts );
-		connect( ui->computerMonitoringWidget->model(), &QAbstractItemModel::modelReset, this, updateCounts );
-		connect( ui->computerMonitoringWidget->model(), &QAbstractItemModel::dataChanged, this, updateCounts );
+		connect( ui->computerMonitoringWidget->model(), &QAbstractItemModel::rowsInserted, this, scheduleCountsUpdate );
+		connect( ui->computerMonitoringWidget->model(), &QAbstractItemModel::rowsRemoved, this, scheduleCountsUpdate );
+		connect( ui->computerMonitoringWidget->model(), &QAbstractItemModel::modelReset, this, scheduleCountsUpdate );
+		connect( ui->computerMonitoringWidget->model(), &QAbstractItemModel::dataChanged, this, scheduleCountsUpdate );
 	}
 
 	monitoringLayout->addWidget( ui->computerMonitoringWidget );

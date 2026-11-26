@@ -1857,6 +1857,18 @@ void ComputerInspectorPanel::executeFeatureByName( const QString& featureName, c
 		if( feat.name().compare( canonicalName, Qt::CaseInsensitive ) == 0 ||
 			feat.displayName().compare( canonicalName, Qt::CaseInsensitive ) == 0 )
 		{
+			if( canonicalName.compare( QLatin1String("reboot"), Qt::CaseInsensitive ) == 0 ||
+				canonicalName.compare( QLatin1String("powerdown"), Qt::CaseInsensitive ) == 0 ||
+				canonicalName.compare( QLatin1String("UserLogoff"), Qt::CaseInsensitive ) == 0 )
+			{
+				if( QMessageBox::question( this, tr( "Confirm Action" ),
+										   tr( "Are you sure you want to execute '%1' on %2 computer(s)?" )
+										   .arg( feat.displayName() ).arg( finalTargets.size() ),
+										   QMessageBox::Yes | QMessageBox::No, QMessageBox::No ) != QMessageBox::Yes )
+				{
+					return;
+				}
+			}
 			VeyonCore::featureManager().startFeature( m_master, feat, finalTargets );
 			return;
 		}
