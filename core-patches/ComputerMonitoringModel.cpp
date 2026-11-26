@@ -120,6 +120,31 @@ bool ComputerMonitoringModel::filterAcceptsRow( int sourceRow, const QModelIndex
 		return false;
 	}
 
+	// Workstation Deduplication:
+	// Ensure that no physical computer / host address is ever displayed more than once in the monitoring grid
+	const auto curCtrl = sourceModel()->data( sourceModel()->index( sourceRow, 0, sourceParent ),
+											  ComputerControlListModel::ControlInterfaceRole ).value<ComputerControlInterface::Pointer>();
+	if( curCtrl )
+	{
+		const QString curHost = curCtrl->computer().hostAddress().toString().trimmed().toLower();
+		if( !curHost.isEmpty() )
+		{
+			for( int r = 0; r < sourceRow; ++r )
+			{
+				const auto prevCtrl = sourceModel()->data( sourceModel()->index( r, 0, sourceParent ),
+														   ComputerControlListModel::ControlInterfaceRole ).value<ComputerControlInterface::Pointer>();
+				if( prevCtrl )
+				{
+					const QString prevHost = prevCtrl->computer().hostAddress().toString().trimmed().toLower();
+					if( prevHost == curHost )
+					{
+						return false; // Deduplicate: Host is already displayed by an earlier row
+					}
+				}
+			}
+		}
+	}
+
 	return QSortFilterProxyModel::filterAcceptsRow( sourceRow, sourceParent );
 }
 
