@@ -90,11 +90,17 @@ public:
 					return true;
 				}
 
-				// Clicking checkbox or item label toggles check state
-				const auto curState = model->data( index, Qt::CheckStateRole ).toInt();
-				const auto newState = ( curState == Qt::Checked ) ? Qt::Unchecked : Qt::Checked;
-				model->setData( index, newState, Qt::CheckStateRole );
-				return true;
+				// Clicking checkbox strictly toggles check state
+				if( cbRect.contains( me->pos() ) )
+				{
+					const auto curState = model->data( index, Qt::CheckStateRole ).toInt();
+					const auto newState = ( curState == Qt::Checked ) ? Qt::Unchecked : Qt::Checked;
+					model->setData( index, newState, Qt::CheckStateRole );
+					return true;
+				}
+
+				// Clicking the label/row allows normal item selection without toggling checkbox
+				return QStyledItemDelegate::editorEvent( event, model, option, index );
 			}
 		}
 		return QStyledItemDelegate::editorEvent( event, model, option, index );
@@ -118,15 +124,15 @@ public:
 		// 1. Draw rounded background pill
 		if( isSelected )
 		{
-			painter->setBrush( QColor(23, 52, 36) );
-			painter->setPen( Qt::NoPen );
-			painter->drawRoundedRect( rowRect, 8, 8 );
+			painter->setBrush( QColor(30, 41, 59) );
+			painter->setPen( QPen( QColor(56, 189, 248), 1 ) );
+			painter->drawRoundedRect( rowRect, 6, 6 );
 		}
 		else if( isHovered )
 		{
 			painter->setBrush( QColor(31, 38, 48) );
 			painter->setPen( Qt::NoPen );
-			painter->drawRoundedRect( rowRect, 8, 8 );
+			painter->drawRoundedRect( rowRect, 6, 6 );
 		}
 
 		// Calculate indentation level
