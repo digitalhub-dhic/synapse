@@ -325,6 +325,7 @@ ComputerSelectPanel::ComputerSelectPanel( ComputerManager& computerManager, QWid
 	if( auto* vLayout = qobject_cast<QVBoxLayout*>( layout() ) )
 	{
 		vLayout->insertWidget( 0, selectHeader );
+		vLayout->insertWidget( 1, ui->filterLineEdit );
 	}
 
 	ui->filterLineEdit->setPlaceholderText( tr( "Search computers..." ) );
