@@ -1,47 +1,52 @@
 """
-Synapse Hardened BYOD Wi-Fi Guard - Enterprise Bulletproof Edition
+Synapse BYOD Campus/Personal Mode Controller - Non-Blocking Edition
+Replaces aggressive Wi-Fi OS lockdown with Campus Mode vs. Personal Mode switching:
+- Campus Mode: When on campus (or forced by policy), ensures Tailscale + DigiAgentService
+  supervision are active and reports tailscale_node_id + mode telemetry via UDP beacon.
+- Personal Mode: When off-campus / Wi-Fi disconnected, paused, or revoked, stops
+  DigiAgentService supervision so the student's personal laptop remains 100% usable
+  offline and at home without any OS/keyboard lockdown.
 """
 
 import os
 import sys
+import json
 import time
+import hmac
+import uuid
 import socket
+import hashlib
+import ctypes
 import subprocess
 import threading
-import tempfile
-import ctypes
-from ctypes import wintypes
-import tkinter as tk
-from tkinter import ttk
-
-import hmac
-import hashlib
 
 # Salted SHA-256 hash of Teacher Master Password with constant-time verification
 PASSWORD_SALT = b"SynapseEnterpriseSalt2026"
 PASSWORD_HASH = "efa0f57bdc9955b979a271903c7ae1c79272c1298df1c17d10c929c30860c33d"
 
+LOG_FILE = r"C:\ProgramData\DigiAgent\guard.log"
+CONFIG_FILE = r"C:\ProgramData\DigiAgent\byod_policy.json"
+STATE_FILE = r"C:\ProgramData\DigiAgent\byod_mode_state.json"
+
+CLASSROOM_SERVER = "192.168.1.150"
+TAILSCALE_SERVER = "100.99.161.43"
+BEACON_UDP_PORT = 11105
+DIGIAGENT_SERVICE = "DigiAgentService"
+
+MODE_CAMPUS = "campus"
+MODE_PERSONAL = "personal"
+MODE_PAUSED = "paused"
+MODE_REVOKED = "revoked"
+
+
 def verify_master_password(candidate: str) -> bool:
     if not candidate:
         return False
-    cand_hash = hashlib.sha256(PASSWORD_SALT + candidate.encode('utf-8')).hexdigest()
+    cand_hash = hashlib.sha256(PASSWORD_SALT + candidate.encode("utf-8")).hexdigest()
     return hmac.compare_digest(cand_hash, PASSWORD_HASH)
 
-LOG_FILE = r"C:\ProgramData\DigiAgent\guard.log"
-CONFIG_FILE = r"C:\ProgramData\DigiAgent\byod_policy.json"
-CLASSROOM_SERVER = "192.168.1.150"
-TAILSCALE_SERVER = "100.99.161.43"
 
-user32 = ctypes.windll.user32
-kernel32 = ctypes.windll.kernel32
-
-# Single-Instance Enforcement: Prevents duplicate guard processes
-_MUTEX_NAME = "Global\\SynapseBYODGuard_SingleInstance_Mutex"
-_mutex_handle = kernel32.CreateMutexW(None, False, _MUTEX_NAME)
-if kernel32.GetLastError() == 183:  # ERROR_ALREADY_EXISTS
-    sys.exit(0)
-
-def log(msg):
+def log(msg: str) -> None:
     ts = time.strftime("%Y-%m-%d %H:%M:%S")
     entry = f"[{ts}] {msg}"
     print(entry, flush=True)
@@ -52,633 +57,354 @@ def log(msg):
     except Exception:
         pass
 
-# Low-level hook constants & structures
-WH_KEYBOARD_LL = 13
-WM_KEYDOWN = 0x0100
-WM_KEYUP = 0x0101
-WM_SYSKEYDOWN = 0x0104
-WM_SYSKEYUP = 0x0105
 
-VK_TAB = 0x09
-VK_ESCAPE = 0x1B
-VK_SPACE = 0x20
-VK_F4 = 0x73
-VK_LWIN = 0x5B
-VK_RWIN = 0x5C
-
-class KBDLLHOOKSTRUCT(ctypes.Structure):
-    _fields_ = [
-        ('vkCode', wintypes.DWORD),
-        ('scanCode', wintypes.DWORD),
-        ('flags', wintypes.DWORD),
-        ('time', wintypes.DWORD),
-        ('dwExtraInfo', ctypes.c_size_t),
-    ]
-
-HOOKPROC = ctypes.WINFUNCTYPE(ctypes.c_long, ctypes.c_int, wintypes.WPARAM, wintypes.LPARAM)
-
-# Screen metrics
-SM_XVIRTUALSCREEN = 76
-SM_YVIRTUALSCREEN = 77
-SM_CXVIRTUALSCREEN = 78
-SM_CYVIRTUALSCREEN = 79
-
-HWND_TOPMOST = -1
-SWP_SHOWWINDOW = 0x0040
-SW_HIDE = 0
-SW_SHOW = 5
-
-def attach_to_interactive_desktop():
-    """Attaches process and thread to WinSta0\\Default to guarantee interactive GUI without leaking handles."""
+def clear_legacy_lock_policies() -> None:
+    """Clears any leftover Task Manager / Taskbar registry locks from legacy BYODGuard."""
     try:
-        hwinsta = user32.OpenWindowStationW("WinSta0", False, 0x037F)
-        if hwinsta:
-            user32.SetProcessWindowStation(hwinsta)
-            user32.CloseWindowStation(hwinsta)
-        hdesk = user32.OpenDesktopW("Default", 0, False, 0x01FF)
-        if hdesk:
-            user32.SetThreadDesktop(hdesk)
-            user32.CloseDesktop(hdesk)
+        subprocess.run(
+            [
+                "reg", "add",
+                r"HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\System",
+                "/v", "DisableTaskMgr", "/t", "REG_DWORD", "/d", "0", "/f",
+            ],
+            capture_output=True, creationflags=0x08000000, timeout=3,
+        )
+        subprocess.run(
+            [
+                "reg", "add",
+                r"HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced",
+                "/v", "ShowTaskViewButton", "/t", "REG_DWORD", "/d", "1", "/f",
+            ],
+            capture_output=True, creationflags=0x08000000, timeout=3,
+        )
     except Exception as e:
-        log(f"attach_to_interactive_desktop error: {e}")
+        log(f"clear_legacy_lock_policies warning: {e}")
 
-def is_wifi_interface_connected():
-    """Checks if any Wi-Fi interface is actively in 'connected' state."""
+
+def load_policy() -> dict:
+    """Loads byod_policy.json; supports legacy {'released': true} and pause/revoke/forced_mode."""
+    default_policy = {
+        "released": False,
+        "paused": False,
+        "revoked": False,
+        "forced_mode": None,  # None | "campus" | "personal"
+    }
+    if not os.path.exists(CONFIG_FILE):
+        return default_policy
+    try:
+        with open(CONFIG_FILE, "r", encoding="utf-8") as f:
+            raw = json.load(f)
+        if isinstance(raw, dict):
+            default_policy.update(raw)
+    except Exception as e:
+        log(f"load_policy error: {e}")
+    return default_policy
+
+
+def save_policy(policy: dict) -> None:
+    try:
+        os.makedirs(os.path.dirname(CONFIG_FILE), exist_ok=True)
+        tmp = CONFIG_FILE + ".tmp"
+        with open(tmp, "w", encoding="utf-8") as f:
+            json.dump(policy, f, indent=2)
+        os.replace(tmp, CONFIG_FILE)
+    except Exception as e:
+        log(f"save_policy error: {e}")
+
+
+def get_tailscale_identity() -> dict:
+    """Returns {'tailscale_node_id': str, 'tailscale_ip': str, 'tailscale_dns': str}."""
+    identity = {"tailscale_node_id": "", "tailscale_ip": "", "tailscale_dns": ""}
     try:
         proc = subprocess.run(
-            ["netsh", "wlan", "show", "interfaces"],
-            capture_output=True,
-            text=True,
-            timeout=2,
-            creationflags=0x08000000
+            ["tailscale", "status", "--json"],
+            capture_output=True, text=True, timeout=3, creationflags=0x08000000,
         )
-        for line in proc.stdout.splitlines():
-            line = line.strip().lower()
-            if line.startswith("state") and "connected" in line:
-                return True
+        if proc.returncode == 0 and proc.stdout.strip():
+            data = json.loads(proc.stdout)
+            self_node = data.get("Self") or {}
+            identity["tailscale_node_id"] = str(self_node.get("ID") or "")
+            identity["tailscale_dns"] = str(self_node.get("DNSName") or "").rstrip(".")
+            ips = self_node.get("TailscaleIPs") or []
+            if ips:
+                identity["tailscale_ip"] = str(ips[0])
     except Exception:
         pass
-    return False
+    return identity
 
-def can_reach_master():
-    """Tests TCP connection to Classroom LAN (192.168.1.150), Tailscale WAN (100.99.161.43), or mDNS fallbacks."""
+
+def get_primary_mac() -> str:
+    node = uuid.getnode()
+    if (node >> 40) & 0x01:
+        return ""
+    return ":".join(f"{(node >> ele) & 0xFF:02X}" for ele in range(40, -1, -8))
+
+
+def get_local_lan_ip() -> str:
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.settimeout(0.5)
+        s.connect((CLASSROOM_SERVER, 11100))
+        ip = s.getsockname()[0]
+        s.close()
+        return ip
+    except Exception:
+        try:
+            return socket.gethostbyname(socket.gethostname())
+        except Exception:
+            return ""
+
+
+def can_reach_campus_network() -> bool:
+    """Checks if campus LAN/server or campus Tailscale endpoint is reachable."""
     targets = [
         (CLASSROOM_SERVER, 11100),
+        (CLASSROOM_SERVER, 445),
         (TAILSCALE_SERVER, 11100),
         ("computer-50.local", 11100),
-        ("fileserver.local", 11100),
     ]
     for host, port in targets:
+        s = None
         try:
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            s.settimeout(0.5)
+            s.settimeout(0.6)
             s.connect((host, port))
-            s.close()
             return True
         except Exception:
             pass
+        finally:
+            if s is not None:
+                try:
+                    s.close()
+                except Exception:
+                    pass
     return False
 
-def is_device_online():
-    """
-    Device is online if it can reach the Master (LAN or Tailscale).
-    If Wi-Fi is physically disconnected and cannot reach Master, device is offline.
-    """
-    if can_reach_master():
-        return True
-    # If cannot reach master, double-check Wi-Fi
-    if not is_wifi_interface_connected():
-        return False
-    # Wi-Fi says connected, but cannot reach master
-    return False
 
-def is_teacher_released():
-    """Checks if the teacher put the computer in released state via byod_policy.json."""
-    if os.path.exists(CONFIG_FILE):
+def get_service_state(service_name: str) -> str:
+    """Returns 'RUNNING', 'STOPPED', 'PENDING', or 'MISSING'."""
+    try:
+        proc = subprocess.run(
+            ["sc", "query", service_name],
+            capture_output=True, text=True, timeout=3, creationflags=0x08000000,
+        )
+        out = proc.stdout.upper()
+        if proc.returncode != 0 and "1060" in (proc.stdout + proc.stderr):
+            return "MISSING"
+        if "RUNNING" in out:
+            return "RUNNING"
+        if "STOPPED" in out:
+            return "STOPPED"
+        if "PENDING" in out:
+            return "PENDING"
+    except Exception:
+        pass
+    return "UNKNOWN"
+
+
+def set_service_running(service_name: str, should_run: bool) -> None:
+    state = get_service_state(service_name)
+    if state == "MISSING":
+        return
+    try:
+        if should_run and state == "STOPPED":
+            log(f"Starting {service_name} (Campus Mode)")
+            subprocess.run(["sc", "start", service_name], capture_output=True, timeout=5, creationflags=0x08000000)
+        elif not should_run and state == "RUNNING":
+            log(f"Stopping {service_name} (Personal/Paused/Revoked Mode)")
+            subprocess.run(["sc", "stop", service_name], capture_output=True, timeout=5, creationflags=0x08000000)
+    except Exception as e:
+        log(f"set_service_running({service_name}, {should_run}) error: {e}")
+
+
+def compute_effective_mode(campus_reachable: bool, policy: dict) -> tuple[str, str]:
+    """Determines effective BYOD mode and reason without locking the user's laptop."""
+    if policy.get("revoked"):
+        return MODE_REVOKED, "enrollment_revoked"
+    if policy.get("paused"):
+        return MODE_PAUSED, "temporarily_paused"
+    if policy.get("released"):
+        return MODE_PERSONAL, "teacher_released"
+
+    forced = policy.get("forced_mode")
+    if forced == MODE_PERSONAL:
+        return MODE_PERSONAL, "admin_override_personal"
+    if forced == MODE_CAMPUS:
+        return MODE_CAMPUS, "admin_override_campus"
+
+    if campus_reachable:
+        return MODE_CAMPUS, "campus_network_detected"
+    return MODE_PERSONAL, "off_campus_or_disconnected"
+
+
+def write_mode_state(state_payload: dict) -> None:
+    try:
+        os.makedirs(os.path.dirname(STATE_FILE), exist_ok=True)
+        tmp = STATE_FILE + ".tmp"
+        with open(tmp, "w", encoding="utf-8") as f:
+            json.dump(state_payload, f, indent=2)
+        os.replace(tmp, STATE_FILE)
+    except Exception as e:
+        log(f"write_mode_state error: {e}")
+
+
+def send_telemetry_beacon(mode: str, reason: str, ts_identity: dict) -> None:
+    """Sends non-blocking UDP discovery & mode telemetry to SynapseFleetDiscovery."""
+    payload = {
+        "hostname": socket.gethostname().upper(),
+        "ip": get_local_lan_ip(),
+        "mac": get_primary_mac(),
+        "tailscale_node_id": ts_identity.get("tailscale_node_id", ""),
+        "tailscale_ip": ts_identity.get("tailscale_ip", ""),
+        "mode": mode,
+        "reason": reason,
+        "timestamp_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+    }
+    encoded = json.dumps(payload).encode("utf-8")
+    for target in (CLASSROOM_SERVER, TAILSCALE_SERVER):
+        sock = None
         try:
-            import json
-            with open(CONFIG_FILE, "r") as f:
-                data = json.load(f)
-                return bool(data.get("released", False))
+            sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            sock.settimeout(0.4)
+            sock.sendto(encoded, (target, BEACON_UDP_PORT))
         except Exception:
             pass
-    return False
-
-def set_system_policies(locked: bool):
-    """Enables or disables anti-bypass policies during lockout."""
-    val = "1" if locked else "0"
-    try:
-        # Disable Task Manager
-        subprocess.run(
-            ["reg", "add", r"HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\System",
-             "/v", "DisableTaskMgr", "/t", "REG_DWORD", "/d", val, "/f"],
-            capture_output=True, creationflags=0x08000000
-        )
-        # Hide Task View button
-        subprocess.run(
-            ["reg", "add", r"HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced",
-             "/v", "ShowTaskViewButton", "/t", "REG_DWORD", "/d", "0" if locked else "1", "/f"],
-            capture_output=True, creationflags=0x08000000
-        )
-        # Disable Timeline / Activity Feed
-        subprocess.run(
-            ["reg", "add", r"HKLM\SOFTWARE\Policies\Microsoft\Windows\System",
-             "/v", "EnableActivityFeed", "/t", "REG_DWORD", "/d", "0", "/f"],
-            capture_output=True, creationflags=0x08000000
-        )
-    except Exception as e:
-        log(f"set_system_policies error: {e}")
-
-def ensure_tailscale_service():
-    """Auto-recovers Tailscale if stopped."""
-    try:
-        proc = subprocess.run(
-            ["sc", "query", "Tailscale"],
-            capture_output=True,
-            text=True,
-            timeout=2,
-            creationflags=0x08000000
-        )
-        if "STOPPED" in proc.stdout or "STOP_PENDING" in proc.stdout:
-            log("Tailscale service was stopped. Restarting...")
-            subprocess.run(["sc", "start", "Tailscale"], capture_output=True, creationflags=0x08000000)
-    except Exception:
-        pass
-
-def get_scanned_wifi_networks():
-    """Returns list of visible SSIDs and saved profiles."""
-    ssids = []
-    try:
-        proc = subprocess.run(
-            ["netsh", "wlan", "show", "networks"],
-            capture_output=True, text=True, timeout=3, creationflags=0x08000000
-        )
-        for line in proc.stdout.splitlines():
-            line = line.strip()
-            if line.startswith("SSID") and ":" in line:
-                ssid = line.split(":", 1)[1].strip()
-                if ssid and ssid not in ssids:
-                    ssids.append(ssid)
-    except Exception:
-        pass
-
-    try:
-        proc2 = subprocess.run(
-            ["netsh", "wlan", "show", "profiles"],
-            capture_output=True, text=True, timeout=2, creationflags=0x08000000
-        )
-        for line in proc2.stdout.splitlines():
-            if "All User Profile" in line and ":" in line:
-                p = line.split(":", 1)[1].strip()
-                if p and p not in ssids:
-                    ssids.append(p)
-    except Exception:
-        pass
-
-    return ssids
-
-def connect_to_wifi(ssid, password=""):
-    """Connects to a Wi-Fi network with or without password."""
-    if not ssid:
-        return False, "Please select a Wi-Fi network."
-
-    try:
-        if password:
-            xml = (
-                '<?xml version="1.0"?>\n'
-                '<WLANProfile xmlns="http://www.microsoft.com/networking/WLAN/profile/v1">\n'
-                f'    <name>{ssid}</name>\n'
-                '    <SSIDConfig>\n'
-                '        <SSID>\n'
-                f'            <name>{ssid}</name>\n'
-                '        </SSID>\n'
-                '    </SSIDConfig>\n'
-                '    <connectionType>ESS</connectionType>\n'
-                '    <connectionMode>auto</connectionMode>\n'
-                '    <MSM>\n'
-                '        <security>\n'
-                '            <authEncryption>\n'
-                '                <authentication>WPA2PSK</authentication>\n'
-                '                <encryption>AES</encryption>\n'
-                '                <useOneX>false</useOneX>\n'
-                '            </authEncryption>\n'
-                '            <sharedKey>\n'
-                '                <keyType>passPhrase</keyType>\n'
-                '                <protected>false</protected>\n'
-                f'                <keyMaterial>{password}</keyMaterial>\n'
-                '            </sharedKey>\n'
-                '        </security>\n'
-                '    </MSM>\n'
-                '</WLANProfile>\n'
-            )
-            tmp_path = os.path.join(tempfile.gettempdir(), f"wlan_{int(time.time())}.xml")
-            with open(tmp_path, "w", encoding="utf-8") as f:
-                f.write(xml)
-
-            subprocess.run(
-                ["netsh", "wlan", "add", "profile", f"filename={tmp_path}"],
-                capture_output=True, creationflags=0x08000000
-            )
-            try:
-                os.remove(tmp_path)
-            except Exception:
-                pass
-
-        res = subprocess.run(
-            ["netsh", "wlan", "connect", f"name={ssid}"],
-            capture_output=True, text=True, timeout=5, creationflags=0x08000000
-        )
-        return True, f"Connecting to {ssid}..."
-    except Exception as e:
-        return False, str(e)
-
-
-class BulletproofLockScreen:
-    """Enterprise Lockdown Controller."""
-    def __init__(self):
-        self.active = False
-        self.emergency_unlocked = False
-        self.root = None
-        self.top_hwnd = None
-        self.hook = None
-        self.hook_proc_ref = None
-        self.watchdog_thread = None
-        self.stop_watchdog = False
-
-    def _hook_callback(self, nCode, wParam, lParam):
-        if nCode >= 0:
-            kb = KBDLLHOOKSTRUCT.from_address(lParam)
-            vk = kb.vkCode
-
-            # Block Windows keys completely (LWIN & RWIN)
-            if vk in (VK_LWIN, VK_RWIN):
-                return 1
-
-            # Block Alt+Tab
-            if vk == VK_TAB and (kb.flags & 0x20):
-                return 1
-
-            # Block Alt+Esc
-            if vk == VK_ESCAPE and (kb.flags & 0x20):
-                return 1
-
-            # Block Alt+F4
-            if vk == VK_F4 and (kb.flags & 0x20):
-                return 1
-
-            # Block Ctrl+Esc
-            if vk == VK_ESCAPE and (user32.GetKeyState(0x11) < 0): # VK_CONTROL
-                return 1
-
-            # Block any key combination while Windows key is held
-            if (user32.GetKeyState(VK_LWIN) < 0) or (user32.GetKeyState(VK_RWIN) < 0):
-                return 1
-
-        return user32.CallNextHookEx(None, nCode, wParam, lParam)
-
-    def _install_hook(self):
-        try:
-            self.hook_proc_ref = HOOKPROC(self._hook_callback)
-            self.hook = user32.SetWindowsHookExW(WH_KEYBOARD_LL, self.hook_proc_ref, 0, 0)
-            log(f"Low-level keyboard hook installed: handle={self.hook}")
-        except Exception as e:
-            log(f"Failed to install keyboard hook: {e}")
-
-    def _uninstall_hook(self):
-        if self.hook:
-            try:
-                user32.UnhookWindowsHookEx(self.hook)
-                log("Low-level keyboard hook uninstalled.")
-            except Exception as e:
-                log(f"Error unhooking: {e}")
-            self.hook = None
-            self.hook_proc_ref = None
-
-    def _hide_taskbar(self, hide: bool):
-        try:
-            cmd = SW_HIDE if hide else SW_SHOW
-            h_tb = user32.FindWindowW("Shell_TrayWnd", None)
-            if h_tb:
-                user32.ShowWindow(h_tb, cmd)
-            h_sec = user32.FindWindowW("Shell_SecondaryTrayWnd", None)
-            if h_sec:
-                user32.ShowWindow(h_sec, cmd)
-        except Exception as e:
-            log(f"Error toggling taskbar: {e}")
-
-    def _snap_back_watchdog(self, vx, vy, vw, vh):
-        """High-frequency thread defeating virtual desktop switches & touchpad swipes."""
-        log("Snap-back watchdog started.")
-        while not self.stop_watchdog and self.active:
-            try:
-                if self.top_hwnd and user32.IsWindow(self.top_hwnd):
-                    fg = user32.GetForegroundWindow()
-                    # Do not steal focus if the foreground window belongs to our own process
-                    # (e.g. Wi-Fi combobox dropdown listbox, password prompt, or popup)
-                    fg_pid = ctypes.wintypes.DWORD()
-                    user32.GetWindowThreadProcessId(fg, ctypes.byref(fg_pid))
-                    if fg != self.top_hwnd and fg_pid.value != os.getpid():
-                        # DWM Snap back to lock window's virtual desktop
-                        user32.SwitchToThisWindow(self.top_hwnd, True)
-                        user32.SetForegroundWindow(self.top_hwnd)
-                        user32.BringWindowToTop(self.top_hwnd)
-                        user32.SetWindowPos(self.top_hwnd, HWND_TOPMOST, vx, vy, vw, vh, SWP_SHOWWINDOW)
-                time.sleep(0.025) # 25ms check
-            except Exception:
-                time.sleep(0.05)
-        log("Snap-back watchdog terminated.")
-
-    def lock(self):
-        if self.active or self.emergency_unlocked or is_teacher_released():
-            return
-
-        log("LOCK ACTIVATING: Classroom network disconnected!")
-        self.active = True
-        set_system_policies(True)
-        self._hide_taskbar(True)
-        self._install_hook()
-
-        # Multi-monitor virtual bounds
-        vx = user32.GetSystemMetrics(SM_XVIRTUALSCREEN)
-        vy = user32.GetSystemMetrics(SM_YVIRTUALSCREEN)
-        vw = user32.GetSystemMetrics(SM_CXVIRTUALSCREEN)
-        vh = user32.GetSystemMetrics(SM_CYVIRTUALSCREEN)
-        if vw <= 0 or vh <= 0:
-            vw = user32.GetSystemMetrics(0) # SM_CXSCREEN
-            vh = user32.GetSystemMetrics(1) # SM_CYSCREEN
-            vx, vy = 0, 0
-
-        log(f"Lock screen geometry: {vw}x{vh}+{vx}+{vy}")
-
-        try:
-            self.root = tk.Tk()
-            self.root.title("Synapse Classroom Lock")
-            self.root.geometry(f"{vw}x{vh}+{vx}+{vy}")
-            self.root.overrideredirect(True)
-            self.root.attributes("-topmost", True)
-            self.root.configure(bg="#0B132B")
-
-            self.root.update_idletasks()
-            wid = self.root.winfo_id()
-            parent = user32.GetParent(wid)
-            self.top_hwnd = parent if parent else wid
-
-            # Start snap-back watchdog
-            self.stop_watchdog = False
-            self.watchdog_thread = threading.Thread(
-                target=self._snap_back_watchdog,
-                args=(vx, vy, vw, vh),
-                daemon=True
-            )
-            self.watchdog_thread.start()
-
-            # Prevent Alt+F4 / Escape
-            self.root.protocol("WM_DELETE_WINDOW", lambda: None)
-            self.root.bind("<Alt-F4>", lambda e: "break")
-            self.root.bind("<Escape>", lambda e: "break")
-
-            # UI Layout
-            card = tk.Frame(self.root, bg="#1C2541", padx=45, pady=32, relief=tk.RAISED, bd=2)
-            card.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
-
-            lbl_icon = tk.Label(card, text="⚠️", font=("Segoe UI", 48), fg="#FF5964", bg="#1C2541")
-            lbl_icon.pack(pady=(0, 4))
-
-            lbl_title = tk.Label(card, text="Classroom Network Disconnected", font=("Segoe UI", 22, "bold"), fg="#FFFFFF", bg="#1C2541")
-            lbl_title.pack(pady=(0, 8))
-
-            lbl_desc = tk.Label(
-                card,
-                text="An active network connection to the classroom is required during class.\n"
-                     "Select School Wi-Fi or your Mobile Hotspot to unlock.",
-                font=("Segoe UI", 11),
-                fg="#CBD5E1",
-                bg="#1C2541",
-                justify=tk.CENTER
-            )
-            lbl_desc.pack(pady=(0, 16))
-
-            # Wi-Fi Section
-            frame_wifi = tk.Frame(card, bg="#1C2541")
-            frame_wifi.pack(fill=tk.X, pady=(0, 10))
-
-            lbl_select = tk.Label(frame_wifi, text="Available Wi-Fi / Hotspot Networks:", font=("Segoe UI", 10, "bold"), fg="#94A3B8", bg="#1C2541")
-            lbl_select.pack(anchor=tk.W, pady=(0, 4))
-
-            combo_ssid = ttk.Combobox(frame_wifi, font=("Segoe UI", 11), state="readonly")
-            combo_ssid.pack(fill=tk.X, pady=(0, 8))
-
-            lbl_pwd_hint = tk.Label(frame_wifi, text="Wi-Fi Password (leave empty if saved profile):", font=("Segoe UI", 10), fg="#94A3B8", bg="#1C2541")
-            lbl_pwd_hint.pack(anchor=tk.W, pady=(0, 4))
-
-            entry_wifi_pwd = tk.Entry(frame_wifi, show="*", font=("Segoe UI", 11), bg="#0B132B", fg="#FFFFFF", insertbackground="#FFFFFF")
-            entry_wifi_pwd.pack(fill=tk.X, pady=(0, 8))
-
-            lbl_status = tk.Label(frame_wifi, text="", font=("Segoe UI", 10, "bold"), fg="#38BDF8", bg="#1C2541")
-            lbl_status.pack(pady=(0, 8))
-
-            def refresh_networks():
-                if not self.active or not self.root:
-                    return
+        finally:
+            if sock is not None:
                 try:
-                    nets = get_scanned_wifi_networks()
-                    current = combo_ssid.get()
-                    combo_ssid["values"] = nets
-                    if nets and (not current or current not in nets):
-                        combo_ssid.current(0)
-                except Exception as e:
-                    log(f"refresh_networks error: {e}")
-                if self.active and self.root:
-                    self.root.after(3500, refresh_networks)
+                    sock.close()
+                except Exception:
+                    pass
 
-            def do_connect():
-                ssid = combo_ssid.get().strip()
-                pwd = entry_wifi_pwd.get()
-                if not ssid:
-                    lbl_status.config(text="Please choose a Wi-Fi network from the list.", fg="#EF4444")
-                    return
-                lbl_status.config(text=f"Connecting to {ssid}...", fg="#38BDF8")
-                self.root.update()
 
-                success, msg = connect_to_wifi(ssid, pwd)
-                if success:
-                    lbl_status.config(text=msg, fg="#10B981")
-                else:
-                    lbl_status.config(text=msg, fg="#EF4444")
+def show_status_window() -> None:
+    """Optional non-blocking status & admin-override window (--ui flag)."""
+    import tkinter as tk
+    from tkinter import simpledialog, messagebox
 
-            btn_connect = tk.Button(
-                frame_wifi,
-                text="📶  Connect to Wi-Fi",
-                font=("Segoe UI", 12, "bold"),
-                bg="#3A86FF",
-                fg="white",
-                activebackground="#2563EB",
-                activeforeground="white",
-                padx=20,
-                pady=7,
-                relief=tk.FLAT,
-                cursor="hand2",
-                command=do_connect
-            )
-            btn_connect.pack(fill=tk.X)
+    root = tk.Tk()
+    root.title("Synapse BYOD Status")
+    root.geometry("420x250")
+    root.configure(bg="#0F172A")
+    root.resizable(False, False)
 
-            # Teacher Unlock Section
-            frame_teacher = tk.Frame(card, bg="#1C2541")
-            frame_teacher.pack(pady=(12, 0), fill=tk.X)
+    lbl_mode = tk.Label(root, text="Checking mode...", font=("Segoe UI", 14, "bold"), bg="#0F172A", fg="#F8FAFC")
+    lbl_mode.pack(pady=(20, 6))
 
-            btn_unlock_toggle = tk.Button(
-                frame_teacher,
-                text="🔑  Teacher Unlock",
-                font=("Segoe UI", 9),
-                bg="#2A3554",
-                fg="#94A3B8",
-                activebackground="#3B4970",
-                activeforeground="white",
-                padx=12,
-                pady=4,
-                relief=tk.FLAT,
-                cursor="hand2"
-            )
-            btn_unlock_toggle.pack()
+    lbl_detail = tk.Label(root, text="", font=("Segoe UI", 10), bg="#0F172A", fg="#94A3B8", wraplength=380)
+    lbl_detail.pack(pady=(0, 14))
 
-            frame_teacher_pwd = tk.Frame(frame_teacher, bg="#1C2541")
-            lbl_tpwd = tk.Label(frame_teacher_pwd, text="Enter Teacher Master Password:", font=("Segoe UI", 10, "bold"), fg="#CBD5E1", bg="#1C2541")
-            lbl_tpwd.pack(pady=(4, 4))
-
-            entry_tpwd = tk.Entry(frame_teacher_pwd, show="*", font=("Segoe UI", 11), width=24, justify=tk.CENTER, bg="#0B132B", fg="#FFFFFF", insertbackground="#FFFFFF")
-            entry_tpwd.pack(pady=(0, 6))
-
-            lbl_tpwd_err = tk.Label(frame_teacher_pwd, text="", font=("Segoe UI", 9), fg="#EF4444", bg="#1C2541")
-            lbl_tpwd_err.pack(pady=(0, 4))
-
-            row_tbtns = tk.Frame(frame_teacher_pwd, bg="#1C2541")
-            row_tbtns.pack()
-
-            def submit_teacher_pwd(event=None):
-                if entry_tpwd.get() and verify_master_password(entry_tpwd.get()):
-                    log("Teacher Master Password entered. Unlocking session...")
-                    self.emergency_unlocked = True
-                    self.unlock()
-                else:
-                    lbl_tpwd_err.config(text="Incorrect password. Please try again.")
-                    entry_tpwd.delete(0, tk.END)
-
-            def show_teacher_box():
-                btn_unlock_toggle.pack_forget()
-                lbl_tpwd_err.config(text="")
-                entry_tpwd.delete(0, tk.END)
-                frame_teacher_pwd.pack()
-                entry_tpwd.focus_set()
-
-            def cancel_teacher_box():
-                frame_teacher_pwd.pack_forget()
-                btn_unlock_toggle.pack()
-
-            btn_tsubmit = tk.Button(row_tbtns, text="Unlock", font=("Segoe UI", 9, "bold"), bg="#10B981", fg="white", activebackground="#059669", padx=12, pady=3, relief=tk.FLAT, cursor="hand2", command=submit_teacher_pwd)
-            btn_tsubmit.pack(side=tk.LEFT, padx=5)
-
-            btn_tcancel = tk.Button(row_tbtns, text="Cancel", font=("Segoe UI", 9), bg="#475569", fg="white", activebackground="#334155", padx=12, pady=3, relief=tk.FLAT, cursor="hand2", command=cancel_teacher_box)
-            btn_tcancel.pack(side=tk.LEFT, padx=5)
-
-            entry_tpwd.bind("<Return>", submit_teacher_pwd)
-            btn_unlock_toggle.config(command=show_teacher_box)
-
-            # Non-blocking asynchronous network state checker (prevents Tkinter GUI freezing)
-            self._async_online = False
-            def bg_network_checker():
-                while self.active and not self.stop_watchdog:
-                    try:
-                        self._async_online = is_device_online() or is_teacher_released()
-                    except Exception:
-                        self._async_online = False
-                    time.sleep(0.5)
-
-            threading.Thread(target=bg_network_checker, daemon=True).start()
-
-            # Polling for auto-reconnect (non-blocking, instant response)
-            def poll_status():
-                if not self.active:
-                    return
-                if getattr(self, '_async_online', False):
-                    log("Reconnected to Classroom! Unlocking desktop...")
-                    lbl_status.config(text="✅ Reconnected to Classroom! Restoring desktop...", fg="#10B981")
-                    self.root.update()
-                    time.sleep(0.3)
-                    self.unlock()
-                    return
-                if self.active and self.root:
-                    self.root.after(200, poll_status)
-
-            refresh_networks()
-            poll_status()
-            self.root.mainloop()
-
-        except Exception as e:
-            log(f"Exception inside lock GUI: {e}")
-            self.unlock()
-
-    def unlock(self):
-        log("UNLOCK EXECUTING: Restoring desktop and controls.")
-        self.active = False
-        self.stop_watchdog = True
-
-        self._uninstall_hook()
-        self._hide_taskbar(False)
-        set_system_policies(False)
-
-        if self.root:
+    def refresh_view():
+        if os.path.exists(STATE_FILE):
             try:
-                self.root.destroy()
+                with open(STATE_FILE, "r", encoding="utf-8") as f:
+                    st = json.load(f)
+                m = st.get("mode", "personal").upper()
+                color = "#10B981" if m == "CAMPUS" else "#38BDF8"
+                lbl_mode.config(text=f"Mode: {m}", fg=color)
+                lbl_detail.config(
+                    text=(
+                        f"Reason: {st.get('reason', '-')}\n"
+                        f"Tailscale Node ID: {st.get('tailscale_node_id') or 'Not connected'}\n"
+                        f"Updated: {st.get('updated_at_utc', '-')}"
+                    )
+                )
             except Exception:
                 pass
-            self.root = None
+        root.after(2000, refresh_view)
 
-        self.top_hwnd = None
-        log("Desktop unlock completed successfully.")
+    def admin_override():
+        pwd = simpledialog.askstring("Admin Override", "Enter Teacher/Admin Password:", show="*", parent=root)
+        if pwd is None:
+            return
+        if not verify_master_password(pwd):
+            messagebox.showerror("Denied", "Incorrect administrator password.", parent=root)
+            return
+        pol = load_policy()
+        currently_paused = bool(pol.get("paused") or pol.get("released"))
+        pol["paused"] = not currently_paused
+        pol["released"] = False
+        pol["forced_mode"] = None
+        save_policy(pol)
+        messagebox.showinfo("Updated", f"BYOD supervision {'PAUSED (Personal Mode)' if pol['paused'] else 'RESUMED (Auto Campus Mode)'}.", parent=root)
+
+    tk.Button(
+        root, text="Admin Pause / Resume Override", command=admin_override,
+        bg="#2563EB", fg="white", font=("Segoe UI", 10, "bold"), relief=tk.FLAT, padx=14, pady=6, cursor="hand2"
+    ).pack(pady=8)
+
+    refresh_view()
+    root.mainloop()
 
 
-guard_lock = BulletproofLockScreen()
+def run_controller_loop() -> None:
+    # Single-Instance Enforcement
+    kernel32 = ctypes.windll.kernel32
+    _mutex_handle = kernel32.CreateMutexW(None, False, "Global\\SynapseBYODGuard_SingleInstance_Mutex")
+    if kernel32.GetLastError() == 183:
+        sys.exit(0)
 
-def main():
     log("==========================================")
-    log("SynapseBYODGuard Enterprise starting up...")
-    log(f"PID: {os.getpid()}, User: {os.environ.get('USERNAME', 'Unknown')}")
+    log("SynapseBYODGuard Non-Blocking Campus/Personal Controller starting...")
+    clear_legacy_lock_policies()
 
-    # Attach to interactive desktop
-    attach_to_interactive_desktop()
-
-    time.sleep(1)
-    disconn_count = 0
+    last_mode = None
+    last_beacon = 0.0
 
     while True:
         try:
-            ensure_tailscale_service()
+            policy = load_policy()
+            campus_reachable = can_reach_campus_network()
+            mode, reason = compute_effective_mode(campus_reachable, policy)
 
-            if is_teacher_released():
-                if guard_lock.active:
-                    guard_lock.unlock()
-                time.sleep(3)
-                continue
-
-            online = is_device_online()
-            if not online:
-                disconn_count += 1
-                log(f"Network check: OFFLINE (counter={disconn_count})")
-                # Trigger lock on 1st offline confirmation (~1s)
-                if disconn_count >= 1 and not guard_lock.active:
-                    guard_lock.lock()
+            # Keep Tailscale available in Campus Mode; leave user's PC unrestricted in Personal Mode
+            if mode == MODE_CAMPUS:
+                set_service_running("Tailscale", True)
+                set_service_running(DIGIAGENT_SERVICE, True)
             else:
-                if disconn_count > 0:
-                    log("Network check: RESTORED ONLINE")
-                disconn_count = 0
-                guard_lock.emergency_unlocked = False
-                if guard_lock.active:
-                    guard_lock.unlock()
+                # Personal / Paused / Revoked -> stop campus supervision, never lock laptop
+                set_service_running(DIGIAGENT_SERVICE, False)
 
-            time.sleep(0.8)
+            ts_identity = get_tailscale_identity()
+            now = time.time()
+
+            if mode != last_mode:
+                log(f"Mode transition: {last_mode} -> {mode} ({reason})")
+                last_mode = mode
+
+            write_mode_state({
+                "mode": mode,
+                "reason": reason,
+                "campus_reachable": campus_reachable,
+                "tailscale_node_id": ts_identity.get("tailscale_node_id", ""),
+                "tailscale_ip": ts_identity.get("tailscale_ip", ""),
+                "tailscale_dns": ts_identity.get("tailscale_dns", ""),
+                "policy": policy,
+                "updated_at_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+            })
+
+            if now - last_beacon >= 15.0:
+                send_telemetry_beacon(mode, reason, ts_identity)
+                last_beacon = now
+
+            time.sleep(3.0)
         except Exception as e:
-            log(f"Exception in main_loop: {e}")
-            time.sleep(1.0)
+            log(f"Controller loop exception: {e}")
+            time.sleep(3.0)
+
+
+def main() -> None:
+    if "--ui" in sys.argv:
+        show_status_window()
+    elif "--status" in sys.argv:
+        if os.path.exists(STATE_FILE):
+            with open(STATE_FILE, "r", encoding="utf-8") as f:
+                print(f.read())
+        else:
+            print(json.dumps({"mode": "unknown"}))
+    else:
+        run_controller_loop()
+
 
 if __name__ == "__main__":
     main()

@@ -20,6 +20,12 @@ BEACON_UDP_PORT = 11105
 SUBNET_PREFIX = "192.168.1."
 SELF_IP = "192.168.1.150"
 TARGET_LOCATION = "BYOD"
+TELEMETRY_PATHS = [
+    r"C:\ProgramData\DigiAgent\fleet_byod_telemetry.json",
+    r"C:\SynapseAISentinel\fleet_byod_telemetry.json",
+]
+byod_telemetry = {}
+telemetry_lock = threading.Lock()
 
 # Win32 Single-Instance Mutex
 MUTEX_NAME = "Global\\SynapseFleetDiscovery_SingleInstance_Mutex"
@@ -229,6 +235,43 @@ def run_subnet_sweep():
             fallback_name = f"BYOD-{ip.split('.')[-1]}"
             sync_device(fallback_name, ip, mac)
 
+def record_byod_telemetry(payload, fallback_ip):
+    """Records BYOD Campus/Personal mode and Tailscale node ID telemetry atomically."""
+    ts_id = (payload.get("tailscale_node_id") or "").strip()
+    mac = (payload.get("mac") or "").strip().upper()
+    ip = (payload.get("ip") or fallback_ip or "").strip()
+    key = ts_id or mac or ip
+    if not key:
+        return
+    entry = {
+        "tailscale_node_id": ts_id,
+        "tailscale_ip": (payload.get("tailscale_ip") or "").strip(),
+        "hostname": (payload.get("hostname") or "").strip(),
+        "ip": ip,
+        "mac": mac,
+        "mode": (payload.get("mode") or "campus").strip().lower(),
+        "reason": (payload.get("reason") or "").strip(),
+        "last_seen_utc": payload.get("timestamp_utc") or time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+    }
+    with telemetry_lock:
+        byod_telemetry[key] = entry
+        snapshot = {
+            "updated_at_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+            "devices": list(byod_telemetry.values()),
+        }
+        for path in TELEMETRY_PATHS:
+            parent = os.path.dirname(path)
+            if os.path.exists(parent) or path.startswith(r"C:\ProgramData"):
+                try:
+                    os.makedirs(parent, exist_ok=True)
+                    tmp = path + ".tmp"
+                    with open(tmp, "w", encoding="utf-8") as f:
+                        json.dump(snapshot, f, indent=2)
+                    os.replace(tmp, path)
+                except Exception:
+                    pass
+
+
 def udp_beacon_listener():
     """Listens for client self-announcement UDP broadcasts on port 11105."""
     try:
@@ -243,7 +286,9 @@ def udp_beacon_listener():
                 hostname = payload.get("hostname")
                 ip = payload.get("ip") or addr[0]
                 mac = payload.get("mac", "")
-                if hostname and ip:
+                mode = (payload.get("mode") or "campus").strip().lower()
+                record_byod_telemetry(payload, addr[0])
+                if hostname and ip and mode == "campus":
                     sync_device(hostname, ip, mac)
             except Exception:
                 pass
