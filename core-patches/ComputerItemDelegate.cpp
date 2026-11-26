@@ -424,7 +424,7 @@ QSize ComputerItemDelegate::sizeHint(const QStyleOptionViewItem& option, const Q
 	{
 		w = 230;
 	}
-	w = qBound(MinimumComputerScreenSize, w, MaximumComputerScreenSize);
+	w = qBound(ComputerMonitoringView::MinimumComputerScreenSize, w, ComputerMonitoringView::MaximumComputerScreenSize);
 	const int h = int((w - 12) * 9.0 / 16.0) + 64;
 	return QSize(w, h);
 }
