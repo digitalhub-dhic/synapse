@@ -527,8 +527,19 @@ void ComputerSelectPanel::updateFilter()
 
 void ComputerSelectPanel::fetchAndExpandAll()
 {
-	fetchAll(m_filterProxyModel->index(0, 0));
-	QTimer::singleShot(0, this, [this]{ui->treeView->expandAll();});
+	const int rootRows = m_filterProxyModel->rowCount();
+	for( int i = 0; i < rootRows; ++i )
+	{
+		fetchAll( m_filterProxyModel->index( i, 0 ) );
+	}
+	if( !m_expandTimer )
+	{
+		m_expandTimer = new QTimer( this );
+		m_expandTimer->setSingleShot( true );
+		m_expandTimer->setInterval( 50 );
+		connect( m_expandTimer, &QTimer::timeout, this, [this]() { ui->treeView->expandAll(); } );
+	}
+	m_expandTimer->start();
 }
 
 
