@@ -794,25 +794,26 @@ QWidget* ComputerInspectorPanel::createDetailsTabWidget()
 	tTitle->setStyleSheet( QStringLiteral( "font-size: 13px; font-weight: bold; color: #E6EDF3; border: none;" ) );
 	tLayout->addWidget( tTitle );
 
-	auto addDetailRow = [&]( const QString& key, const QString& val, const QString& color = QStringLiteral( "#8B949E" ) ) {
+	auto addDetailRow = [&]( const QString& key, QLabel*& valOut, const QString& val, const QString& color = QStringLiteral( "#94A3B8" ) ) {
 		auto* row = new QHBoxLayout();
 		auto* kLbl = new QLabel( key, telemCard );
-		kLbl->setStyleSheet( QStringLiteral( "font-size: 11px; color: #8B949E; border: none;" ) );
-		auto* vLbl = new QLabel( val, telemCard );
-		vLbl->setAlignment( Qt::AlignRight | Qt::AlignVCenter );
-		vLbl->setStyleSheet( QStringLiteral( "font-size: 11px; font-weight: 600; color: %1; border: none;" ).arg( color ) );
+		kLbl->setStyleSheet( QStringLiteral( "font-size: 11px; color: #94A3B8; border: none;" ) );
+		valOut = new QLabel( val, telemCard );
+		valOut->setAlignment( Qt::AlignRight | Qt::AlignVCenter );
+		valOut->setStyleSheet( QStringLiteral( "font-size: 11px; font-weight: 600; color: %1; border: none;" ).arg( color ) );
 		row->addWidget( kLbl );
 		row->addStretch( 1 );
-		row->addWidget( vLbl );
+		row->addWidget( valOut );
 		tLayout->addLayout( row );
 	};
 
-	addDetailRow( tr( "Version" ), QStringLiteral( "4.11.3 (x86_64)" ), QStringLiteral( "#238636" ) );
-	addDetailRow( tr( "Security State" ), tr( "Shield Active" ), QStringLiteral( "#2563EB" ) );
-	addDetailRow( tr( "UDP Auto-Discovery" ), tr( "Port 11400 (Active)" ), QStringLiteral( "#2563EB" ) );
-	addDetailRow( tr( "TaskMgr Shield" ), tr( "Enforced on Shutdown" ), QStringLiteral( "#238636" ) );
-	addDetailRow( tr( "AutoEndTasks" ), tr( "Enabled (Registry Force)" ), QStringLiteral( "#2563EB" ) );
-	addDetailRow( tr( "Subnet Probe Sweep" ), tr( "Every 15 Seconds" ), QStringLiteral( "#8B949E" ) );
+	addDetailRow( tr( "Engine Version" ), m_detailVersionVal, VeyonCore::versionString(), QStringLiteral( "#22C55E" ) );
+	addDetailRow( tr( "Active Target" ), m_detailTargetVal, tr( "Global Fleet" ), QStringLiteral( "#F1F5F9" ) );
+	addDetailRow( tr( "Host Address" ), m_detailIpVal, tr( "All Subnets" ), QStringLiteral( "#3B82F6" ) );
+	addDetailRow( tr( "Logged-In User" ), m_detailUserVal, QStringLiteral( "—" ), QStringLiteral( "#F1F5F9" ) );
+	addDetailRow( tr( "Link State" ), m_detailStateVal, tr( "Monitoring" ), QStringLiteral( "#22C55E" ) );
+	addDetailRow( tr( "Displays" ), m_detailScreensVal, QStringLiteral( "—" ), QStringLiteral( "#94A3B8" ) );
+	updateQuickStats();
 
 	layout->addWidget( telemCard );
 	layout->addStretch( 1 );
