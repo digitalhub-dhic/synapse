@@ -166,6 +166,20 @@ void ComputerItemDelegate::paint(QPainter* painter, const QStyleOptionViewItem& 
 				const int px = previewRect.left() + (previewRect.width() - cachedPixmap.width()) / 2;
 				const int py = previewRect.top() + (previewRect.height() - cachedPixmap.height()) / 2;
 				painter->drawPixmap(px, py, cachedPixmap);
+
+				// Subtle hint if display is solid black (logon / sleeping monitor)
+				if (fb.width() > 20 && fb.height() > 20)
+				{
+					const QColor cMid = fb.pixelColor(fb.width() / 2, fb.height() / 2);
+					const QColor cCorner = fb.pixelColor(10, 10);
+					if (cMid.red() < 6 && cMid.green() < 6 && cMid.blue() < 6 &&
+						cCorner.red() < 6 && cCorner.green() < 6 && cCorner.blue() < 6)
+					{
+						painter->setPen(QColor(100, 116, 139));
+						painter->setFont(QFont(QStringLiteral("Segoe UI"), 8));
+						painter->drawText(previewRect, Qt::AlignCenter, tr("Display Blank / Logon"));
+					}
+				}
 			}
 		}
 		else
@@ -179,38 +193,22 @@ void ComputerItemDelegate::paint(QPainter* painter, const QStyleOptionViewItem& 
 	}
 	else if (isConnecting)
 	{
-		// Connecting State - Dark Container with Amber Radar Indicator
-		painter->fillRect(previewRect, QColor(5, 7, 10));
-
-		painter->setPen(QPen(QColor(245, 158, 11, 100), 1)); // Amber subtle border
+		// Quiet Connecting State - Subtle border & compact status without radar noise
+		painter->fillRect(previewRect, QColor(9, 13, 22));
+		painter->setPen(QPen(QColor(30, 41, 59), 1));
 		painter->drawRect(previewRect.adjusted(0, 0, -1, -1));
 
 		const int cx = previewRect.center().x();
-		const int cy = previewRect.center().y() - 14;
-
-		// Concentric connecting pulses
-		painter->setPen(QPen(QColor(245, 158, 11, 140), 1.2, Qt::DashLine));
-		painter->setBrush(Qt::NoBrush);
-		painter->drawEllipse(QPoint(cx, cy), 16, 16);
-
-		painter->setPen(QPen(QColor(251, 191, 36), 1.4));
-		painter->setBrush(QColor(245, 158, 11, 35));
-		painter->drawEllipse(QPoint(cx, cy), 9, 9);
+		const int cy = previewRect.center().y() - 6;
 
 		painter->setBrush(QColor(245, 158, 11));
 		painter->setPen(Qt::NoPen);
-		painter->drawEllipse(QPoint(cx, cy), 3, 3);
+		painter->drawEllipse(QPoint(cx, cy - 8), 4, 4);
 
-		// Status text
 		painter->setFont(QFont(QStringLiteral("Segoe UI"), 8, QFont::DemiBold));
-		painter->setPen(QColor(251, 191, 36)); // Amber
-		painter->drawText(QRect(previewRect.left(), cy + 18, previewRect.width(), 16),
+		painter->setPen(QColor(148, 163, 184));
+		painter->drawText(QRect(previewRect.left(), cy + 2, previewRect.width(), 16),
 						  Qt::AlignCenter, tr("Connecting..."));
-
-		painter->setFont(QFont(QStringLiteral("Segoe UI"), 7));
-		painter->setPen(QColor(148, 163, 184)); // Slate-400
-		painter->drawText(QRect(previewRect.left(), cy + 34, previewRect.width(), 14),
-						  Qt::AlignCenter, tr("Establishing Secure Link"));
 	}
 	else
 	{
