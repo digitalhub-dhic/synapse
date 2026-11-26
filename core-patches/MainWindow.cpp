@@ -677,7 +677,7 @@ MainWindow::MainWindow( VeyonMaster &masterCore, QWidget* parent ) :
 	ui->toolBar->setMovable( false );
 	ui->toolBar->setFloatable( false );
 	ui->toolBar->setVisible( true );
-	ui->toolBar->setFixedHeight( 70 );
+	ui->toolBar->setFixedHeight( 74 );
 
 	// add widgets to status bar
 	auto* readyWidget = new QWidget( ui->statusBar );
