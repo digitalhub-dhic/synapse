@@ -25,9 +25,12 @@
 #pragma once
 
 #include <QPixmapCache>
+#include <QPointer>
 #include <QStyledItemDelegate>
 
 #include "ComputerControlInterface.h"
+
+class VeyonMaster;
 
 class ComputerItemDelegate : public QStyledItemDelegate
 {
@@ -49,5 +52,6 @@ private:
 	static constexpr int OverlayIconsRadius = 4;
 
 	QMap<QUuid, QPixmap> m_featurePixmaps;
+	mutable QPointer<VeyonMaster> m_master;
 
 };
