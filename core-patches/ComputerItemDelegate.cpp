@@ -138,13 +138,13 @@ void ComputerItemDelegate::paint(QPainter* painter, const QStyleOptionViewItem& 
 			painter->fillRect(previewRect, QColor(5, 7, 10));
 
 			QPixmap cachedPixmap;
-			const QString cacheKey = QStringLiteral("prev_%1_%2x%3_%4")
+			const QString cacheKey = QStringLiteral("prev_%1_%2x%3")
 										 .arg(ip)
 										 .arg(previewRect.width())
-										 .arg(previewRect.height())
-										 .arg(fb.cacheKey());
+										 .arg(previewRect.height());
+			const qint64 fbKey = fb.cacheKey();
 
-			if (!QPixmapCache::find(cacheKey, &cachedPixmap))
+			if (m_lastFbKeys.value(cacheKey) != fbKey || !QPixmapCache::find(cacheKey, &cachedPixmap))
 			{
 				QImage scaled;
 				if (fb.size() == previewRect.size())
@@ -153,10 +153,11 @@ void ComputerItemDelegate::paint(QPainter* painter, const QStyleOptionViewItem& 
 				}
 				else
 				{
-					scaled = fb.scaled(previewRect.size(), Qt::KeepAspectRatio, Qt::SmoothTransformation);
+					scaled = fb.scaled(previewRect.size(), Qt::KeepAspectRatio, Qt::FastTransformation);
 				}
 				cachedPixmap = QPixmap::fromImage(scaled);
 				QPixmapCache::insert(cacheKey, cachedPixmap);
+				m_lastFbKeys[cacheKey] = fbKey;
 			}
 
 			if (!cachedPixmap.isNull())

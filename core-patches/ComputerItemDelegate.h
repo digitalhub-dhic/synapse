@@ -54,5 +54,6 @@ private:
 
 	QMap<QUuid, QPixmap> m_featurePixmaps;
 	mutable QPointer<VeyonMaster> m_master;
+	mutable QHash<QString, qint64> m_lastFbKeys;
 
 };
