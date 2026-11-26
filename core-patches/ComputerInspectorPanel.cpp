@@ -261,13 +261,10 @@ void ComputerInspectorPanel::updateQuickStats()
 	{
 		if( ctrl && ctrl->state() == ComputerControlInterface::State::Connected )
 		{
+			online++;
 			if( ctrl->userLoginName().trimmed().isEmpty() )
 			{
 				idle++;
-			}
-			else
-			{
-				online++;
 			}
 		}
 		else
@@ -278,8 +275,8 @@ void ComputerInspectorPanel::updateQuickStats()
 
 	if( m_statTotalVal ) m_statTotalVal->setText( QString::number( total ) );
 	if( m_statOnlineVal ) m_statOnlineVal->setText( QString::number( online ) );
-	if( m_statOfflineVal ) m_statOfflineVal->setText( QString::number( offline ) );
 	if( m_statIdleVal ) m_statIdleVal->setText( QString::number( idle ) );
+	if( m_statOfflineVal ) m_statOfflineVal->setText( QString::number( offline ) );
 }
 
 
