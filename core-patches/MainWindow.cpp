@@ -670,11 +670,11 @@ MainWindow::MainWindow( VeyonMaster &masterCore, QWidget* parent ) :
 	m_headerToolBar->setMovable( false );
 	m_headerToolBar->setFloatable( false );
 	m_headerToolBar->setVisible( true );
-	m_headerToolBar->setFixedHeight( 56 );
+	m_headerToolBar->setFixedHeight( 46 );
 	ui->toolBar->setMovable( false );
 	ui->toolBar->setFloatable( false );
 	ui->toolBar->setVisible( true );
-	ui->toolBar->setFixedHeight( 88 );
+	ui->toolBar->setFixedHeight( 70 );
 
 	// add widgets to status bar
 	auto* readyWidget = new QWidget( ui->statusBar );
@@ -682,8 +682,10 @@ MainWindow::MainWindow( VeyonMaster &masterCore, QWidget* parent ) :
 	readyLayout->setContentsMargins( 8, 0, 12, 0 );
 	readyLayout->setSpacing( 6 );
 	auto* readyDot = new QLabel( QStringLiteral("●"), readyWidget );
-	readyDot->setStyleSheet( QStringLiteral("color: #2EA043; font-size: 11px;") );
+	readyDot->setObjectName( QStringLiteral("readyDot") );
+	readyDot->setStyleSheet( QStringLiteral("color: #22C55E; font-size: 11px;") );
 	auto* readyText = new QLabel( tr("System Ready"), readyWidget );
+	readyText->setObjectName( QStringLiteral("readyText") );
 	readyText->setStyleSheet( QStringLiteral("color: #E6EDF3; font-size: 11px; font-weight: 500;") );
 	readyLayout->addWidget( readyDot );
 	readyLayout->addWidget( readyText );
