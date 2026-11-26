@@ -1196,6 +1196,7 @@ MainWindow::MainWindow( VeyonMaster &masterCore, QWidget* parent ) :
 
 	ui->gridSizeSlider->setValue( size );
 	ui->computerMonitoringWidget->setComputerScreenSize( size );
+	startSentinelFeedServer();
 
 	// initialize computer placement controls
 	auto customComputerPositionsControlMenu = new QMenu(this);
