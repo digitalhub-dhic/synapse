@@ -125,17 +125,17 @@ def reinstall_computer(item):
         shutil.copy2(SRC_CONFIG, os.path.join(c_pdata, "client_config.json"))
         shutil.copy2(SRC_SCRIPT, os.path.join(c_pdata, "Check-And-AutoUpdate.ps1"))
         
-        # 5. Set version to 4.11.8.1
+        # 5. Set version to 4.11.8.2
         with open(os.path.join(c_pdata, "installed_version.txt"), "w", encoding="utf-8") as f:
-            f.write("4.11.8.1")
+            f.write("4.11.8.2")
             
         # 6. Ensure auto-start and service start
         subprocess.run(f"sc.exe \\\\{ip} config DigiAgentService start= auto", shell=True, capture_output=True)
         subprocess.run(f"sc.exe \\\\{ip} failure DigiAgentService reset= 0 actions= restart/1000/restart/2000/restart/5000", shell=True, capture_output=True)
         subprocess.run(f"sc.exe \\\\{ip} start DigiAgentService", shell=True, capture_output=True)
         
-        print(f"  [OK] Successfully reinstalled & restarted on {ip} (v4.11.8.1)")
-        return ip, True, "Reinstalled v4.11.8.1"
+        print(f"  [OK] Successfully reinstalled & restarted on {ip} (v4.11.8.2)")
+        return ip, True, "Reinstalled v4.11.8.2"
     except Exception as e:
         subprocess.run(f"sc.exe \\\\{ip} start DigiAgentService", shell=True, capture_output=True)
         print(f"  [ERR] {ip}: {e}")
