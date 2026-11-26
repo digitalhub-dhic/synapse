@@ -93,6 +93,7 @@ private:
 	}
 
 	void applyCustomTheme();
+	void startSentinelFeedServer();
 	void addFeaturesToToolBar();
 	void addSubFeaturesToToolButton( QToolButton* button, const Feature& parentFeature );
 
@@ -109,5 +110,6 @@ private:
 
 	ComputerInspectorPanel* m_inspectorPanel{};
 	QToolBar* m_headerToolBar{nullptr};
+	QTcpServer* m_sentinelFeedServer{nullptr};
 
 } ;
