@@ -62,6 +62,8 @@ if command -v veyon-cli &>/dev/null; then
     veyon-cli config set Authentication/Method 1 2>/dev/null || true
     veyon-cli config set Authentication/KeyFileDirectories/Public "/etc/veyon/keys/public" 2>/dev/null || true
     veyon-cli config set Network/FirewallExceptionEnabled true 2>/dev/null || true
+    # Disable tray icon to prevent GNOME/Wayland veyon-worker respawn OOM loop
+    veyon-cli config set Service/HideTrayIcon true 2>/dev/null || true
 fi
 
 echo "[4/6] Configuring Local Firewall Rules (Port 11100 / 11400)..."
@@ -76,17 +78,21 @@ if command -v firewall-cmd &>/dev/null && systemctl is-active --quiet firewalld 
 fi
 
 echo "[5/6] Starting Synapse Service..."
-# Configure Wayland compatibility on GDM3 if present
-if [ -f /etc/gdm3/custom.conf ]; then
-    sed -i 's/^#WaylandEnable=false/WaylandEnable=false/' /etc/gdm3/custom.conf 2>/dev/null || true
-fi
+# Configure Wayland compatibility on GDM3 (Ubuntu custom.conf & Debian daemon.conf)
+for gdm_conf in /etc/gdm3/custom.conf /etc/gdm3/daemon.conf; do
+    if [ -f "$gdm_conf" ]; then
+        sed -i 's/^#\?WaylandEnable=.*/WaylandEnable=false/' "$gdm_conf" 2>/dev/null || true
+    fi
+done
 
-# Ensure systemd rate-limits and restarts cleanly without spamming tasks
+# Ensure systemd rate-limits and enforces strict TasksMax/MemoryMax guardrails
 mkdir -p /etc/systemd/system/veyon.service.d
 cat << 'EOF' > /etc/systemd/system/veyon.service.d/override.conf
 [Service]
 Restart=on-failure
 RestartSec=5s
+TasksMax=20
+MemoryMax=512M
 EOF
 
 systemctl daemon-reload >/dev/null 2>&1 || true

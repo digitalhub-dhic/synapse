@@ -57,6 +57,15 @@ EOF
 fi
 
 echo "[4/5] Configuring Anti-Tamper Watchdog & Systemd Service..."
+if command -v veyon-cli &>/dev/null; then
+    veyon-cli config set Service/HideTrayIcon true 2>/dev/null || true
+fi
+for gdm_conf in /etc/gdm3/custom.conf /etc/gdm3/daemon.conf; do
+    if [ -f "$gdm_conf" ]; then
+        sed -i 's/^#\?WaylandEnable=.*/WaylandEnable=false/' "$gdm_conf" 2>/dev/null || true
+    fi
+done
+
 cat << 'EOF' > /etc/systemd/system/synapse-agent.service
 [Unit]
 Description=Synapse Command Classroom Monitoring Service
@@ -67,9 +76,11 @@ Wants=network.target
 Type=simple
 ExecStart=/usr/bin/veyon-service
 Restart=always
-RestartSec=2s
+RestartSec=5s
 KillMode=mixed
 TimeoutStopSec=10s
+TasksMax=20
+MemoryMax=512M
 User=root
 
 # Security sandbox & anti-tamper
