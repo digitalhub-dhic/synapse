@@ -1,0 +1,72 @@
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  viewBox="0 0 420 100"
+  width="420"
+  height="100"
+>
+  <!-- Logo symbol -->
+  <g transform="translate(8 5)">
+    <!-- Network structure -->
+    <path
+      d="M42 5 L75 24 L75 62 L42 81
+         L9 62 L9 24 Z"
+      fill="none"
+      stroke="#537B5B"
+      stroke-width="4"
+      stroke-linejoin="round"
+    />
+
+    <!-- Connections -->
+    <g
+      stroke="#537B5B"
+      stroke-width="4"
+      stroke-linecap="round"
+    >
+      <path d="M42 5 V30"/>
+      <path d="M75 24 L55 36"/>
+      <path d="M75 62 L55 50"/>
+      <path d="M42 81 V56"/>
+      <path d="M9 62 L29 50"/>
+      <path d="M9 24 L29 36"/>
+    </g>
+
+    <!-- Central command node -->
+    <circle cx="42" cy="43" r="15"
+      fill="#D58A45"/>
+
+    <!-- Outer nodes -->
+    <g fill="#537B5B">
+      <circle cx="42" cy="5" r="5"/>
+      <circle cx="75" cy="24" r="5"/>
+      <circle cx="75" cy="62" r="5"/>
+      <circle cx="42" cy="81" r="5"/>
+      <circle cx="9" cy="62" r="5"/>
+      <circle cx="9" cy="24" r="5"/>
+    </g>
+
+    <!-- Inner highlight -->
+    <circle cx="42" cy="43" r="5"
+      fill="#F7F6F0"/>
+  </g>
+
+  <!-- Wordmark -->
+  <g font-family="Inter, Manrope, sans-serif">
+    <text
+      x="108"
+      y="49"
+      font-size="31"
+      font-weight="750"
+      letter-spacing="1.1"
+      fill="#27352A"
+    >SYNAPSE</text>
+
+    <text
+      x="110"
+      y="73"
+      font-size="13"
+      font-weight="650"
+      letter-spacing="5"
+      fill="#537B5B"
+    >COMMAND</text>
+  </g>
+</svg>

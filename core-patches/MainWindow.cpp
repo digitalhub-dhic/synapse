@@ -92,28 +92,28 @@ MainWindow::MainWindow( VeyonMaster &masterCore, QWidget* parent ) :
 		auto pDwmSetWindowAttribute = reinterpret_cast<pfnDwmSetWindowAttribute>(GetProcAddress(hDwm, "DwmSetWindowAttribute"));
 		if (pDwmSetWindowAttribute)
 		{
-			BOOL darkMode = TRUE;
+			BOOL darkMode = FALSE;
 			pDwmSetWindowAttribute(reinterpret_cast<HWND>(winId()), 20 /* DWMWA_USE_IMMERSIVE_DARK_MODE */, &darkMode, sizeof(darkMode));
 		}
 	}
 #endif
 
-	QPalette darkPalette;
-	darkPalette.setColor( QPalette::Window, QColor( 8, 14, 27 ) ); // #080e1b
-	darkPalette.setColor( QPalette::WindowText, QColor( 248, 250, 252 ) );
-	darkPalette.setColor( QPalette::Base, QColor( 12, 21, 39 ) ); // #0c1527
-	darkPalette.setColor( QPalette::AlternateBase, QColor( 16, 27, 49 ) );
-	darkPalette.setColor( QPalette::ToolTipBase, QColor( 16, 27, 49 ) );
-	darkPalette.setColor( QPalette::ToolTipText, QColor( 248, 250, 252 ) );
-	darkPalette.setColor( QPalette::Text, QColor( 248, 250, 252 ) );
-	darkPalette.setColor( QPalette::Button, QColor( 14, 23, 42 ) );
-	darkPalette.setColor( QPalette::ButtonText, QColor( 203, 213, 225 ) );
-	darkPalette.setColor( QPalette::BrightText, Qt::white );
-	darkPalette.setColor( QPalette::Highlight, QColor( 37, 99, 235 ) );
-	darkPalette.setColor( QPalette::HighlightedText, Qt::white );
-	setPalette( darkPalette );
+	QPalette sagePalette;
+	sagePalette.setColor( QPalette::Window, QColor( 0xF3, 0xF2, 0xEB ) ); // #F3F2EB Warm Alabaster
+	sagePalette.setColor( QPalette::WindowText, QColor( 0x27, 0x35, 0x2A ) ); // #27352A
+	sagePalette.setColor( QPalette::Base, QColor( 0xFF, 0xFF, 0xFF ) ); // #FFFFFF
+	sagePalette.setColor( QPalette::AlternateBase, QColor( 0xF8, 0xF7, 0xF1 ) ); // #F8F7F1
+	sagePalette.setColor( QPalette::ToolTipBase, QColor( 0x27, 0x35, 0x2A ) );
+	sagePalette.setColor( QPalette::ToolTipText, QColor( 0xFF, 0xFF, 0xFF ) );
+	sagePalette.setColor( QPalette::Text, QColor( 0x27, 0x35, 0x2A ) );
+	sagePalette.setColor( QPalette::Button, QColor( 0xFF, 0xFF, 0xFF ) );
+	sagePalette.setColor( QPalette::ButtonText, QColor( 0x27, 0x35, 0x2A ) );
+	sagePalette.setColor( QPalette::BrightText, Qt::white );
+	sagePalette.setColor( QPalette::Highlight, QColor( 0x53, 0x7B, 0x5B ) ); // #537B5B Botanical Sage
+	sagePalette.setColor( QPalette::HighlightedText, Qt::white );
+	setPalette( sagePalette );
 
-	// Cyber Cockpit Top Header Toolbar
+	// Warm Sage Enterprise Top Header Toolbar
 	m_headerToolBar = new QToolBar( tr("Header"), this );
 	m_headerToolBar->setObjectName( QStringLiteral("headerToolBar") );
 	m_headerToolBar->setMovable( false );
@@ -123,24 +123,52 @@ MainWindow::MainWindow( VeyonMaster &masterCore, QWidget* parent ) :
 	addToolBarBreak( Qt::TopToolBarArea );
 
 	auto* logo = new QLabel( m_headerToolBar );
-	logo->setFixedSize( 32, 32 );
+	logo->setFixedSize( 34, 34 );
 	logo->setAlignment( Qt::AlignCenter );
-	QPixmap logoPix( 20, 20 );
+	QPixmap logoPix( 28, 28 );
 	logoPix.fill( Qt::transparent );
 	{
 		QPainter lp( &logoPix );
 		lp.setRenderHint( QPainter::Antialiasing );
-		lp.setBrush( Qt::white );
+		// Hexagonal network structure (#537B5B)
+		const QPointF hex[6] = {
+			QPointF( 14.0, 2.5 ),
+			QPointF( 24.0, 8.2 ),
+			QPointF( 24.0, 19.8 ),
+			QPointF( 14.0, 25.5 ),
+			QPointF( 4.0, 19.8 ),
+			QPointF( 4.0, 8.2 )
+		};
+		QPolygonF hexPoly;
+		for( const auto& pt : hex ) hexPoly << pt;
+		lp.setPen( QPen( QColor( 0x53, 0x7B, 0x5B ), 1.6, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin ) );
+		lp.setBrush( Qt::NoBrush );
+		lp.drawPolygon( hexPoly );
+
+		// Spokes to center (14, 14)
+		for( const auto& pt : hex )
+		{
+			lp.drawLine( pt, QPointF( 14.0, 14.0 ) );
+		}
+
+		// Outer nodes (#537B5B)
 		lp.setPen( Qt::NoPen );
-		QPolygonF bolt;
-		bolt << QPointF( 10, 2 ) << QPointF( 4, 10 ) << QPointF( 9, 10 )
-		     << QPointF( 8, 17 ) << QPointF( 15, 8 ) << QPointF( 10, 8 );
-		lp.drawPolygon( bolt );
+		lp.setBrush( QColor( 0x53, 0x7B, 0x5B ) );
+		for( const auto& pt : hex )
+		{
+			lp.drawEllipse( pt, 2.1, 2.1 );
+		}
+
+		// Central amber command node (#D58A45) + warm inner highlight (#F7F6F0)
+		lp.setBrush( QColor( 0xD5, 0x8A, 0x45 ) );
+		lp.drawEllipse( QPointF( 14.0, 14.0 ), 5.2, 5.2 );
+		lp.setBrush( QColor( 0xF7, 0xF6, 0xF0 ) );
+		lp.drawEllipse( QPointF( 14.0, 14.0 ), 1.9, 1.9 );
 	}
 	logo->setPixmap( logoPix );
 	logo->setObjectName( QStringLiteral("logoIconLabel") );
 	logo->setStyleSheet( QStringLiteral(
-		"background-color: #2563EB; border-radius: 6px; border: 1px solid #3B82F6;"
+		"background-color: #E5EDE1; border-radius: 8px; border: 1px solid #C6D6C1;"
 	) );
 
 	auto* titleWidget = new QWidget( m_headerToolBar );
@@ -151,10 +179,10 @@ MainWindow::MainWindow( VeyonMaster &masterCore, QWidget* parent ) :
 	titleLayout->setSpacing( 2 );
 	auto* appTitle = new QLabel( QStringLiteral("Synapse Command"), titleWidget );
 	appTitle->setFixedHeight( 18 );
-	appTitle->setStyleSheet( QStringLiteral("font-size: 13px; font-weight: 700; color: #F1F5F9; letter-spacing: 0.2px; background: transparent;") );
-	auto* appSub = new QLabel( QStringLiteral("Fleet Monitoring  •  Classroom Control"), titleWidget );
+	appTitle->setStyleSheet( QStringLiteral("font-size: 13px; font-weight: 700; color: #27352A; letter-spacing: 0.2px; background: transparent;") );
+	auto* appSub = new QLabel( QStringLiteral("One network  •  Every classroom"), titleWidget );
 	appSub->setFixedHeight( 14 );
-	appSub->setStyleSheet( QStringLiteral("font-size: 10px; font-weight: 500; color: #94A3B8; letter-spacing: 0.2px; background: transparent;") );
+	appSub->setStyleSheet( QStringLiteral("font-size: 10px; font-weight: 500; color: #537B5B; letter-spacing: 0.2px; background: transparent;") );
 	titleLayout->addWidget( appTitle );
 	titleLayout->addWidget( appSub );
 
