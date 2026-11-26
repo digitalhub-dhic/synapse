@@ -104,6 +104,13 @@ void ComputerMonitoringView::setFilterPoweredOnComputers( bool enabled )
 
 
 
+void ComputerMonitoringView::setFilterOfflineComputers( bool enabled )
+{
+	dataModel()->setFilterOfflineOnly( enabled );
+}
+
+
+
 void ComputerMonitoringView::setFilterComputersWithLoggedOnUsers( bool enabled )
 {
 	dataModel()->setFilterNonEmptyUserLoginNames( enabled );
