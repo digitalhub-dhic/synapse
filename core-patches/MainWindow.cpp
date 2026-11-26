@@ -961,7 +961,15 @@ MainWindow::MainWindow( VeyonMaster &masterCore, QWidget* parent ) :
 		}
 		if (auto* bDot = findChild<QLabel*>( QStringLiteral("bellDot") ))
 		{
-			bDot->setVisible( offline > 0 );
+			bool hasAiAlerts = false;
+			QFile af( QStringLiteral("C:/SynapseViolations/live_alerts.json") );
+			if( af.exists() && af.open( QIODevice::ReadOnly ) )
+			{
+				const auto adoc = QJsonDocument::fromJson( af.readAll() );
+				hasAiAlerts = adoc.isArray() && !adoc.array().isEmpty();
+				af.close();
+			}
+			bDot->setVisible( offline > 0 || hasAiAlerts );
 		}
 		countBadge->setText( tr( "%1 Computers  •  %2 Online  •  %3 Offline  •  %4 Idle" ).arg( total ).arg( online ).arg( offline ).arg( idle ) );
 	};
