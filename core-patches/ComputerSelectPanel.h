@@ -59,6 +59,7 @@ private:
 	ComputerManager& m_computerManager;
 	QSortFilterProxyModel* m_filterProxyModel;
 	QString m_previousFilter;
-	QModelIndexList m_expandedGroups;
+	QList<QPersistentModelIndex> m_expandedGroups;
+	QTimer* m_expandTimer{ nullptr };
 
 };

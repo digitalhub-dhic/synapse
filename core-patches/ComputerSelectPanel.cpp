@@ -318,14 +318,7 @@ ComputerSelectPanel::ComputerSelectPanel( ComputerManager& computerManager, QWid
 		"QPushButton:hover { background: #dc2626; color: #ffffff; }"
 	) );
 	connect( closeButton, &QPushButton::clicked, this, [this]() {
-		if( auto* parentDock = this->parentWidget() )
-		{
-			parentDock->hide();
-		}
-		else
-		{
-			this->hide();
-		}
+		this->hide();
 	} );
 	headerLayout->addWidget( closeButton );
 
