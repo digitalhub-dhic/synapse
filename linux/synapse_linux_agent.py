@@ -245,7 +245,12 @@ class SynapseLinuxClient:
 
     def open_url(self, url):
         """Push a website to open in the active user's default browser."""
-        logging.info(f"Opening URL: {url}")
+        import shlex
+        url_str = str(url).strip()
+        if not (url_str.startswith("http://") or url_str.startswith("https://")):
+            logging.warning(f"Rejected unsafe URL scheme: {url_str}")
+            return
+        logging.info(f"Opening URL: {url_str}")
         user = get_active_gui_user()
         display = os.environ.get("DISPLAY", ":0")
         env = os.environ.copy()
@@ -254,9 +259,11 @@ class SynapseLinuxClient:
         try:
             # Run as GUI user using su or runuser if we are root
             if user and user != "root":
-                subprocess.Popen(["su", "-", user, "-c", f"DISPLAY={display} xdg-open '{url}'"], stderr=subprocess.DEVNULL)
+                safe_url = shlex.quote(url_str)
+                safe_display = shlex.quote(display)
+                subprocess.Popen(["su", "-", user, "-c", f"DISPLAY={safe_display} xdg-open {safe_url}"], stderr=subprocess.DEVNULL)
             else:
-                subprocess.Popen(["xdg-open", url], env=env, stderr=subprocess.DEVNULL)
+                subprocess.Popen(["xdg-open", url_str], env=env, stderr=subprocess.DEVNULL)
         except Exception as e:
             logging.error(f"Failed to open URL: {e}")
 

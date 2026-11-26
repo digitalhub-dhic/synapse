@@ -1433,19 +1433,6 @@ void MainWindow::addFeaturesToToolBar()
 					}
 				}
 			}
-			else if( feature.name().contains( QLatin1String("reboot"), Qt::CaseInsensitive ) )
-			{
-				const auto targets = selectedComputerControlInterfaces();
-				const int count = targets.isEmpty() ? m_master.computerControlListModel().computerControlInterfaces().count() : targets.count();
-				const QString targetDesc = targets.isEmpty() ? tr("ALL %1 computers").arg(count) : tr("%1 selected computer(s)").arg(count);
-				if( QMessageBox::question( this, tr("Confirm Disruptive Action"),
-										   tr("Are you sure you want to execute '%1' on %2?")
-										   .arg( feature.displayName(), targetDesc ),
-										   QMessageBox::Yes | QMessageBox::No, QMessageBox::No ) != QMessageBox::Yes )
-				{
-					return;
-				}
-			}
 			m_master.runFeature( feature );
 			updateModeButtonGroup();
 			if( feature.testFlag( Feature::Flag::Mode ) )
