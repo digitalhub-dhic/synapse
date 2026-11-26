@@ -26,6 +26,7 @@
 #include <QPainterPath>
 #include <QFontMetrics>
 #include <QApplication>
+#include <QMouseEvent>
 
 #include "ComputerControlListModel.h"
 #include "ComputerItemDelegate.h"
@@ -252,14 +253,23 @@ void ComputerItemDelegate::paint(QPainter* painter, const QStyleOptionViewItem& 
 		painter->drawRoundedRect(hoverBar, 4, 4);
 
 		painter->setFont(QFont(QStringLiteral("Segoe UI"), 7, QFont::DemiBold));
-		painter->setPen(QColor(230, 237, 243));
+		painter->setPen(QColor(241, 245, 249));
 		if (isOnline)
 		{
-			painter->drawText(hoverBar, Qt::AlignCenter, tr("Double-click to View • Right-click for Menu"));
+			const int third = hoverBar.width() / 3;
+			const QRect rView(hoverBar.left(), hoverBar.top(), third, hoverBar.height());
+			const QRect rCtrl(hoverBar.left() + third, hoverBar.top(), third, hoverBar.height());
+			const QRect rMsg(hoverBar.left() + third * 2, hoverBar.top(), hoverBar.width() - third * 2, hoverBar.height());
+			painter->drawText(rView, Qt::AlignCenter, tr("View"));
+			painter->drawText(rCtrl, Qt::AlignCenter, tr("Control"));
+			painter->drawText(rMsg, Qt::AlignCenter, tr("Message"));
+			painter->setPen(QColor(42, 50, 61));
+			painter->drawLine(rCtrl.left(), hoverBar.top() + 3, rCtrl.left(), hoverBar.bottom() - 3);
+			painter->drawLine(rMsg.left(), hoverBar.top() + 3, rMsg.left(), hoverBar.bottom() - 3);
 		}
 		else
 		{
-			painter->drawText(hoverBar, Qt::AlignCenter, tr("Right-click for Power On (WOL)"));
+			painter->drawText(hoverBar, Qt::AlignCenter, tr("⚡ Power On (WOL)"));
 		}
 	}
 
@@ -429,6 +439,74 @@ QSize ComputerItemDelegate::sizeHint(const QStyleOptionViewItem& option, const Q
 	w = qBound(ComputerMonitoringView::MinimumComputerScreenSize, w, ComputerMonitoringView::MaximumComputerScreenSize);
 	const int h = int((w - 12) * 9.0 / 16.0) + 64;
 	return QSize(w, h);
+}
+
+
+
+bool ComputerItemDelegate::editorEvent(QEvent* event, QAbstractItemModel* model, const QStyleOptionViewItem& option, const QModelIndex& index)
+{
+	if (event->type() == QEvent::MouseButtonRelease && index.isValid())
+	{
+		auto* me = static_cast<QMouseEvent*>(event);
+		if (me->button() == Qt::LeftButton)
+		{
+			const QRect rect = option.rect.adjusted(3, 3, -3, -3);
+			const int previewMargin = 6;
+			const int previewW = rect.width() - (previewMargin * 2);
+			const int previewH = qMax(48, rect.height() - 56);
+			const QRect previewRect(rect.left() + previewMargin, rect.top() + previewMargin, previewW, previewH);
+			const QRect hoverBar(previewRect.left() + 4, previewRect.bottom() - 22, previewRect.width() - 8, 20);
+
+			if (previewRect.height() >= 65 && hoverBar.contains(me->pos()))
+			{
+				const auto controlInterface = model->data(index, ComputerControlListModel::ControlInterfaceRole).value<ComputerControlInterface::Pointer>();
+				if (controlInterface)
+				{
+					if (!m_master)
+					{
+						m_master = VeyonCore::instance()->findChild<VeyonMaster*>();
+					}
+					if (m_master)
+					{
+						const bool isOnline = (controlInterface->state() == ComputerControlInterface::State::Connected);
+						QString targetFeat;
+						if (isOnline)
+						{
+							const int third = hoverBar.width() / 3;
+							const int relX = me->pos().x() - hoverBar.left();
+							if (relX < third)
+							{
+								targetFeat = QStringLiteral("RemoteView");
+							}
+							else if (relX < third * 2)
+							{
+								targetFeat = QStringLiteral("RemoteControl");
+							}
+							else
+							{
+								targetFeat = QStringLiteral("TextMessage");
+							}
+						}
+						else
+						{
+							targetFeat = QStringLiteral("PowerOn");
+						}
+
+						for (const auto& feat : VeyonCore::featureManager().features())
+						{
+							if (feat.name().compare(targetFeat, Qt::CaseInsensitive) == 0)
+							{
+								VeyonCore::featureManager().startFeature(*m_master, feat, { controlInterface });
+								return true;
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	return QStyledItemDelegate::editorEvent(event, model, option, index);
 }
 
 
