@@ -23,7 +23,25 @@ echo "[1/6] Detecting Linux distribution and installing client..."
 if command -v apt-get &>/dev/null; then
     export DEBIAN_FRONTEND=noninteractive
     apt-get update -qq
-    apt-get install -y -qq veyon-service veyon-plugins libfakekey0 curl jq || apt-get install -y -qq veyon-service
+    apt-get install -y -qq veyon-service veyon-plugins libfakekey0 curl jq xdg-desktop-portal pipewire || apt-get install -y -qq veyon-service
+
+    # Upgrade to Veyon 4.11+ (native Wayland PipeWire support) if distro ships < 4.11
+    VEYON_VER=$(veyon-cli --version 2>/dev/null | grep -oE '[0-9]+\.[0-9]+' | head -n1 || echo "0.0")
+    if [ -n "$VEYON_VER" ] && awk "BEGIN {exit !($VEYON_VER < 4.11)}"; then
+        echo "  [*] Detected Veyon $VEYON_VER (< 4.11). Checking for Veyon 4.11+ package..."
+        if grep -qi "ubuntu" /etc/os-release 2>/dev/null && command -v add-apt-repository &>/dev/null; then
+            add-apt-repository -y ppa:veyon/stable >/dev/null 2>&1 || true
+            apt-get update -qq >/dev/null 2>&1 || true
+            apt-get install -y -qq veyon-service veyon-plugins >/dev/null 2>&1 || true
+        else
+            CODENAME=$(. /etc/os-release 2>/dev/null && echo "${VERSION_CODENAME:-bookworm}")
+            DEB_URL=$(curl -sSL https://api.github.com/repos/veyon/veyon/releases/latest 2>/dev/null | jq -r ".assets[]?.browser_download_url | select(test(\"${CODENAME}.*amd64\\\\.deb$|debian.*amd64\\\\.deb$\"))" | head -n1 || true)
+            if [ -n "$DEB_URL" ] && [ "$DEB_URL" != "null" ]; then
+                curl -sSL "$DEB_URL" -o /tmp/veyon-latest.deb && apt-get install -y -qq /tmp/veyon-latest.deb || true
+                rm -f /tmp/veyon-latest.deb
+            fi
+        fi
+    fi
 elif command -v dnf &>/dev/null; then
     dnf install -y -q veyon veyon-service curl jq || dnf install -y -q veyon
 elif command -v pacman &>/dev/null; then
@@ -66,6 +84,19 @@ if command -v veyon-cli &>/dev/null; then
     veyon-cli config set Service/HideTrayIcon true 2>/dev/null || true
 fi
 
+# Direct INI fallback so HideTrayIcon=true is guaranteed even without Session DBus
+for conf_dir in "/etc/xdg/Veyon Solutions" "/etc/veyon"; do
+    mkdir -p "$conf_dir"
+    conf_file="$conf_dir/Veyon.conf"
+    if [ -f "$conf_file" ]; then
+        if grep -q "^\[Service\]" "$conf_file"; then
+            grep -q "^HideTrayIcon=" "$conf_file" && sed -i 's/^HideTrayIcon=.*/HideTrayIcon=true/' "$conf_file" || sed -i '/^\[Service\]/a HideTrayIcon=true' "$conf_file"
+        else
+            printf "\n[Service]\nHideTrayIcon=true\n" >> "$conf_file"
+        fi
+    fi
+done
+
 echo "[4/6] Configuring Local Firewall Rules (Port 11100 / 11400)..."
 if command -v ufw &>/dev/null && ufw status 2>/dev/null | grep -qw "active"; then
     ufw allow 11100/tcp comment 'Synapse Classroom Monitoring' >/dev/null 2>&1 || true
@@ -78,22 +109,29 @@ if command -v firewall-cmd &>/dev/null && systemctl is-active --quiet firewalld 
 fi
 
 echo "[5/6] Starting Synapse Service..."
-# Configure Wayland compatibility on GDM3 (Ubuntu custom.conf & Debian daemon.conf)
-for gdm_conf in /etc/gdm3/custom.conf /etc/gdm3/daemon.conf; do
-    if [ -f "$gdm_conf" ]; then
-        sed -i 's/^#\?WaylandEnable=.*/WaylandEnable=false/' "$gdm_conf" 2>/dev/null || true
-    fi
-done
+VEYON_VER=$(veyon-cli --version 2>/dev/null | grep -oE '[0-9]+\.[0-9]+' | head -n1 || echo "0.0")
+IS_LEGACY_VEYON=$(awk "BEGIN {print ($VEYON_VER < 4.11) ? 1 : 0}" 2>/dev/null || echo "1")
 
-# Ensure systemd rate-limits and enforces strict TasksMax/MemoryMax guardrails
-mkdir -p /etc/systemd/system/veyon.service.d
-cat << 'EOF' > /etc/systemd/system/veyon.service.d/override.conf
+# Only force X11 in GDM3 if Veyon < 4.11 (4.11+ supports Wayland natively via PipeWire)
+if [ "$IS_LEGACY_VEYON" = "1" ]; then
+    for gdm_conf in /etc/gdm3/custom.conf /etc/gdm3/daemon.conf; do
+        if [ -f "$gdm_conf" ]; then
+            sed -i 's/^#\?WaylandEnable=.*/WaylandEnable=false/' "$gdm_conf" 2>/dev/null || true
+        fi
+    done
+fi
+
+# Ensure systemd rate-limits and enforces strict TasksMax/MemoryMax guardrails on both unit names
+for unit_dir in /etc/systemd/system/veyon.service.d /etc/systemd/system/veyon-service.service.d; do
+    mkdir -p "$unit_dir"
+    cat << 'EOF' > "$unit_dir/limits.conf"
 [Service]
 Restart=on-failure
 RestartSec=5s
 TasksMax=20
 MemoryMax=512M
 EOF
+done
 
 systemctl daemon-reload >/dev/null 2>&1 || true
 
