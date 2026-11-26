@@ -559,10 +559,11 @@ void ComputerInspectorPanel::rebuildComputerTab()
 		{
 			m_currentComputerIndex = 0;
 		}
-		m_computerSelectorCombo->setCurrentIndex( m_currentComputerIndex );
+		const int comboIdx = ( m_currentComputerIndex == -1 ) ? m_selectedInterfaces.size() : m_currentComputerIndex;
+		m_computerSelectorCombo->setCurrentIndex( comboIdx );
 
 		connect( m_computerSelectorCombo, QOverload<int>::of( &QComboBox::currentIndexChanged ), this, [this]( int idx ) {
-			m_currentComputerIndex = idx;
+			m_currentComputerIndex = m_computerSelectorCombo->itemData( idx ).toInt();
 			QTimer::singleShot( 0, this, [this]() { rebuildComputerTab(); } );
 		} );
 
