@@ -24,6 +24,7 @@
 
 #pragma once
 
+#include <QHash>
 #include <QPixmapCache>
 #include <QPointer>
 #include <QStyledItemDelegate>
