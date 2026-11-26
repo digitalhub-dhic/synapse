@@ -278,6 +278,37 @@ void ComputerInspectorPanel::updateQuickStats()
 	if( m_statOnlineVal ) m_statOnlineVal->setText( QString::number( online ) );
 	if( m_statIdleVal ) m_statIdleVal->setText( QString::number( idle ) );
 	if( m_statOfflineVal ) m_statOfflineVal->setText( QString::number( offline ) );
+
+	// Refresh live Details Tab telemetry
+	if( m_detailVersionVal )
+	{
+		m_detailVersionVal->setText( VeyonCore::versionString() );
+	}
+	if( m_selectedInterfaces.size() == 1 && m_selectedInterfaces.first() )
+	{
+		const auto& sel = m_selectedInterfaces.first();
+		if( m_detailTargetVal ) m_detailTargetVal->setText( sel->computerName().isEmpty() ? tr("Unknown") : sel->computerName() );
+		if( m_detailIpVal ) m_detailIpVal->setText( sel->computer().hostAddress() );
+		if( m_detailUserVal ) m_detailUserVal->setText( sel->userLoginName().isEmpty() ? tr("None (Logon Screen)") : sel->userLoginName() );
+		if( m_detailStateVal ) m_detailStateVal->setText( sel->state() == ComputerControlInterface::State::Connected ? tr("Online (VNC Live)") : tr("Offline") );
+		if( m_detailScreensVal ) m_detailScreensVal->setText( QString::number( qMax( 1, sel->screens().size() ) ) );
+	}
+	else if( m_selectedInterfaces.size() > 1 )
+	{
+		if( m_detailTargetVal ) m_detailTargetVal->setText( tr("%1 Selected Workstations").arg( m_selectedInterfaces.size() ) );
+		if( m_detailIpVal ) m_detailIpVal->setText( tr("Batch Mode") );
+		if( m_detailUserVal ) m_detailUserVal->setText( tr("Multiple") );
+		if( m_detailStateVal ) m_detailStateVal->setText( tr("%1 Online / %2 Total").arg( online ).arg( total ) );
+		if( m_detailScreensVal ) m_detailScreensVal->setText( QStringLiteral("—") );
+	}
+	else
+	{
+		if( m_detailTargetVal ) m_detailTargetVal->setText( tr("Global Fleet (%1)").arg( total ) );
+		if( m_detailIpVal ) m_detailIpVal->setText( tr("All Subnets") );
+		if( m_detailUserVal ) m_detailUserVal->setText( tr("%1 Active Users").arg( qMax( 0, online - idle ) ) );
+		if( m_detailStateVal ) m_detailStateVal->setText( tr("%1 Online / %2 Offline").arg( online ).arg( offline ) );
+		if( m_detailScreensVal ) m_detailScreensVal->setText( QString::number( total ) );
+	}
 }
 
 
