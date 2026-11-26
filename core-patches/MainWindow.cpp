@@ -1492,6 +1492,77 @@ void MainWindow::applyCustomTheme()
 
 
 
+void MainWindow::startSentinelFeedServer()
+{
+	if( m_sentinelFeedServer )
+	{
+		return;
+	}
+	m_sentinelFeedServer = new QTcpServer( this );
+	if( !m_sentinelFeedServer->listen( QHostAddress::LocalHost, 11410 ) )
+	{
+		return;
+	}
+
+	connect( m_sentinelFeedServer, &QTcpServer::newConnection, this, [this]() {
+		while( m_sentinelFeedServer->hasPendingConnections() )
+		{
+			auto* sock = m_sentinelFeedServer->nextPendingConnection();
+			connect( sock, &QTcpSocket::readyRead, this, [this, sock]() {
+				const QByteArray req = sock->readAll();
+				if( !req.contains( "GET /frames" ) )
+				{
+					sock->write( "HTTP/1.1 404 Not Found\r\nContent-Length: 0\r\nConnection: close\r\n\r\n" );
+					sock->disconnectFromHost();
+					return;
+				}
+
+				QJsonArray arr;
+				for( const auto& ci : m_master.allComputerControlInterfaces() )
+				{
+					if( !ci || ci->state() != ComputerControlInterface::State::Connected )
+					{
+						continue;
+					}
+					const QImage fb = ci->framebuffer();
+					if( fb.isNull() )
+					{
+						continue;
+					}
+					const QImage scaled = ( fb.width() > 640 )
+						? fb.scaledToWidth( 640, Qt::FastTransformation )
+						: fb;
+					QByteArray jpgBytes;
+					QBuffer buf( &jpgBytes );
+					buf.open( QIODevice::WriteOnly );
+					scaled.save( &buf, "JPEG", 75 );
+
+					QJsonObject obj;
+					obj.insert( QStringLiteral("name"), ci->computerName() );
+					obj.insert( QStringLiteral("ip"), ci->computer().hostAddress().toString() );
+					obj.insert( QStringLiteral("user"), ci->userLoginName() );
+					obj.insert( QStringLiteral("frame_b64"), QString::fromLatin1( jpgBytes.toBase64() ) );
+					arr.append( obj );
+				}
+
+				QJsonObject root;
+				root.insert( QStringLiteral("computers"), arr );
+				const QByteArray body = QJsonDocument( root ).toJson( QJsonDocument::Compact );
+
+				const QByteArray hdr = "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: "
+					+ QByteArray::number( body.size() )
+					+ "\r\nConnection: close\r\n\r\n";
+				sock->write( hdr );
+				sock->write( body );
+				sock->disconnectFromHost();
+			} );
+			connect( sock, &QTcpSocket::disconnected, sock, &QTcpSocket::deleteLater );
+		}
+	} );
+}
+
+
+
 void MainWindow::addFeaturesToToolBar()
 {
 	QMap<QString, Feature> featureMap;
