@@ -1543,7 +1543,7 @@ void MainWindow::startSentinelFeedServer()
 					return;
 				}
 				const QByteArray headers = req.left( headerEnd );
-				const QByteArray body = req.mid( headerEnd + 4 );
+				const QByteArray requestBody = req.mid( headerEnd + 4 );
 				int contentLength = 0;
 				for( const auto& line : headers.split( '\n' ) )
 				{
@@ -1558,7 +1558,7 @@ void MainWindow::startSentinelFeedServer()
 					sock->disconnectFromHost();
 					return;
 				}
-				if( body.size() < contentLength )
+				if( requestBody.size() < contentLength )
 				{
 					return;
 				}
@@ -1574,7 +1574,7 @@ void MainWindow::startSentinelFeedServer()
 				if( requestLine.startsWith( "POST /screenshot " ) )
 				{
 					QJsonParseError parseError;
-					const auto requestDoc = QJsonDocument::fromJson( body.left( contentLength ), &parseError );
+					const auto requestDoc = QJsonDocument::fromJson( requestBody.left( contentLength ), &parseError );
 					const QString requestedIp = requestDoc.object().value( QStringLiteral("ip") ).toString().trimmed();
 					if( parseError.error != QJsonParseError::NoError || !requestDoc.isObject() || requestedIp.isEmpty() )
 					{

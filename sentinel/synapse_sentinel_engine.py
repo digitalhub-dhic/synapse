@@ -625,9 +625,16 @@ class SynapseAISentinel:
                 logging.info(f"⚠️ Candidate violation on {comp_name} ({ip}): {reason} [{cand['count']}/{required_cycles}]")
 
                 if cand["count"] >= required_cycles:
-                    # CONFIRMED VIOLATION
-                    evidence_path = self.save_evidence_image(comp_name, ip, reason, screen_crop, master_screenshot)
-                    self.lock_computer(comp_name, ip, reason, evidence_path)
+                    # Keep fallback detections on the same screenshot-and-review
+                    # path as direct frame detections.
+                    evidence_path, capture_error = self.capture_existing_screenshot(ip, comp_name, reason)
+                    if capture_error:
+                        logging.error(f"Built-in Screenshot failed for {comp_name} ({ip}): {capture_error}")
+                    if self.config.get("auto_freeze", False):
+                        self.lock_computer(comp_name, ip, reason, evidence_path)
+                        self.publish_live_alert(comp_name, ip, reason, evidence_path, 0.78, "LOCKED", capture_error)
+                    else:
+                        self.publish_live_alert(comp_name, ip, reason, evidence_path, 0.78, "ALERT", capture_error)
                     del self.violation_candidates[ip]
             else:
                 # Reset candidate count on clean frame
