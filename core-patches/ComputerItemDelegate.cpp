@@ -334,8 +334,8 @@ void ComputerItemDelegate::paint(QPainter* painter, const QStyleOptionViewItem& 
 	QColor statusDotColor;
 	if (isOnline)
 	{
-		statusDotColor = QColor(37, 99, 235);
-		painter->setBrush(QColor(37, 99, 235, 50));
+		statusDotColor = QColor(34, 197, 94); // #22C55E Semantic Online Green
+		painter->setBrush(QColor(34, 197, 94, 45));
 		painter->setPen(Qt::NoPen);
 		painter->drawEllipse(dotCenter, 6, 6);
 	}

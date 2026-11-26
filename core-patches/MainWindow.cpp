@@ -1006,22 +1006,28 @@ MainWindow::MainWindow( VeyonMaster &masterCore, QWidget* parent ) :
 	centralVBox->addWidget( subHeader );
 	centralVBox->addWidget( mainSplitter, 1 );
 
-	// Ensure both Locations and Inspector sidebars are open and sized appropriately on startup
-	ui->computerSelectPanelButton->setChecked( true );
-	computerSelectPanel->show();
+	// Restore saved splitter layout if valid; otherwise apply clean 4-pane defaults
+	const auto savedMainSizes = m_master.userConfig().splitterStates()[mainSplitter->objectName()].toArray();
+	if( savedMainSizes.size() != 4 )
+	{
+		ui->computerSelectPanelButton->setChecked( true );
+		computerSelectPanel->show();
 
-	inspectorPanelButton->setChecked( true );
-	m_inspectorPanel->show();
+		inspectorPanelButton->setChecked( true );
+		m_inspectorPanel->show();
+
+		mainSplitter->setSizes( { 200, 0, 800, 260 } );
+	}
 
 	computerSelectPanel->setMinimumWidth( 160 );
-	computerSelectPanel->setMaximumWidth( 220 );
+	computerSelectPanel->setMaximumWidth( 260 );
 	m_inspectorPanel->setMinimumWidth( 220 );
-	m_inspectorPanel->setMaximumWidth( 280 );
+	m_inspectorPanel->setMaximumWidth( 300 );
 
 	mainSplitter->setStretchFactor( 0, 0 );
-	mainSplitter->setStretchFactor( 1, 1 );
-	mainSplitter->setStretchFactor( 2, 0 );
-	mainSplitter->setSizes( { 176, 800, 224 } );
+	mainSplitter->setStretchFactor( 1, 0 );
+	mainSplitter->setStretchFactor( 2, 1 );
+	mainSplitter->setStretchFactor( 3, 0 );
 
 	// initialize filter controls
 	connect( ui->filterLineEdit, &QLineEdit::textChanged,
