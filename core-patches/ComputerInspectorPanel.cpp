@@ -155,8 +155,9 @@ void ComputerInspectorPanel::setupUi()
 	auto* titleLabel = new QLabel( tr( "Inspector" ), inspectorHeader );
 	titleLabel->setStyleSheet( QStringLiteral( "font-size: 12px; font-weight: 700; color: #E6EDF3;" ) );
 
-	auto* subtitleLabel = new QLabel( tr( "Computer Controls" ), inspectorHeader );
-	subtitleLabel->setStyleSheet( QStringLiteral( "font-size: 10px; color: #6B7280;" ) );
+	auto* subtitleLabel = new QLabel( tr( "Fleet Overview" ), inspectorHeader );
+	subtitleLabel->setObjectName( QStringLiteral("inspectorSubtitleLabel") );
+	subtitleLabel->setStyleSheet( QStringLiteral( "font-size: 10px; color: #94A3B8;" ) );
 
 	headerLayout->addWidget( titleLabel );
 	headerLayout->addStretch( 1 );
