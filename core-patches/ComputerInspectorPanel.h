@@ -126,6 +126,14 @@ private:
 	// Footer Components
 	QLabel* m_footerClockLabel{};
 
+	// Live Details Tab Labels
+	QLabel* m_detailVersionVal{};
+	QLabel* m_detailTargetVal{};
+	QLabel* m_detailIpVal{};
+	QLabel* m_detailUserVal{};
+	QLabel* m_detailStateVal{};
+	QLabel* m_detailScreensVal{};
+
 	// Timers and State
 	QMap<QString, CountdownItem> m_activeCountdowns;
 	QMap<QString, QList<CountdownUiSet>> m_countdownUiMap;

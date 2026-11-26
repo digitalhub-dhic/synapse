@@ -857,18 +857,27 @@ MainWindow::MainWindow( VeyonMaster &masterCore, QWidget* parent ) :
 	countsTimer->setSingleShot( true );
 	countsTimer->setInterval( 250 );
 
-	auto updateCounts = [this, countBadge]() {
+	auto updateCounts = [this, countBadge, locationTitle]() {
 		const auto* model = ui->computerMonitoringWidget->model();
 		const int total = model ? model->rowCount() : 0;
 		int online = 0;
 		int offline = 0;
 		int idle = 0;
+		QStringList locations;
 		if (model)
 		{
 			for (int r = 0; r < total; ++r)
 			{
 				const auto idx = model->index(r, 0);
 				const auto ci = model->data(idx, ComputerControlListModel::ControlInterfaceRole).value<ComputerControlInterface::Pointer>();
+				if (ci)
+				{
+					const QString loc = ci->computer().location();
+					if (!loc.isEmpty() && !locations.contains(loc))
+					{
+						locations.append(loc);
+					}
+				}
 				if (ci && ci->state() == ComputerControlInterface::State::Connected)
 				{
 					online++;
@@ -882,6 +891,22 @@ MainWindow::MainWindow( VeyonMaster &masterCore, QWidget* parent ) :
 					offline++;
 				}
 			}
+		}
+		if (locations.isEmpty())
+		{
+			locationTitle->setText( tr( "All Locations" ) );
+		}
+		else if (locations.size() <= 2)
+		{
+			locationTitle->setText( locations.join( QStringLiteral("  •  ") ) );
+		}
+		else
+		{
+			locationTitle->setText( tr( "%1 Locations" ).arg( locations.size() ) );
+		}
+		if (auto* bDot = findChild<QLabel*>( QStringLiteral("bellDot") ))
+		{
+			bDot->setVisible( offline > 0 );
 		}
 		countBadge->setText( tr( "%1 Computers  •  %2 Online  •  %3 Offline  •  %4 Idle" ).arg( total ).arg( online ).arg( offline ).arg( idle ) );
 	};
