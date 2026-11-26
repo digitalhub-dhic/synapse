@@ -209,10 +209,46 @@ MainWindow::MainWindow( VeyonMaster &masterCore, QWidget* parent ) :
 		"QToolButton#bellButton:hover { border-color: #2563EB; background-color: #1F2630; color: #FFFFFF; }"
 	) );
 	auto* bellDot = new QLabel( bellBtn );
+	bellDot->setObjectName( QStringLiteral("bellDot") );
 	bellDot->setFixedSize( 6, 6 );
 	bellDot->setStyleSheet( QStringLiteral( "background-color: #EF4444; border-radius: 3px; border: 1px solid #101827;" ) );
 	bellDot->move( 18, 3 );
-	bellDot->show();
+	bellDot->hide();
+	bellBtn->setToolTip( tr( "Fleet Alerts" ) );
+	connect( bellBtn, &QToolButton::clicked, this, [this, bellBtn]() {
+		auto* menu = new QMenu( this );
+		menu->setAttribute( Qt::WA_DeleteOnClose );
+		menu->setStyleSheet( QStringLiteral(
+			"QMenu { background-color: #0F172A; border: 1px solid #1E293B; border-radius: 8px; padding: 6px; color: #F1F5F9; }"
+			"QMenu::item { padding: 6px 12px; border-radius: 4px; font-size: 11px; }"
+			"QMenu::item:selected { background-color: #172554; }"
+		) );
+		const auto& all = m_master.allComputerControlInterfaces();
+		int offlineCount = 0;
+		for( const auto& ci : all )
+		{
+			if( ci && ci->state() != ComputerControlInterface::State::Connected )
+			{
+				offlineCount++;
+				if( offlineCount <= 8 )
+				{
+					const QString name = ci->computerName().isEmpty() ? ci->computer().hostAddress() : ci->computerName();
+					menu->addAction( tr( "Offline: %1" ).arg( name ) );
+				}
+			}
+		}
+		if( offlineCount == 0 )
+		{
+			auto* okAct = menu->addAction( tr( "All %1 workstations online" ).arg( all.size() ) );
+			okAct->setEnabled( false );
+		}
+		else if( offlineCount > 8 )
+		{
+			auto* moreAct = menu->addAction( tr( "...and %1 more offline" ).arg( offlineCount - 8 ) );
+			moreAct->setEnabled( false );
+		}
+		menu->popup( bellBtn->mapToGlobal( QPoint( 0, bellBtn->height() + 4 ) ) );
+	} );
 	m_headerToolBar->addWidget( bellBtn );
 
 	auto* settingsBtn = new QToolButton( m_headerToolBar );
