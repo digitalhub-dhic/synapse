@@ -23,6 +23,7 @@
 #include <QComboBox>
 #include <QInputDialog>
 #include <QMenu>
+#include <QMessageBox>
 #include <QStackedWidget>
 
 // Custom painted laptop illustration widget matching the mockup

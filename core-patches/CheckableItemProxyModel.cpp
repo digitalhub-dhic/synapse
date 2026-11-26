@@ -172,16 +172,10 @@ void CheckableItemProxyModel::loadStates( const QJsonArray& data )
 	for( const auto& item : data )
 	{
 		const QUuid uid = QUuid( item.toString() );
-		const auto indexList = match( index( 0, 0 ), m_uidRole, uid, 1, // clazy:exclude=inefficient-qlist
-									  Qt::MatchExactly | Qt::MatchRecursive );
-		if( indexList.isEmpty() == false &&
-				hasChildren( indexList.first() ) == false )
+		if( !uid.isNull() )
 		{
-			setData( indexList.first(), Qt::Checked, Qt::CheckStateRole );
+			m_checkStates[uid] = Qt::Checked;
 		}
-
-		// allow items being added dynamically even if we can't propagate the check state at the moment
-		m_checkStates[uid] = Qt::Checked;
 	}
 
 	endResetModel();

@@ -132,7 +132,13 @@ def enroll_computer(name, host, mac="", location=TARGET_LOCATION):
         print(f"[AUTO-ENROLL ERR] {e}")
         return False
 
+sync_lock = threading.Lock()
+
 def sync_device(name, current_ip, mac=""):
+    with sync_lock:
+        return _sync_device_impl(name, current_ip, mac)
+
+def _sync_device_impl(name, current_ip, mac=""):
     """
     Intelligently registers or updates computers without creating duplicates.
     1. If MAC matches an existing entry, update IP if changed.
