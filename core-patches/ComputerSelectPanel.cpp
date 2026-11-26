@@ -403,7 +403,10 @@ ComputerSelectPanel::ComputerSelectPanel( ComputerManager& computerManager, QWid
 	ui->addLocationButton->setVisible( VeyonCore::config().showCurrentLocationOnly() &&
 									   VeyonCore::config().allowAddingHiddenLocations() );
 
-	ui->filterLineEdit->hide();
+	ui->filterLineEdit->setPlaceholderText( tr( "Filter locations / computers..." ) );
+	ui->filterLineEdit->setClearButtonEnabled( true );
+	ui->filterLineEdit->setFixedHeight( 28 );
+	ui->filterLineEdit->setVisible( true );
 
 	connect( ui->filterLineEdit, &QLineEdit::textChanged,
 			 this, &ComputerSelectPanel::updateFilter );

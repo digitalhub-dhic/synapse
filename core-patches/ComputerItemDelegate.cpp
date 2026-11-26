@@ -65,20 +65,20 @@ void ComputerItemDelegate::paint(QPainter* painter, const QStyleOptionViewItem& 
 
 	if (isSelected)
 	{
-		painter->fillPath(cardPath, QColor(30, 41, 59));
-		painter->setPen(QPen(QColor(56, 189, 248), 1.5));
+		painter->fillPath(cardPath, QColor(23, 37, 84)); // #172554 WCAG AA selection
+		painter->setPen(QPen(QColor(59, 130, 246), 1.5)); // #3B82F6 focus border
 		painter->drawPath(cardPath);
 	}
 	else if (isHovered)
 	{
-		painter->fillPath(cardPath, QColor(31, 38, 48));
-		painter->setPen(QPen(QColor(56, 189, 248), 1.0));
+		painter->fillPath(cardPath, QColor(22, 32, 50)); // #162032 elevated hover
+		painter->setPen(QPen(QColor(59, 130, 246), 1.0));
 		painter->drawPath(cardPath);
 	}
 	else
 	{
-		painter->fillPath(cardPath, QColor(15, 23, 42));
-		painter->setPen(QPen(QColor(42, 50, 61), 1.0));
+		painter->fillPath(cardPath, QColor(15, 22, 36)); // #0F1624 surface
+		painter->setPen(QPen(QColor(30, 41, 59), 1.0)); // #1E293B subtle border
 		painter->drawPath(cardPath);
 	}
 
@@ -268,17 +268,17 @@ void ComputerItemDelegate::paint(QPainter* painter, const QStyleOptionViewItem& 
 	// 4. Badges on top of preview
 	if (isOnline)
 	{
-		// Pill badge in top right: "● LIVE"
+		// Pill badge in top right: "● LIVE" (strictly semantic green #22C55E)
 		const QRect badgeRect(previewRect.right() - 48, previewRect.top() + 5, 44, 16);
-		painter->setBrush(QColor(9, 14, 26, 230));
-		painter->setPen(QPen(QColor(37, 99, 235), 1));
+		painter->setBrush(QColor(9, 13, 22, 230));
+		painter->setPen(QPen(QColor(34, 197, 94, 180), 1));
 		painter->drawRoundedRect(badgeRect, 8, 8);
 
-		painter->setBrush(QColor(37, 99, 235));
+		painter->setBrush(QColor(34, 197, 94));
 		painter->setPen(Qt::NoPen);
 		painter->drawEllipse(QPoint(badgeRect.left() + 7, badgeRect.center().y()), 3, 3);
 
-		painter->setPen(QColor(52, 211, 153));
+		painter->setPen(QColor(74, 222, 128));
 		painter->setFont(QFont(QStringLiteral("Segoe UI"), 6, QFont::Bold));
 		painter->drawText(QRect(badgeRect.left() + 11, badgeRect.top(), badgeRect.width() - 12, badgeRect.height()),
 						  Qt::AlignCenter, QStringLiteral("LIVE"));
