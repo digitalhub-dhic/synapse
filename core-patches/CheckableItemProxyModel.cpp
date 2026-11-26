@@ -125,18 +125,20 @@ void CheckableItemProxyModel::updateNewRows(const QModelIndex &parent, int first
 				setData( index( i, 0, parent ), Qt::Checked, Qt::CheckStateRole );
 			}
 		}
-		else if( parentState == Qt::Unchecked )
+		else if( parentState == Qt::Unchecked || parentState == Qt::PartiallyChecked )
 		{
 			// make sure parent is (partially) checked if one of the newly inserted items was checked previously
-			for( int i = first; i <= last; ++i )
+			bool allChecked = true;
+			bool anyChecked = false;
+			const int total = rowCount( parent );
+			for( int i = 0; i < total; ++i )
 			{
-				if (data(index(i, 0, parent), Qt::CheckStateRole).value<Qt::CheckState>() == Qt::Checked)
-				{
-					parentState = Qt::Checked;
-				}
+				const auto st = data( index( i, 0, parent ), Qt::CheckStateRole ).value<Qt::CheckState>();
+				if( st == Qt::Checked ) anyChecked = true;
+				else allChecked = false;
 			}
-
-			setParentData( parent, parentState );
+			const auto newParentState = allChecked ? Qt::Checked : ( anyChecked ? Qt::PartiallyChecked : Qt::Unchecked );
+			setParentData( parent, newParentState );
 		}
 	}
 }
