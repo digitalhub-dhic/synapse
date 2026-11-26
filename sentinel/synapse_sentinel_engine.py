@@ -55,6 +55,9 @@ DEFAULT_CONFIG = {
     "confirmation_cycles": 2,  # Must be seen across 2 checks to avoid false positives
     "lock_cooldown_seconds": 30,  # Don't re-lock host within 30s
     "confidence_threshold": 0.65,
+    "ai_alerts_enabled": False,  # Enable only after validating local thresholds on labeled screens.
+    "ai_min_similarity": 0.20,
+    "ai_min_margin": 0.08,
     "detection_targets": {
         "sports_streams": True,
         "movies_streaming": True,
@@ -100,6 +103,8 @@ class SynapseAISentinel:
         self.locked_hosts = {}           # host -> { "lock_time": float, "reason": str }
         self.recent_violations = []      # list of recent events for UI
         self.last_master_crop = None
+        self._ort_session = None
+        self._text_embs = None
         self.load_network_catalog()
         self.load_audit_log()
 
@@ -279,32 +284,62 @@ class SynapseAISentinel:
         targets = self.config.get("detection_targets", {})
         r, g, b = arr[:, :, 0].astype(int), arr[:, :, 1].astype(int), arr[:, :, 2].astype(int)
 
-        # --- Optional ONNX Vision Model (MobileCLIP-S0) if installed locally ---
-        onnx_model_path = os.path.join(BASE_DIR, "models", "mobileclip_s0_image.onnx")
-        onnx_emb_path = os.path.join(BASE_DIR, "models", "text_embeddings.npz")
+        # --- Local-only ONNX vision model (SigLIP, CPUExecutionProvider) ---
+        model_dir = os.path.join(BASE_DIR, "models", "siglip-base-patch16-224")
+        quantized_model_path = os.path.join(model_dir, "image", "model-int8.onnx")
+        onnx_model_path = quantized_model_path if os.path.exists(quantized_model_path) else os.path.join(model_dir, "image", "model.onnx")
+        onnx_emb_path = os.path.join(model_dir, "text_embeddings.npz")
         if os.path.exists(onnx_model_path) and os.path.exists(onnx_emb_path):
             try:
                 import onnxruntime as ort
-                if not hasattr(self, "_ort_session"):
-                    self._ort_session = ort.InferenceSession(onnx_model_path, providers=["CPUExecutionProvider"])
-                    self._text_embs = np.load(onnx_emb_path)
-                img_256 = frame_rgb.resize((256, 256), Image.BILINEAR)
-                inp = (np.asarray(img_256, dtype=np.float32) / 255.0).transpose(2, 0, 1)[None, ...]
+                if self._ort_session is None:
+                    options = ort.SessionOptions()
+                    options.intra_op_num_threads = 2
+                    options.inter_op_num_threads = 1
+                    options.execution_mode = ort.ExecutionMode.ORT_SEQUENTIAL
+                    self._ort_session = ort.InferenceSession(
+                        onnx_model_path,
+                        sess_options=options,
+                        providers=["CPUExecutionProvider"],
+                    )
+                    with np.load(onnx_emb_path, allow_pickle=False) as emb_file:
+                        labels = emb_file["labels"].astype(str)
+                        text_vectors = emb_file["embeddings"].astype(np.float32)
+                    text_vectors /= np.maximum(np.linalg.norm(text_vectors, axis=1, keepdims=True), 1e-8)
+                    self._text_embs = {"labels": labels, "embeddings": text_vectors}
+
+                # SigLIP uses a 224x224 resize and [-1, 1] normalization.
+                img_224 = frame_rgb.resize((224, 224), Image.Resampling.BICUBIC)
+                inp = np.asarray(img_224, dtype=np.float32) / 127.5 - 1.0
+                inp = inp.transpose(2, 0, 1)[None, ...]
                 in_name = self._ort_session.get_inputs()[0].name
-                img_feat = self._ort_session.run(None, {in_name: inp})[0]
-                img_feat = img_feat / max(1e-8, np.linalg.norm(img_feat, axis=-1, keepdims=True))
+                out_name = self._ort_session.get_outputs()[0].name
+                img_feat = self._ort_session.run([out_name], {in_name: inp})[0].astype(np.float32)
+                img_feat /= np.maximum(np.linalg.norm(img_feat, axis=-1, keepdims=True), 1e-8)
                 labels = self._text_embs["labels"].tolist()
                 text_mat = self._text_embs["embeddings"]
-                logits = (img_feat @ text_mat.T)[0] * 100.0
-                exp_l = np.exp(logits - np.max(logits))
-                probs = exp_l / np.sum(exp_l)
-                best_idx = int(np.argmax(probs))
+                similarities = (img_feat @ text_mat.T)[0]
+                order = np.argsort(similarities)
+                best_idx = int(order[-1])
                 best_label = str(labels[best_idx])
-                best_conf = float(probs[best_idx])
-                metrics["ai_model"] = "mobileclip-s0-onnx"
-                metrics["confidence"] = round(best_conf, 3)
-                if best_label != "productive" and best_conf >= self.config.get("confidence_threshold", 0.65):
-                    return True, f"AI Vision: {best_label} ({best_conf * 100:.0f}%)", metrics
+                best_similarity = float(similarities[best_idx])
+                second_similarity = float(similarities[int(order[-2])]) if len(order) > 1 else -1.0
+                margin = best_similarity - second_similarity
+                metrics["ai_model"] = "siglip-base-patch16-224-int8"
+                metrics["ai_label"] = best_label
+                metrics["ai_similarity"] = round(best_similarity, 4)
+                metrics["ai_margin"] = round(margin, 4)
+
+                # Similarity is a ranking score, not a calibrated probability. Keep
+                # model output in shadow mode until classroom examples are labeled.
+                if (
+                    self.config.get("ai_alerts_enabled", False)
+                    and best_label != "productive"
+                    and best_similarity >= self.config.get("ai_min_similarity", 0.20)
+                    and margin >= self.config.get("ai_min_margin", 0.08)
+                ):
+                    metrics["confidence"] = max(0.0, min(1.0, best_similarity))
+                    return True, f"AI review candidate: {best_label}", metrics
             except Exception as e:
                 logging.debug(f"ONNX inference fallback: {e}")
 

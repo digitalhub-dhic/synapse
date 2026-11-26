@@ -793,10 +793,10 @@ MainWindow::MainWindow( VeyonMaster &masterCore, QWidget* parent ) :
 
 	// Quick filter pills: [All] [Online] [Offline]
 	const QString pillBase = QStringLiteral(
-		"QPushButton { background: #111A2D; border: 1px solid #21262D; border-radius: 10px;"
+		"QPushButton { background: #0F1624; border: 1px solid #1E293B; border-radius: 10px;"
 		" color: #94A3B8; font-size: 10px; font-weight: 600; padding: 2px 10px; min-height: 20px; }"
-		"QPushButton:checked { background: #238636; color: #FFFFFF; font-weight: bold; border-color: #2563EB; }"
-		"QPushButton:hover { border-color: #3B82F6; color: #E2E8F0; }");
+		"QPushButton:checked { background: #2563EB; color: #FFFFFF; font-weight: 700; border-color: #3B82F6; }"
+		"QPushButton:hover { border-color: #3B82F6; color: #F1F5F9; }");
 	auto* pillAll     = new QPushButton( tr("All"),     subHeader );
 	auto* pillOnline  = new QPushButton( tr("Online"),  subHeader );
 	auto* pillOffline = new QPushButton( tr("Offline"), subHeader );
@@ -853,12 +853,12 @@ MainWindow::MainWindow( VeyonMaster &masterCore, QWidget* parent ) :
 		"QComboBox:hover { border-color: #3B82F6; color: #FFFFFF; }"
 		"QComboBox QAbstractItemView { background: #0D1729; border: 1px solid #21262D; color: #F1F5F9; selection-background-color: #2563EB; selection-color: #FFFFFF; }"
 	) );
-	sortCombo->addItem( tr("Sort: Hostname A-Z 🔤"), 0 );
-	sortCombo->addItem( tr("Sort: Online First 🟢"), 1 );
-	sortCombo->addItem( tr("Sort: Offline First 🔴"), 4 );
-	sortCombo->addItem( tr("Sort: Logged In 👤"), 2 );
-	sortCombo->addItem( tr("Sort: Logged Out 🔒"), 5 );
-	sortCombo->addItem( tr("Sort: IP Address 🌐"), 3 );
+	sortCombo->addItem( tr("Sort: Hostname A-Z"), 0 );
+	sortCombo->addItem( tr("Sort: Online First"), 1 );
+	sortCombo->addItem( tr("Sort: Offline First"), 4 );
+	sortCombo->addItem( tr("Sort: Logged In"), 2 );
+	sortCombo->addItem( tr("Sort: Logged Out"), 5 );
+	sortCombo->addItem( tr("Sort: IP Address"), 3 );
 	sortCombo->setCurrentIndex( 1 ); // Default: Online First
 
 	connect( sortCombo, QOverload<int>::of(&QComboBox::currentIndexChanged), this, [this, sortCombo]( int ) {
@@ -883,9 +883,9 @@ MainWindow::MainWindow( VeyonMaster &masterCore, QWidget* parent ) :
 	auto* btnLive = new QPushButton( tr("Live"), densityWidget );
 
 	const QString densityBtnStyle = QStringLiteral(
-		"QPushButton { background: #0F172A; border: 1px solid #2A323D; border-radius: 6px; padding: 2px 8px; color: #8B949E; font-size: 10px; font-weight: 600; }"
-		"QPushButton:hover { background: #1F2630; color: #E6EDF3; border-color: #2563EB; }"
-		"QPushButton:checked { background: #238636; color: #FFFFFF; font-weight: bold; border-color: #2563EB; }"
+		"QPushButton { background: #0F1624; border: 1px solid #1E293B; border-radius: 6px; padding: 2px 8px; color: #94A3B8; font-size: 10px; font-weight: 600; }"
+		"QPushButton:hover { background: #162032; color: #F1F5F9; border-color: #3B82F6; }"
+		"QPushButton:checked { background: #2563EB; color: #FFFFFF; font-weight: 700; border-color: #3B82F6; }"
 	);
 	for (auto* b : { btnCompact, btnBalanced, btnLive })
 	{
