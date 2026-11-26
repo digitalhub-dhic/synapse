@@ -246,18 +246,18 @@ void ComputerItemDelegate::paint(QPainter* painter, const QStyleOptionViewItem& 
 	{
 		const QRect hoverBar(previewRect.left() + 4, previewRect.bottom() - 22, previewRect.width() - 8, 20);
 		painter->setBrush(QColor(15, 23, 42, 240));
-		painter->setPen(QPen(QColor(37, 99, 235, 200), 1));
+		painter->setPen(QPen(QColor(56, 189, 248, 180), 1));
 		painter->drawRoundedRect(hoverBar, 4, 4);
 
 		painter->setFont(QFont(QStringLiteral("Segoe UI"), 7, QFont::DemiBold));
 		painter->setPen(QColor(230, 237, 243));
 		if (isOnline)
 		{
-			painter->drawText(hoverBar, Qt::AlignCenter, tr("View   Control   Message"));
+			painter->drawText(hoverBar, Qt::AlignCenter, tr("Double-click to View • Right-click for Menu"));
 		}
 		else
 		{
-			painter->drawText(hoverBar, Qt::AlignCenter, tr("Power On (WOL)"));
+			painter->drawText(hoverBar, Qt::AlignCenter, tr("Right-click for Power On (WOL)"));
 		}
 	}
 
@@ -320,7 +320,7 @@ void ComputerItemDelegate::paint(QPainter* painter, const QStyleOptionViewItem& 
 
 	// Computer Name
 	painter->setFont(QFont(QStringLiteral("Segoe UI"), 9, QFont::Bold));
-	painter->setPen(isSelected ? QColor(37, 99, 235) : QColor(230, 237, 243));
+	painter->setPen(isSelected ? QColor(248, 250, 252) : QColor(230, 237, 243));
 	QFontMetrics fmName(painter->font());
 	const QString elidedName = fmName.elidedText(compName, Qt::ElideRight, infoRect.width());
 	painter->drawText(QRect(infoRect.left(), infoRect.top(), infoRect.width(), 16), Qt::AlignLeft | Qt::AlignVCenter, elidedName);
