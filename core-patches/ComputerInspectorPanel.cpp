@@ -335,7 +335,8 @@ QWidget* ComputerInspectorPanel::createGlobalTabWidget()
 	};
 
 	addStatRow( tr( "Total Workstations" ), m_statTotalVal, QStringLiteral( "#FAF5EF" ) );
-	addStatRow( tr( "Online Active" ), m_statOnlineVal, QStringLiteral( "#10B981" ) );
+	addStatRow( tr( "Online Connected" ), m_statOnlineVal, QStringLiteral( "#10B981" ) );
+	addStatRow( tr( "Standby / Logon Screen" ), m_statIdleVal, QStringLiteral( "#F59E0B" ) );
 	addStatRow( tr( "Offline" ), m_statOfflineVal, QStringLiteral( "#6B7280" ) );
 
 	layout->addWidget( statsCard );
