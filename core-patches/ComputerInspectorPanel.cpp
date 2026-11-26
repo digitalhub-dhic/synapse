@@ -215,21 +215,28 @@ void ComputerInspectorPanel::switchTab( InspectorTab tab )
 {
 	const QString activeStyle = QStringLiteral(
 		"QPushButton {"
-		"   background-color: #238636; color: #ffffff; font-weight: bold; font-size: 11px;"
+		"   background-color: #2563EB; color: #ffffff; font-weight: bold; font-size: 11px;"
 		"   border: none; border-radius: 6px; padding: 4px 8px;"
 		"}"
 	);
 	const QString inactiveStyle = QStringLiteral(
 		"QPushButton {"
-		"   background-color: transparent; color: #8B949E; font-weight: 600; font-size: 11px;"
+		"   background-color: transparent; color: #94A3B8; font-weight: 600; font-size: 11px;"
 		"   border: none; border-radius: 6px; padding: 4px 8px;"
 		"}"
-		"QPushButton:hover { background-color: #0F172A; color: #E6EDF3; }"
+		"QPushButton:hover { background-color: #162032; color: #F1F5F9; }"
 	);
 
 	m_btnGlobal->setStyleSheet( tab == InspectorTab::Global ? activeStyle : inactiveStyle );
 	m_btnComputer->setStyleSheet( tab == InspectorTab::Computer ? activeStyle : inactiveStyle );
 	m_btnDetails->setStyleSheet( tab == InspectorTab::Details ? activeStyle : inactiveStyle );
+
+	if( auto* subLbl = findChild<QLabel*>( QStringLiteral("inspectorSubtitleLabel") ) )
+	{
+		if( tab == InspectorTab::Global ) subLbl->setText( tr( "Fleet Overview" ) );
+		else if( tab == InspectorTab::Computer ) subLbl->setText( tr( "Computer Controls" ) );
+		else subLbl->setText( tr( "Diagnostics" ) );
+	}
 
 	m_stackedWidget->setCurrentIndex( static_cast<int>( tab ) );
 	if( tab == InspectorTab::Global )
