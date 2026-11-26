@@ -1,7 +1,9 @@
 #include "ComputerMonitoringModel.h"
+#include <QBuffer>
 #include <QComboBox>
 #include <QShortcut>
-#include <QShortcut>
+#include <QTcpServer>
+#include <QTcpSocket>
 #include <QPainter>
 #include <QPainterPath>
 /*
@@ -223,6 +225,59 @@ MainWindow::MainWindow( VeyonMaster &masterCore, QWidget* parent ) :
 			"QMenu::item { padding: 6px 12px; border-radius: 4px; font-size: 11px; }"
 			"QMenu::item:selected { background-color: #172554; }"
 		) );
+
+		// 1. Load live AI Sentinel alerts (if any) for 1-click teacher review & freeze
+		QFile alertFile( QStringLiteral("C:/SynapseViolations/live_alerts.json") );
+		if( alertFile.exists() && alertFile.open( QIODevice::ReadOnly ) )
+		{
+			const auto doc = QJsonDocument::fromJson( alertFile.readAll() );
+			alertFile.close();
+			if( doc.isArray() && !doc.array().isEmpty() )
+			{
+				auto* aiHdr = menu->addAction( tr( "AI SENTINEL ALERTS (Click to Freeze)" ) );
+				aiHdr->setEnabled( false );
+				for( const auto& item : doc.array() )
+				{
+					const auto obj = item.toObject();
+					const QString cName = obj.value( QStringLiteral("computer_name") ).toString();
+					const QString cIp = obj.value( QStringLiteral("ip") ).toString();
+					const QString reason = obj.value( QStringLiteral("violation_type") ).toString();
+					const int conf = qRound( obj.value( QStringLiteral("confidence") ).toDouble( 0.0 ) * 100.0 );
+					const QString label = conf > 0
+						? tr( "Freeze %1 (%2 - %3%)" ).arg( cName, reason ).arg( conf )
+						: tr( "Freeze %1 (%2)" ).arg( cName, reason );
+
+					menu->addAction( label, this, [this, cIp, reason]() {
+						ComputerControlInterfaceList targets;
+						for( const auto& ci : m_master.allComputerControlInterfaces() )
+						{
+							if( ci && ci->computer().hostAddress().toString() == cIp )
+							{
+								targets.append( ci );
+								break;
+							}
+						}
+						if( !targets.isEmpty() )
+						{
+							for( const auto& feat : VeyonCore::featureManager().features() )
+							{
+								if( feat.name().compare( QStringLiteral("ScreenLockWithMessage"), Qt::CaseInsensitive ) == 0 ||
+									feat.name().compare( QStringLiteral("ScreenLock"), Qt::CaseInsensitive ) == 0 )
+								{
+									VeyonCore::featureManager().startFeature( m_master, feat, targets );
+									break;
+								}
+							}
+						}
+					} );
+				}
+				menu->addAction( tr( "Clear AI Alerts" ), this, []() {
+					QFile::remove( QStringLiteral("C:/SynapseViolations/live_alerts.json") );
+				} );
+				menu->addSeparator();
+			}
+		}
+
 		const auto& all = m_master.allComputerControlInterfaces();
 		int offlineCount = 0;
 		for( const auto& ci : all )
