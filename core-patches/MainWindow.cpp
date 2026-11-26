@@ -865,6 +865,15 @@ MainWindow::MainWindow( VeyonMaster &masterCore, QWidget* parent ) :
 		connect( ui->computerMonitoringWidget->model(), &QAbstractItemModel::dataChanged, this, scheduleCountsUpdate );
 	}
 
+	// Dynamic Fleet Auto-Refresh Timer:
+	// Automatically checks for newly enrolled network objects from Sentinel discovery every 20 seconds
+	auto* directoryRefreshTimer = new QTimer( this );
+	connect( directoryRefreshTimer, &QTimer::timeout, this, [this]() {
+		VeyonCore::networkObjectDirectoryManager().configuredDirectory()->update();
+		m_master.computerControlListModel().reload();
+	} );
+	directoryRefreshTimer->start( 20000 );
+
 	monitoringLayout->addWidget( ui->computerMonitoringWidget );
 
 	monitoringSplitter->addWidget( slideshowSpotlightSplitter );
@@ -1332,15 +1341,27 @@ void MainWindow::showAboutDialog()
 
 void MainWindow::applyCustomTheme()
 {
-	QFile customTheme( QStringLiteral("C:/ProgramData/DigiAgent/custom_theme.qss") );
-	if( customTheme.open( QIODevice::ReadOnly | QIODevice::Text ) )
+	const QStringList candidatePaths = {
+		QStringLiteral("C:/ProgramData/DigiAgent/custom_theme.qss"),
+		QCoreApplication::applicationDirPath() + QStringLiteral("/custom_theme.qss"),
+		QStringLiteral("/etc/veyon/custom_theme.qss")
+	};
+	for( const auto& path : candidatePaths )
 	{
-		const QString qss = QString::fromUtf8( customTheme.readAll() );
-		customTheme.close();
-		setStyleSheet( qss );
-		if( qApp )
+		QFile customTheme( path );
+		if( customTheme.exists() && customTheme.open( QIODevice::ReadOnly | QIODevice::Text ) )
 		{
-			qApp->setStyleSheet( qss );
+			const QString qss = QString::fromUtf8( customTheme.readAll() );
+			customTheme.close();
+			if( qApp )
+			{
+				qApp->setStyleSheet( qss );
+			}
+			else
+			{
+				setStyleSheet( qss );
+			}
+			return;
 		}
 	}
 }
