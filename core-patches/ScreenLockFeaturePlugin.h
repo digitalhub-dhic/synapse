@@ -119,5 +119,7 @@ private:
 	LockWidget* m_lockWidget;
 	QPointer<VeyonServerInterface> m_server;
 	QTimer* m_watchdogTimer{ nullptr };
+	QTimer* m_timedLockTimer{ nullptr };
+	quint64 m_lockGeneration{ 0 };
 
 };

@@ -515,6 +515,11 @@ bool ScreenLockFeaturePlugin::handleFeatureMessage( VeyonServerInterface& server
 		if (message.command<FeatureCommand>() == FeatureCommand::StopLock ||
 			message.featureUid() == m_unfreezeFeature.uid())
 		{
+			++m_lockGeneration;
+			if( m_timedLockTimer )
+			{
+				m_timedLockTimer->stop();
+			}
 			savePersistentLock( false );
 
 			for (const auto& uid : { m_screenLockFeature.uid(), m_freezeScreenFeature.uid(),
