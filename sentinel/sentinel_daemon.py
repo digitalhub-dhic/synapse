@@ -91,24 +91,39 @@ def capture_synapse_master():
 
 
 def sentinel_worker():
-    """Background monitoring thread."""
+    """Background monitoring thread (prefers direct per-computer framebuffers from Master)."""
+    import requests
     logging.info("Sentinel background worker thread started.")
     while daemon_state["is_active"]:
         try:
             cfg = sentinel_instance.config
             if cfg.get("enabled", True):
-                master_frame = capture_synapse_master()
-                if master_frame is not None:
-                    try:
+                used_direct = False
+                try:
+                    resp = requests.get("http://127.0.0.1:11410/frames", timeout=1.5)
+                    if resp.status_code == 200:
+                        comps = resp.json().get("computers", [])
                         daemon_state["last_window_found"] = True
                         daemon_state["last_scan_time"] = datetime.datetime.now().strftime("%H:%M:%S")
                         daemon_state["scan_count"] += 1
-                        sentinel_instance.scan_cycle(master_frame)
-                    finally:
-                        if hasattr(master_frame, "close"):
-                            master_frame.close()
-                else:
-                    daemon_state["last_window_found"] = False
+                        sentinel_instance.scan_direct_frames(comps)
+                        used_direct = True
+                except Exception:
+                    pass
+
+                if not used_direct:
+                    master_frame = capture_synapse_master()
+                    if master_frame is not None:
+                        try:
+                            daemon_state["last_window_found"] = True
+                            daemon_state["last_scan_time"] = datetime.datetime.now().strftime("%H:%M:%S")
+                            daemon_state["scan_count"] += 1
+                            sentinel_instance.scan_cycle(master_frame)
+                        finally:
+                            if hasattr(master_frame, "close"):
+                                master_frame.close()
+                    else:
+                        daemon_state["last_window_found"] = False
             interval = max(1.0, float(cfg.get("scan_interval_seconds", 2.0)))
             time.sleep(interval)
         except Exception as e:

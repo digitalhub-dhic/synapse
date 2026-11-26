@@ -50,9 +50,11 @@ logging.getLogger().addHandler(console)
 
 DEFAULT_CONFIG = {
     "enabled": True,
+    "auto_freeze": False,  # Safe default: alert & save evidence first; teacher freezes with 1 click
     "scan_interval_seconds": 2.0,
     "confirmation_cycles": 2,  # Must be seen across 2 checks to avoid false positives
     "lock_cooldown_seconds": 30,  # Don't re-lock host within 30s
+    "confidence_threshold": 0.65,
     "detection_targets": {
         "sports_streams": True,
         "movies_streaming": True,
@@ -64,6 +66,8 @@ DEFAULT_CONFIG = {
     "whitelist_names": ["computer-50"],
     "play_sound": True
 }
+
+LIVE_ALERTS_FILE = os.path.join(VIOLATIONS_DIR, "live_alerts.json")
 
 
 def load_config():
@@ -273,10 +277,39 @@ class SynapseAISentinel:
         game_motion_thresh = 5.0 if sens == "strict" else (6.5 if sens == "medium" else 8.5)
 
         targets = self.config.get("detection_targets", {})
+        r, g, b = arr[:, :, 0].astype(int), arr[:, :, 1].astype(int), arr[:, :, 2].astype(int)
+
+        # --- Optional ONNX Vision Model (MobileCLIP-S0) if installed locally ---
+        onnx_model_path = os.path.join(BASE_DIR, "models", "mobileclip_s0_image.onnx")
+        onnx_emb_path = os.path.join(BASE_DIR, "models", "text_embeddings.npz")
+        if os.path.exists(onnx_model_path) and os.path.exists(onnx_emb_path):
+            try:
+                import onnxruntime as ort
+                if not hasattr(self, "_ort_session"):
+                    self._ort_session = ort.InferenceSession(onnx_model_path, providers=["CPUExecutionProvider"])
+                    self._text_embs = np.load(onnx_emb_path)
+                img_256 = frame_rgb.resize((256, 256), Image.BILINEAR)
+                inp = (np.asarray(img_256, dtype=np.float32) / 255.0).transpose(2, 0, 1)[None, ...]
+                in_name = self._ort_session.get_inputs()[0].name
+                img_feat = self._ort_session.run(None, {in_name: inp})[0]
+                img_feat = img_feat / max(1e-8, np.linalg.norm(img_feat, axis=-1, keepdims=True))
+                labels = self._text_embs["labels"].tolist()
+                text_mat = self._text_embs["embeddings"]
+                logits = (img_feat @ text_mat.T)[0] * 100.0
+                exp_l = np.exp(logits - np.max(logits))
+                probs = exp_l / np.sum(exp_l)
+                best_idx = int(np.argmax(probs))
+                best_label = str(labels[best_idx])
+                best_conf = float(probs[best_idx])
+                metrics["ai_model"] = "mobileclip-s0-onnx"
+                metrics["confidence"] = round(best_conf, 3)
+                if best_label != "productive" and best_conf >= self.config.get("confidence_threshold", 0.65):
+                    return True, f"AI Vision: {best_label} ({best_conf * 100:.0f}%)", metrics
+            except Exception as e:
+                logging.debug(f"ONNX inference fallback: {e}")
 
         # --- A. SPORTS DETECTOR (Fullscreen & Inline/Thumbnail/PiP Detection) ---
         if targets.get("sports_streams", True):
-            r, g, b = arr[:,:,0].astype(int), arr[:,:,1].astype(int), arr[:,:,2].astype(int)
             # Grass pitch detection: G is high, G > R + 15, G > B + 15
             turf_mask = (g > 45) & (g > r + 15) & (g > b + 15)
             # Basketball / Tennis clay court detection: Warm wood/clay (R high, G moderate, B low)
@@ -399,6 +432,73 @@ class SynapseAISentinel:
     # ==========================================
     #          SENTINEL SCAN LOOP
     # ==========================================
+
+    def publish_live_alert(self, name, ip, reason, evidence_path, confidence=0.75, status="ALERT"):
+        """Writes live alert for Synapse Command bellBtn 1-click teacher review."""
+        entry = {
+            "timestamp": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            "computer_name": name,
+            "ip": ip,
+            "violation_type": reason,
+            "confidence": confidence,
+            "evidence_image": evidence_path,
+            "status": status
+        }
+        self.save_audit_entry(entry)
+        self.play_alert_sound()
+        try:
+            alerts = []
+            if os.path.exists(LIVE_ALERTS_FILE):
+                with open(LIVE_ALERTS_FILE, "r", encoding="utf-8") as f:
+                    alerts = json.load(f)
+            alerts = [a for a in alerts if a.get("ip") != ip]
+            alerts.insert(0, entry)
+            with open(LIVE_ALERTS_FILE, "w", encoding="utf-8") as f:
+                json.dump(alerts[:25], f, indent=2)
+        except Exception as e:
+            logging.error(f"Failed to write live alerts: {e}")
+
+    def scan_direct_frames(self, frames_list):
+        """Processes direct per-computer framebuffers from veyon-master (no 7x5 crop)."""
+        import base64
+        from io import BytesIO
+        if not self.config.get("enabled", True):
+            return
+
+        for item in frames_list:
+            comp_name = item.get("name") or item.get("ip", "Unknown")
+            ip = item.get("ip", "")
+            b64 = item.get("frame_b64", "")
+            if not ip or not b64 or self.is_whitelisted(comp_name, ip):
+                continue
+
+            try:
+                raw = base64.b64decode(b64)
+                frame_img = Image.open(BytesIO(raw)).convert("RGB")
+            except Exception:
+                continue
+
+            is_violation, reason, metrics = self.analyze_frame(comp_name, ip, frame_img)
+            if is_violation:
+                cand = self.violation_candidates.get(ip, {"count": 0, "reason": reason})
+                cand["count"] += 1
+                cand["reason"] = reason
+                self.violation_candidates[ip] = cand
+
+                required_cycles = self.config.get("confirmation_cycles", 2)
+                if cand["count"] >= required_cycles:
+                    evidence_path = self.save_evidence_image(comp_name, ip, reason, frame_img)
+                    conf = metrics.get("confidence", 0.78)
+                    if self.config.get("auto_freeze", False):
+                        self.lock_computer(comp_name, ip, reason, evidence_path)
+                        self.publish_live_alert(comp_name, ip, reason, evidence_path, conf, "LOCKED")
+                    else:
+                        logging.warning(f"🔔 AI ALERT (Review): [{comp_name}] ({ip}) -> {reason}")
+                        self.publish_live_alert(comp_name, ip, reason, evidence_path, conf, "ALERT")
+                    del self.violation_candidates[ip]
+            else:
+                if ip in self.violation_candidates:
+                    del self.violation_candidates[ip]
 
     def scan_cycle(self, master_screenshot):
         """Processes one frame of the Synapse Command window grid."""
