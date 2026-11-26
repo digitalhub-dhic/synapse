@@ -124,13 +124,13 @@ public:
 		// 1. Draw rounded background pill
 		if( isSelected )
 		{
-			painter->setBrush( QColor(23, 37, 84) ); // #172554 WCAG AA selection
+			painter->setBrush( QColor(23, 37, 84) ); // #E5EDE1 WCAG AA selection
 			painter->setPen( QPen( QColor(59, 130, 246), 1 ) );
 			painter->drawRoundedRect( rowRect, 6, 6 );
 		}
 		else if( isHovered )
 		{
-			painter->setBrush( QColor(22, 32, 50) ); // #162032 elevated hover
+			painter->setBrush( QColor(22, 32, 50) ); // #F8F7F1 elevated hover
 			painter->setPen( Qt::NoPen );
 			painter->drawRoundedRect( rowRect, 6, 6 );
 		}
@@ -169,8 +169,8 @@ public:
 		painter->setRenderHint( QPainter::Antialiasing, true );
 		if( checkState == Qt::Checked )
 		{
-			painter->setBrush( QColor( 37, 99, 235 ) );
-			painter->setPen( QColor( 59, 130, 246 ) );
+			painter->setBrush( QColor( 0x53, 0x7B, 0x5B ) );
+			painter->setPen( QColor( 0x42, 0x67, 0x49 ) );
 			painter->drawRoundedRect( cbRect, 3, 3 );
 
 			painter->setPen( QPen( Qt::white, 1.8, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin ) );
@@ -203,7 +203,7 @@ public:
 		painter->setRenderHint( QPainter::Antialiasing );
 		if( isLocation )
 		{
-			QPen fPen( isSelected ? QColor( 0xFF, 0xFF, 0xFF ) : QColor( 0x3B, 0x82, 0xF6 ), 1.5, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin );
+			QPen fPen( isSelected ? QColor( 0xFF, 0xFF, 0xFF ) : QColor( 0x42, 0x67, 0x49 ), 1.5, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin );
 			painter->setPen( fPen );
 			painter->setBrush( Qt::NoBrush );
 			QPainterPath fp;
@@ -296,13 +296,13 @@ ComputerSelectPanel::ComputerSelectPanel( ComputerManager& computerManager, QWid
 
 	auto* selectHeader = new QFrame( this );
 	selectHeader->setFixedHeight( 32 );
-	selectHeader->setStyleSheet( QStringLiteral( "QFrame { background-color: #070E1E; border-bottom: 1px solid #122547; }" ) );
+	selectHeader->setStyleSheet( QStringLiteral( "QFrame { background-color: #F3F2EB; border-bottom: 1px solid #E5EDE1; }" ) );
 	auto* headerLayout = new QHBoxLayout( selectHeader );
 	headerLayout->setContentsMargins( 12, 0, 8, 0 );
 	headerLayout->setSpacing( 6 );
 
 	auto* titleText = new QLabel( tr( "Locations / Computers" ), selectHeader );
-	titleText->setStyleSheet( QStringLiteral( "font-weight: 700; font-size: 11px; color: #E6EDF3;" ) );
+	titleText->setStyleSheet( QStringLiteral( "font-weight: 700; font-size: 11px; color: #27352A;" ) );
 	headerLayout->addWidget( titleText );
 	headerLayout->addStretch();
 
@@ -313,9 +313,9 @@ ComputerSelectPanel::ComputerSelectPanel( ComputerManager& computerManager, QWid
 	closeButton->setStyleSheet( QStringLiteral(
 		"QPushButton {"
 		"   background: transparent; border: none; border-radius: 4px;"
-		"   color: #8B949E; font-size: 11px; font-weight: bold; padding: 0px;"
+		"   color: #657064; font-size: 11px; font-weight: bold; padding: 0px;"
 		"}"
-		"QPushButton:hover { background: #dc2626; color: #ffffff; }"
+		"QPushButton:hover { background: #A64F42; color: #ffffff; }"
 	) );
 	connect( closeButton, &QPushButton::clicked, this, [this]() {
 		this->hide();
@@ -336,12 +336,12 @@ ComputerSelectPanel::ComputerSelectPanel( ComputerManager& computerManager, QWid
 
 		setStyleSheet( QStringLiteral(
 		"ComputerSelectPanel, QWidget#ComputerSelectPanel {"
-		"   background-color: #090E1A;"
-		"   border-right: 1px solid #21262D;"
+		"   background-color: #F3F2EB;"
+		"   border-right: 1px solid #DCDDD2;"
 		"}"
 		"QTreeView {"
-		"   background-color: #090E1A;"
-		"   color: #E6EDF3;"
+		"   background-color: #F3F2EB;"
+		"   color: #27352A;"
 		"   border: none;"
 		"   outline: none;"
 		"}"
@@ -349,35 +349,35 @@ ComputerSelectPanel::ComputerSelectPanel( ComputerManager& computerManager, QWid
 		"   background: transparent;"
 		"}"
 		"QLineEdit {"
-		"   background-color: #0F172A;"
-		"   border: 1px solid #2A323D;"
+		"   background-color: #27352A;"
+		"   border: 1px solid #DCDDD2;"
 		"   border-radius: 6px;"
 		"   padding: 4px 10px;"
 		"   margin: 0px 8px;"
-		"   color: #E6EDF3;"
+		"   color: #27352A;"
 		"   font-size: 11px;"
 		"}"
 		"QLineEdit:focus {"
-		"   border: 1px solid #2563EB;"
-		"   background-color: #090E1A;"
+		"   border: 1px solid #537B5B;"
+		"   background-color: #F3F2EB;"
 		"}"
 		"QPushButton {"
-		"   background-color: #0F172A;"
-		"   border: 1px solid #2A323D;"
+		"   background-color: #27352A;"
+		"   border: 1px solid #DCDDD2;"
 		"   border-radius: 6px;"
 		"   margin: 0px 8px;"
-		"   color: #E6EDF3;"
+		"   color: #27352A;"
 		"   font-size: 11px;"
 		"   font-weight: 500;"
 		"   padding: 4px 10px;"
 		"}"
 		"QPushButton:hover {"
-		"   background-color: #1F2630;"
-		"   border-color: #2563EB;"
-		"   color: #2563EB;"
+		"   background-color: #E5EDE1;"
+		"   border-color: #537B5B;"
+		"   color: #537B5B;"
 		"}"
 	) );
-	ui->treeView->viewport()->setStyleSheet( QStringLiteral( "background-color: #090E1A;" ) );
+	ui->treeView->viewport()->setStyleSheet( QStringLiteral( "background-color: #F3F2EB;" ) );
 
 	// Hide table header and style tree view
 	ui->treeView->setHeaderHidden( true );

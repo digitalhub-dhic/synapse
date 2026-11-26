@@ -66,20 +66,20 @@ void ComputerItemDelegate::paint(QPainter* painter, const QStyleOptionViewItem& 
 
 	if (isSelected)
 	{
-		painter->fillPath(cardPath, QColor(23, 37, 84)); // #172554 WCAG AA selection
-		painter->setPen(QPen(QColor(59, 130, 246), 1.5)); // #3B82F6 focus border
+		painter->fillPath(cardPath, QColor(23, 37, 84)); // #E5EDE1 WCAG AA selection
+		painter->setPen(QPen(QColor(59, 130, 246), 1.5)); // #426749 focus border
 		painter->drawPath(cardPath);
 	}
 	else if (isHovered)
 	{
-		painter->fillPath(cardPath, QColor(22, 32, 50)); // #162032 elevated hover
+		painter->fillPath(cardPath, QColor(22, 32, 50)); // #F8F7F1 elevated hover
 		painter->setPen(QPen(QColor(59, 130, 246), 1.0));
 		painter->drawPath(cardPath);
 	}
 	else
 	{
-		painter->fillPath(cardPath, QColor(15, 22, 36)); // #0F1624 surface
-		painter->setPen(QPen(QColor(30, 41, 59), 1.0)); // #1E293B subtle border
+		painter->fillPath(cardPath, QColor(15, 22, 36)); // #EAECE3 surface
+		painter->setPen(QPen(QColor(30, 41, 59), 1.0)); // #F0F4EB subtle border
 		painter->drawPath(cardPath);
 	}
 
@@ -276,7 +276,7 @@ void ComputerItemDelegate::paint(QPainter* painter, const QStyleOptionViewItem& 
 	// 4. Badges on top of preview
 	if (isOnline)
 	{
-		// Pill badge in top right: "● LIVE" (strictly semantic green #22C55E)
+		// Pill badge in top right: "● LIVE" (strictly semantic green #39845B)
 		const QRect badgeRect(previewRect.right() - 48, previewRect.top() + 5, 44, 16);
 		painter->setBrush(QColor(9, 13, 22, 230));
 		painter->setPen(QPen(QColor(34, 197, 94, 180), 1));
@@ -342,14 +342,14 @@ void ComputerItemDelegate::paint(QPainter* painter, const QStyleOptionViewItem& 
 	QColor statusDotColor;
 	if (isOnline)
 	{
-		statusDotColor = QColor(34, 197, 94); // #22C55E Semantic Online Green
+		statusDotColor = QColor(34, 197, 94); // #39845B Semantic Online Green
 		painter->setBrush(QColor(34, 197, 94, 45));
 		painter->setPen(Qt::NoPen);
 		painter->drawEllipse(dotCenter, 6, 6);
 	}
 	else if (isConnecting)
 	{
-		statusDotColor = QColor(251, 191, 36); // #FBBF24 Warning Amber
+		statusDotColor = QColor(251, 191, 36); // #D58A45 Warning Amber
 		painter->setBrush(QColor(251, 191, 36, 40));
 		painter->setPen(Qt::NoPen);
 		painter->drawEllipse(dotCenter, 6, 6);
