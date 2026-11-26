@@ -673,7 +673,7 @@ MainWindow::MainWindow( VeyonMaster &masterCore, QWidget* parent ) :
 	m_headerToolBar->setMovable( false );
 	m_headerToolBar->setFloatable( false );
 	m_headerToolBar->setVisible( true );
-	m_headerToolBar->setFixedHeight( 46 );
+	m_headerToolBar->setFixedHeight( 52 );
 	ui->toolBar->setMovable( false );
 	ui->toolBar->setFloatable( false );
 	ui->toolBar->setVisible( true );
