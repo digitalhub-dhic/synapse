@@ -428,8 +428,11 @@ QWidget* ComputerInspectorPanel::createGlobalTabWidget()
 		actionsLayout->addWidget( btn );
 	};
 
-	addActionRow( QStringLiteral( "💬" ), tr( "Send Message" ), QStringLiteral( "textmessage" ) );
-	addActionRow( QStringLiteral( "🌐" ), tr( "Open Website" ), QStringLiteral( "openwebsite" ) );
+	addActionRow( QStringLiteral( "💬" ), tr( "Send Message to Fleet" ), QStringLiteral( "textmessage" ) );
+	addActionRow( QStringLiteral( "🌐" ), tr( "Open Website on Fleet" ), QStringLiteral( "openwebsite" ) );
+	addActionRow( QStringLiteral( "❄️" ), tr( "Freeze All Screens" ), QStringLiteral( "ScreenLock" ) );
+	addActionRow( QStringLiteral( "🔓" ), tr( "Unfreeze All Screens" ), QStringLiteral( "UnfreezeScreen" ) );
+	addActionRow( QStringLiteral( "⚡" ), tr( "Power On Fleet (WOL)" ), QStringLiteral( "poweron" ) );
 
 	layout->addWidget( actionsCard );
 	layout->addStretch( 1 );
