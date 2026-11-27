@@ -1082,28 +1082,34 @@ MainWindow::MainWindow( VeyonMaster &masterCore, QWidget* parent ) :
 	inspectorPanelButton->setObjectName( QStringLiteral("inspectorPanelButton") );
 	inspectorPanelButton->setText( tr( "Inspector" ) );
 	auto makeFooterIcon = []( const QString& kind ) -> QIcon {
-		QPixmap px( 16, 16 );
-		px.fill( Qt::transparent );
-		QPainter p( &px );
-		p.setRenderHint( QPainter::Antialiasing );
-		p.setPen( QPen( QColor( 0x18, 0x18, 0x1B ), 1.5, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin ) );
-		p.setBrush( Qt::NoBrush );
-		if( kind == QLatin1String("locations") )
-		{
-			p.drawRoundedRect( QRectF( 2.0, 3.0, 12.0, 10.0 ), 1.8, 1.8 );
-			p.drawLine( QPointF( 5.5, 3.0 ), QPointF( 5.5, 13.0 ) );
-		}
-		else if( kind == QLatin1String("screenshots") )
-		{
-			p.drawRoundedRect( QRectF( 2.0, 4.0, 12.0, 9.0 ), 1.8, 1.8 );
-			p.drawEllipse( QPointF( 8.0, 8.5 ), 2.2, 2.2 );
-		}
-		else
-		{
-			p.drawRoundedRect( QRectF( 2.0, 3.0, 12.0, 10.0 ), 1.8, 1.8 );
-			p.drawLine( QPointF( 10.5, 3.0 ), QPointF( 10.5, 13.0 ) );
-		}
-		return QIcon( px );
+		auto drawPx = [&]( const QColor& col ) -> QPixmap {
+			QPixmap px( 16, 16 );
+			px.fill( Qt::transparent );
+			QPainter p( &px );
+			p.setRenderHint( QPainter::Antialiasing );
+			p.setPen( QPen( col, 1.5, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin ) );
+			p.setBrush( Qt::NoBrush );
+			if( kind == QLatin1String("locations") )
+			{
+				p.drawRoundedRect( QRectF( 2.0, 3.0, 12.0, 10.0 ), 1.8, 1.8 );
+				p.drawLine( QPointF( 5.5, 3.0 ), QPointF( 5.5, 13.0 ) );
+			}
+			else if( kind == QLatin1String("screenshots") )
+			{
+				p.drawRoundedRect( QRectF( 2.0, 4.0, 12.0, 9.0 ), 1.8, 1.8 );
+				p.drawEllipse( QPointF( 8.0, 8.5 ), 2.2, 2.2 );
+			}
+			else
+			{
+				p.drawRoundedRect( QRectF( 2.0, 3.0, 12.0, 10.0 ), 1.8, 1.8 );
+				p.drawLine( QPointF( 10.5, 3.0 ), QPointF( 10.5, 13.0 ) );
+			}
+			return px;
+		};
+		QIcon ic;
+		ic.addPixmap( drawPx( QColor( 0x18, 0x18, 0x1B ) ), QIcon::Normal, QIcon::Off );
+		ic.addPixmap( drawPx( Qt::white ), QIcon::Normal, QIcon::On );
+		return ic;
 	};
 	ui->computerSelectPanelButton->setIcon( makeFooterIcon( QStringLiteral("locations") ) );
 	ui->screenshotManagementPanelButton->setIcon( makeFooterIcon( QStringLiteral("screenshots") ) );
