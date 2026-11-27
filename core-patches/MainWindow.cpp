@@ -130,40 +130,46 @@ MainWindow::MainWindow( VeyonMaster &masterCore, QWidget* parent ) :
 	{
 		QPainter lp( &logoPix );
 		lp.setRenderHint( QPainter::Antialiasing );
-		// Hexagonal network structure (#537B5B)
-		const QPointF hex[6] = {
-			QPointF( 14.0, 2.5 ),
-			QPointF( 24.0, 8.2 ),
-			QPointF( 24.0, 19.8 ),
-			QPointF( 14.0, 25.5 ),
-			QPointF( 4.0, 19.8 ),
-			QPointF( 4.0, 8.2 )
-		};
-		QPolygonF hexPoly;
-		for( const auto& pt : hex ) hexPoly << pt;
-		lp.setPen( QPen( QColor( 0x53, 0x7B, 0x5B ), 1.6, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin ) );
+		lp.scale( 28.0 / 64.0, 28.0 / 64.0 );
+
+		// Left human connection (#537B5B)
+		QPainterPath leftArm;
+		leftArm.moveTo( 8.0, 43.0 );
+		leftArm.cubicTo( 8.0, 34.0, 14.0, 28.0, 21.0, 28.0 );
+		leftArm.cubicTo( 26.0, 28.0, 29.0, 31.0, 32.0, 36.0 );
+		lp.setPen( QPen( QColor( 0x53, 0x7B, 0x5B ), 5.0, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin ) );
 		lp.setBrush( Qt::NoBrush );
-		lp.drawPolygon( hexPoly );
+		lp.drawPath( leftArm );
 
-		// Spokes to center (14, 14)
-		for( const auto& pt : hex )
-		{
-			lp.drawLine( pt, QPointF( 14.0, 14.0 ) );
-		}
+		// Right human connection (#537B5B)
+		QPainterPath rightArm;
+		rightArm.moveTo( 56.0, 43.0 );
+		rightArm.cubicTo( 56.0, 34.0, 50.0, 28.0, 43.0, 28.0 );
+		rightArm.cubicTo( 38.0, 28.0, 35.0, 31.0, 32.0, 36.0 );
+		lp.drawPath( rightArm );
 
-		// Outer nodes (#537B5B)
+		// Central connecting body (#426749)
+		QPainterPath centerBody;
+		centerBody.moveTo( 19.0, 53.0 );
+		centerBody.cubicTo( 20.0, 43.0, 25.0, 37.0, 32.0, 37.0 );
+		centerBody.cubicTo( 39.0, 37.0, 44.0, 43.0, 45.0, 53.0 );
+		lp.setPen( QPen( QColor( 0x42, 0x67, 0x49 ), 5.0, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin ) );
+		lp.drawPath( centerBody );
+
+		// Shared foundation arc (#D58A45)
+		QPainterPath foundation;
+		foundation.moveTo( 13.0, 55.0 );
+		foundation.cubicTo( 23.0, 62.0, 41.0, 62.0, 51.0, 55.0 );
+		lp.setPen( QPen( QColor( 0xD5, 0x8A, 0x45 ), 2.5, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin ) );
+		lp.drawPath( foundation );
+
+		// Central mentor node (#D58A45) & supporting human heads (#537B5B)
 		lp.setPen( Qt::NoPen );
-		lp.setBrush( QColor( 0x53, 0x7B, 0x5B ) );
-		for( const auto& pt : hex )
-		{
-			lp.drawEllipse( pt, 2.1, 2.1 );
-		}
-
-		// Central amber command node (#D58A45) + warm inner highlight (#F7F6F0)
 		lp.setBrush( QColor( 0xD5, 0x8A, 0x45 ) );
-		lp.drawEllipse( QPointF( 14.0, 14.0 ), 5.2, 5.2 );
-		lp.setBrush( QColor( 0xF7, 0xF6, 0xF0 ) );
-		lp.drawEllipse( QPointF( 14.0, 14.0 ), 1.9, 1.9 );
+		lp.drawEllipse( QPointF( 32.0, 13.0 ), 6.0, 6.0 );
+		lp.setBrush( QColor( 0x53, 0x7B, 0x5B ) );
+		lp.drawEllipse( QPointF( 20.0, 24.0 ), 4.0, 4.0 );
+		lp.drawEllipse( QPointF( 44.0, 24.0 ), 4.0, 4.0 );
 	}
 	logo->setPixmap( logoPix );
 	logo->setObjectName( QStringLiteral("logoIconLabel") );
