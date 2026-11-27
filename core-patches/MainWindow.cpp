@@ -1791,16 +1791,12 @@ void MainWindow::addFeaturesToToolBar()
 		const QString featName = feature.name();
 		const QString k = featName.toLower().remove( QLatin1Char(' ') ).remove( QLatin1Char('_') ).remove( QLatin1Char('-') );
 
-		auto drawFeatureGlyph = []( const QString& key, const QColor& fg, const QColor& bgBadge ) -> QPixmap {
+		auto drawFeatureGlyph = []( const QString& key, const QColor& fg, const QColor& /*unused*/ ) -> QPixmap {
 			QPixmap px( 24, 24 );
 			px.fill( Qt::transparent );
 			QPainter p( &px );
 			p.setRenderHint( QPainter::Antialiasing );
-			p.setPen( Qt::NoPen );
-			p.setBrush( bgBadge );
-			p.drawRoundedRect( QRectF( 1.0, 1.0, 22.0, 22.0 ), 6.0, 6.0 );
-
-			p.setPen( QPen( fg, 1.7, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin ) );
+			p.setPen( QPen( fg, 1.6, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin ) );
 			p.setBrush( Qt::NoBrush );
 
 			if( key.contains( QStringLiteral("monitor") ) )
