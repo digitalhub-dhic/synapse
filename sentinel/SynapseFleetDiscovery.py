@@ -235,6 +235,32 @@ def run_subnet_sweep():
             fallback_name = f"BYOD-{ip.split('.')[-1]}"
             sync_device(fallback_name, ip, mac)
 
+
+def run_tailscale_sweep():
+    """Discovers online Tailscale peers on port 11100 (for BYOD devices on external networks)."""
+    try:
+        proc = subprocess.run(
+            ["tailscale", "status", "--json"],
+            capture_output=True, text=True, timeout=5, creationflags=0x08000000
+        )
+        if proc.returncode != 0 or not proc.stdout.strip():
+            return
+        data = json.loads(proc.stdout)
+        peers = (data.get("Peer") or {}).values()
+        for peer in peers:
+            if not peer.get("Online"):
+                continue
+            ips = peer.get("TailscaleIPs") or []
+            ts_ip = next((ip for ip in ips if "." in ip), "")
+            if not ts_ip:
+                continue
+            _, is_open = probe_agent_port(ts_ip, timeout=0.8)
+            if is_open:
+                hostname = (peer.get("HostName") or "").strip().upper() or f"BYOD-{ts_ip.split('.')[-1]}"
+                sync_device(hostname, ts_ip, "")
+    except Exception:
+        pass
+
 def record_byod_telemetry(payload, fallback_ip):
     """Records BYOD Campus/Personal mode and Tailscale node ID telemetry atomically."""
     ts_id = (payload.get("tailscale_node_id") or "").strip()
@@ -307,6 +333,7 @@ def run_discovery_daemon():
     while True:
         try:
             run_subnet_sweep()
+            run_tailscale_sweep()
         except Exception as e:
             print(f"[SWEEP ERR] {e}")
         time.sleep(45)
