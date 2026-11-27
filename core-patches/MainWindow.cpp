@@ -472,7 +472,7 @@ MainWindow::MainWindow( VeyonMaster &masterCore, QWidget* parent ) :
 		"QToolBar#mainToolBar QToolButton:hover, QToolBar#toolBar QToolButton:hover {"
 		"   background-color: #E5EDE1;"
 		"   border-color: #537B5B;"
-		"   color: #FFFFFF;"
+		"   color: #27352A;"
 		"}"
 		"QToolBar#mainToolBar QToolButton:pressed, QToolBar#toolBar QToolButton:pressed {"
 		"   background-color: #537B5B;"
