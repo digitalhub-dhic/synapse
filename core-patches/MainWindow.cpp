@@ -1865,7 +1865,7 @@ void MainWindow::addFeaturesToToolBar()
 		};
 
 		QColor accentFg( 0x53, 0x7B, 0x5B ); // Botanical Sage
-		QColor accentBg( 0xE5, 0xEDE1 );
+		QColor accentBg( 0xE5, 0xED, 0xE1 );
 		if( k.contains( QStringLiteral("timedlock") ) || k.contains( QStringLiteral("timedfreeze") ) || k.contains( QStringLiteral("reboot") ) )
 		{
 			accentFg = QColor( 0xB7, 0x83, 0x32 ); // Warm Amber
