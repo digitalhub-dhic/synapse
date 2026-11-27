@@ -1889,32 +1889,11 @@ void MainWindow::addFeaturesToToolBar()
 			return px;
 		};
 
-		QColor accentFg( 0xFA, 0xFA, 0xFA ); // Botanical Sage
-		QColor accentBg( 0x29, 0x29, 0x2E );
-		if( k.contains( QStringLiteral("timedlock") ) || k.contains( QStringLiteral("timedfreeze") ) || k.contains( QStringLiteral("reboot") ) )
-		{
-			accentFg = QColor( 0xFB, 0xBF, 0x24 ); // Warm Amber
-			accentBg = QColor( 0x38, 0x2B, 0x13 );
-		}
-		else if( k.contains( QStringLiteral("freeze") ) || k.contains( QStringLiteral("lock") ) || k.contains( QStringLiteral("powerdown") ) )
-		{
-			accentFg = QColor( 0xF8, 0x71, 0x71 ); // Muted Terracotta
-			accentBg = QColor( 0x3A, 0x1D, 0x20 );
-		}
-		else if( k.contains( QStringLiteral("poweron") ) )
-		{
-			accentFg = QColor( 0x4A, 0xDE, 0x80 ); // Semantic Online Green
-			accentBg = QColor( 0xE4, 0xF1, 0xE7 );
-		}
-		else if( k.contains( QStringLiteral("logoff") ) )
-		{
-			accentFg = QColor( 0xFB, 0x92, 0x3C ); // Warm Warning
-			accentBg = QColor( 0x3A, 0x24, 0x18 );
-		}
-
+		// Monochrome Lucide-style icons (#B4B8C2 normal, #F4F4F5 active, #B7E34B checked)
 		QIcon richIcon;
-		richIcon.addPixmap( drawFeatureGlyph( k, accentFg, accentBg ), QIcon::Normal, QIcon::Off );
-		richIcon.addPixmap( drawFeatureGlyph( k, QColor( 0xC6, 0xE6, 0x6A ), QColor( 0x22, 0x25, 0x1C ) ), QIcon::Normal, QIcon::On );
+		richIcon.addPixmap( drawFeatureGlyph( k, QColor( 0xB4, 0xB8, 0xC2 ), Qt::transparent ), QIcon::Normal, QIcon::Off );
+		richIcon.addPixmap( drawFeatureGlyph( k, QColor( 0xF4, 0xF4, 0xF5 ), Qt::transparent ), QIcon::Active, QIcon::Off );
+		richIcon.addPixmap( drawFeatureGlyph( k, QColor( 0xB7, 0xE3, 0x4B ), Qt::transparent ), QIcon::Normal, QIcon::On );
 
 		QString text = feature.displayName();
 		if( k.contains( QStringLiteral("monitor") ) )
