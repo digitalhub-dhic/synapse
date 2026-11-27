@@ -64,7 +64,7 @@ protected:
 		const int baseY = cy + 16;
 		QPainterPath basePath;
 		basePath.addRoundedRect( cx - baseW / 2, baseY, baseW, baseH, 4, 4 );
-		p.setBrush( QColor( 0x16, 0x22, 0x38 ) );
+		p.setBrush( QColor( 0xF8, 0xF7, 0xF1 ) );
 		p.setPen( QPen( QColor( 0x3b, 0x82, 0xf6 ), 1.2 ) );
 		p.drawPath( basePath );
 
@@ -74,18 +74,18 @@ protected:
 		const int screenY = cy - 22;
 		QPainterPath screenPath;
 		screenPath.addRoundedRect( cx - screenW / 2, screenY, screenW, screenH, 5, 5 );
-		p.setBrush( QColor( 0x0b, 0x10, 0x20 ) );
-		p.setPen( QPen( QColor( 0x28, 0x38, 0x4f ), 1.5 ) );
+		p.setBrush( QColor( 0xFF, 0xFF, 0xFF ) );
+		p.setPen( QPen( QColor( 0xDC, 0xDD, 0xD2 ), 1.5 ) );
 		p.drawPath( screenPath );
 
 		// Screen inner display
-		p.setBrush( QColor( 0x11, 0x1a, 0x2d ) );
+		p.setBrush( QColor( 0xEA, 0xEC, 0xE3 ) );
 		p.setPen( Qt::NoPen );
 		p.drawRoundedRect( cx - screenW / 2 + 4, screenY + 4, screenW - 8, screenH - 8, 3, 3 );
 
 		// Glowing green checkmark badge in center
 		const int badgeRadius = 11;
-		p.setBrush( QColor( 0x05, 0x96, 0x69 ) );
+		p.setBrush( QColor( 0x39, 0x84, 0x5B ) );
 		p.setPen( QPen( QColor( 0x34, 0xd3, 0x99 ), 1.5 ) );
 		p.drawEllipse( QPoint( cx, screenY + screenH / 2 ), badgeRadius, badgeRadius );
 
@@ -174,7 +174,7 @@ void ComputerInspectorPanel::setupUi()
 	auto* navFrame = new QFrame( contentWidget );
 	navFrame->setStyleSheet( QStringLiteral(
 		"QFrame {"
-		"   background-color: #27352A; border: 1px solid #DCDDD2; border-radius: 6px; padding: 2px;"
+		"   background-color: #FFFFFF; border: 1px solid #DCDDD2; border-radius: 6px; padding: 2px;"
 		"}"
 	) );
 	auto* navLayout = new QHBoxLayout( navFrame );
@@ -346,7 +346,7 @@ QWidget* ComputerInspectorPanel::createGlobalTabWidget()
 	auto* statsCard = new QFrame( container );
 	statsCard->setStyleSheet( QStringLiteral(
 		"QFrame {"
-		"   background-color: #27352A; border: 1px solid #DCDDD2; border-radius: 8px; padding: 6px;"
+		"   background-color: #FFFFFF; border: 1px solid #DCDDD2; border-radius: 8px; padding: 6px;"
 		"}"
 	) );
 	auto* statsLayout = new QVBoxLayout( statsCard );
@@ -385,7 +385,7 @@ QWidget* ComputerInspectorPanel::createGlobalTabWidget()
 	auto* actionsCard = new QFrame( container );
 	actionsCard->setStyleSheet( QStringLiteral(
 		"QFrame {"
-		"   background-color: #27352A; border: 1px solid #DCDDD2; border-radius: 8px; padding: 6px;"
+		"   background-color: #FFFFFF; border: 1px solid #DCDDD2; border-radius: 8px; padding: 6px;"
 		"}"
 	) );
 	auto* actionsLayout = new QVBoxLayout( actionsCard );
@@ -402,7 +402,7 @@ QWidget* ComputerInspectorPanel::createGlobalTabWidget()
 		btn->setCursor( Qt::PointingHandCursor );
 		btn->setStyleSheet( QStringLiteral(
 			"QPushButton {"
-			"   background-color: #27352A; border: 1px solid #DCDDD2; border-radius: 6px;"
+			"   background-color: #FFFFFF; border: 1px solid #DCDDD2; border-radius: 6px;"
 			"   padding: 0px 8px; text-align: left;"
 			"}"
 			"QPushButton:hover { background-color: #E5EDE1; border-color: #39845B; }"
@@ -521,7 +521,7 @@ void ComputerInspectorPanel::rebuildComputerTab()
 		auto* emptyCard = new QFrame( m_computerContentContainer );
 		emptyCard->setStyleSheet( QStringLiteral(
 			"QFrame {"
-			"   background-color: #27352A; border: 1px dashed #DCDDD2; border-radius: 10px; padding: 20px;"
+			"   background-color: #FFFFFF; border: 1px dashed #DCDDD2; border-radius: 10px; padding: 20px;"
 			"}"
 		) );
 		auto* eLayout = new QVBoxLayout( emptyCard );
@@ -568,7 +568,7 @@ void ComputerInspectorPanel::rebuildComputerTab()
 	{
 		auto* selectorCard = new QFrame( m_computerContentContainer );
 		selectorCard->setStyleSheet( QStringLiteral(
-			"QFrame { background-color: #27352A; border: 1px solid #DCDDD2; border-radius: 8px; padding: 4px; }"
+			"QFrame { background-color: #FFFFFF; border: 1px solid #DCDDD2; border-radius: 8px; padding: 4px; }"
 		) );
 		auto* sLayout = new QHBoxLayout( selectorCard );
 		sLayout->setContentsMargins( 6, 4, 6, 4 );
@@ -580,12 +580,12 @@ void ComputerInspectorPanel::rebuildComputerTab()
 		m_computerSelectorCombo->setFixedHeight( 28 );
 		m_computerSelectorCombo->setStyleSheet( QStringLiteral(
 			"QComboBox {"
-			"   background-color: #27352A; border: 1px solid #DCDDD2; border-radius: 6px;"
+			"   background-color: #FFFFFF; border: 1px solid #DCDDD2; border-radius: 6px;"
 			"   color: #27352A; font-size: 11px; font-weight: 600; padding: 2px 8px;"
 			"}"
 			"QComboBox::drop-down { border: none; width: 20px; }"
 			"QComboBox QAbstractItemView {"
-			"   background-color: #27352A; color: #27352A; selection-background-color: #39845B; border: 1px solid #DCDDD2;"
+			"   background-color: #FFFFFF; color: #27352A; selection-background-color: #39845B; border: 1px solid #DCDDD2;"
 			"}"
 		) );
 
@@ -646,7 +646,7 @@ void ComputerInspectorPanel::rebuildComputerTab()
 		// Group info card
 		auto* grpCard = new QFrame( m_computerContentContainer );
 		grpCard->setStyleSheet( QStringLiteral(
-			"QFrame { background-color: #27352A; border: 1px solid #DCDDD2; border-radius: 10px; padding: 10px; }"
+			"QFrame { background-color: #FFFFFF; border: 1px solid #DCDDD2; border-radius: 10px; padding: 10px; }"
 		) );
 		auto* gLayout = new QVBoxLayout( grpCard );
 		auto* gTitle = new QLabel( tr( "Batch Control: %1 Computers" ).arg( targets.size() ), grpCard );
@@ -796,7 +796,7 @@ QWidget* ComputerInspectorPanel::createDetailsTabWidget()
 	// Telemetry Card
 	auto* telemCard = new QFrame( container );
 	telemCard->setStyleSheet( QStringLiteral(
-		"QFrame { background-color: #27352A; border: 1px solid #DCDDD2; border-radius: 10px; padding: 12px; }"
+		"QFrame { background-color: #FFFFFF; border: 1px solid #DCDDD2; border-radius: 10px; padding: 12px; }"
 	) );
 	auto* tLayout = new QVBoxLayout( telemCard );
 	tLayout->setSpacing( 8 );
@@ -933,7 +933,7 @@ QWidget* ComputerInspectorPanel::createActiveOperationSummaryCard( QWidget* pare
 	auto* card = new QFrame( parent );
 	card->setStyleSheet( QStringLiteral(
 		"QFrame {"
-		"   background-color: #27352A;"
+		"   background-color: #FFFFFF;"
 		"   border: 1px solid #DCDDD2;"
 		"   border-radius: 8px;"
 		"   padding: 2px;"
@@ -1176,7 +1176,7 @@ QWidget* ComputerInspectorPanel::createCountdownCard( QWidget* parent, const Cou
 	auto* card = new QFrame( parent );
 	card->setStyleSheet( QStringLiteral(
 		"QFrame {"
-		"   background-color: #27352A;"
+		"   background-color: #FFFFFF;"
 		"   border: 1px solid #DCDDD2;"
 		"   border-radius: 8px;"
 		"   padding: 2px;"
@@ -1403,7 +1403,7 @@ QWidget* ComputerInspectorPanel::createMachineInfoCard( QWidget* parent, const C
 {
 	auto* card = new QFrame( parent );
 	card->setStyleSheet( QStringLiteral(
-		"QFrame { background-color: #27352A; border: 1px solid #DCDDD2; border-radius: 10px; padding: 10px;"
+		"QFrame { background-color: #FFFFFF; border: 1px solid #DCDDD2; border-radius: 10px; padding: 10px;"
 		"}"
 	) );
 
@@ -1460,7 +1460,7 @@ QWidget* ComputerInspectorPanel::createActionHubCard( QWidget* parent, const QSt
 {
 	auto* card = new QFrame( parent );
 	card->setStyleSheet( QStringLiteral(
-		"QFrame { background-color: #27352A; border: 1px solid #DCDDD2; border-radius: 8px; padding: 4px; }"
+		"QFrame { background-color: #FFFFFF; border: 1px solid #DCDDD2; border-radius: 8px; padding: 4px; }"
 	) );
 
 	auto* layout = new QVBoxLayout( card );

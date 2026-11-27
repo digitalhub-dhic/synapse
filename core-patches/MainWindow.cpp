@@ -199,7 +199,7 @@ MainWindow::MainWindow( VeyonMaster &masterCore, QWidget* parent ) :
 	topSearch->setFixedWidth( 200 );
 	topSearch->setFixedHeight( 28 );
 		topSearch->setStyleSheet( QStringLiteral(
-		"QLineEdit { background-color: #27352A; border: 1px solid #DCDDD2; border-radius: 14px; padding: 4px 12px; color: #27352A; font-size: 11px; } "
+		"QLineEdit { background-color: #FFFFFF; border: 1px solid #DCDDD2; border-radius: 14px; padding: 4px 12px; color: #27352A; font-size: 11px; } "
 		"QLineEdit:focus { border-color: #537B5B; background-color: #F3F2EB; }"
 	) );
 	connect( topSearch, &QLineEdit::textChanged, this, [this]( const QString& t ) {
@@ -241,7 +241,7 @@ MainWindow::MainWindow( VeyonMaster &masterCore, QWidget* parent ) :
 	bellBtn->setIcon( QIcon( bellPix ) );
 	bellBtn->setIconSize( QSize( 16, 16 ) );
 		bellBtn->setStyleSheet( QStringLiteral(
-		"QToolButton#bellButton { background-color: #27352A; border: 1px solid #DCDDD2; border-radius: 14px; color: #27352A; font-size: 12px; min-width: 28px; max-width: 28px; min-height: 28px; max-height: 28px; padding: 0px; } "
+		"QToolButton#bellButton { background-color: #FFFFFF; border: 1px solid #DCDDD2; border-radius: 14px; color: #27352A; font-size: 12px; min-width: 28px; max-width: 28px; min-height: 28px; max-height: 28px; padding: 0px; } "
 		"QToolButton#bellButton:hover { border-color: #537B5B; background-color: #E5EDE1; color: #27352A; }"
 	) );
 	auto* bellDot = new QLabel( bellBtn );
@@ -255,7 +255,7 @@ MainWindow::MainWindow( VeyonMaster &masterCore, QWidget* parent ) :
 		auto* menu = new QMenu( this );
 		menu->setAttribute( Qt::WA_DeleteOnClose );
 		menu->setStyleSheet( QStringLiteral(
-			"QMenu { background-color: #27352A; border: 1px solid #F0F4EB; border-radius: 8px; padding: 6px; color: #27352A; }"
+			"QMenu { background-color: #FFFFFF; border: 1px solid #F0F4EB; border-radius: 8px; padding: 6px; color: #27352A; }"
 			"QMenu::item { padding: 6px 12px; border-radius: 4px; font-size: 11px; }"
 			"QMenu::item:selected { background-color: #E5EDE1; }"
 		) );
@@ -361,7 +361,7 @@ MainWindow::MainWindow( VeyonMaster &masterCore, QWidget* parent ) :
 	settingsBtn->setIcon( QIcon( gearPix ) );
 	settingsBtn->setIconSize( QSize( 16, 16 ) );
 		settingsBtn->setStyleSheet( QStringLiteral(
-		"QToolButton#settingsButton { background-color: #27352A; border: 1px solid #DCDDD2; border-radius: 14px; color: #27352A; font-size: 13px; min-width: 28px; max-width: 28px; min-height: 28px; max-height: 28px; padding: 0px; } "
+		"QToolButton#settingsButton { background-color: #FFFFFF; border: 1px solid #DCDDD2; border-radius: 14px; color: #27352A; font-size: 13px; min-width: 28px; max-width: 28px; min-height: 28px; max-height: 28px; padding: 0px; } "
 		"QToolButton#settingsButton:hover { border-color: #537B5B; background-color: #E5EDE1; color: #27352A; }"
 	) );
 	connect( settingsBtn, &QToolButton::clicked, this, &MainWindow::showAboutDialog );
@@ -376,21 +376,21 @@ MainWindow::MainWindow( VeyonMaster &masterCore, QWidget* parent ) :
 		"   color: #27352A;"
 		"}"
 		"QDialog QPlainTextEdit, QDialog QTextEdit {"
-		"   background-color: #27352A;"
+		"   background-color: #FFFFFF;"
 		"   border: 1px solid #DCDDD2;"
 		"   border-radius: 6px;"
 		"   color: #27352A;"
 		"   padding: 6px;"
 		"}"
 		"QDialog QLineEdit {"
-		"   background-color: #27352A;"
+		"   background-color: #FFFFFF;"
 		"   border: 1px solid #DCDDD2;"
 		"   border-radius: 6px;"
 		"   color: #27352A;"
 		"   padding: 4px 8px;"
 		"}"
 		"QDialog QPushButton {"
-		"   background-color: #27352A;"
+		"   background-color: #FFFFFF;"
 		"   border: 1px solid #DCDDD2;"
 		"   border-radius: 6px;"
 		"   color: #27352A;"
@@ -416,7 +416,7 @@ MainWindow::MainWindow( VeyonMaster &masterCore, QWidget* parent ) :
 		"   padding: 4px 14px;"
 		"}"
 		"QToolBar#headerToolBar QToolButton {"
-		"   background-color: #27352A;"
+		"   background-color: #FFFFFF;"
 		"   border: 1px solid #DCDDD2;"
 		"   border-radius: 14px;"
 		"   min-width: 28px;"
@@ -438,7 +438,7 @@ MainWindow::MainWindow( VeyonMaster &masterCore, QWidget* parent ) :
 		"   border: none; background: transparent; padding: 0px; margin: 0px;"
 		"}"
 		"QToolBar#mainToolBar QToolButton, QToolBar#toolBar QToolButton {"
-		"   background-color: #27352A;"
+		"   background-color: #FFFFFF;"
 		"   border: 1px solid #DCDDD2;"
 		"   border-radius: 8px;"
 		"   color: #27352A;"
@@ -493,7 +493,7 @@ MainWindow::MainWindow( VeyonMaster &masterCore, QWidget* parent ) :
 		"   margin: 4px 6px;"
 		"}"
 		"QToolTip {"
-		"   background-color: #27352A;"
+		"   background-color: #FFFFFF;"
 		"   color: #27352A;"
 		"   border: 1px solid #DCDDD2;"
 		"   border-radius: 6px;"
@@ -501,7 +501,7 @@ MainWindow::MainWindow( VeyonMaster &masterCore, QWidget* parent ) :
 		"   font-size: 11px;"
 		"}"
 "QMenu {"
-		"   background-color: #27352A;"
+		"   background-color: #FFFFFF;"
 		"   border: 1px solid #DCDDD2;"
 		"   border-radius: 8px;"
 		"   padding: 6px;"
@@ -529,7 +529,7 @@ MainWindow::MainWindow( VeyonMaster &masterCore, QWidget* parent ) :
 		"   padding: 2px 8px;"
 		"}"
 		"QStatusBar QToolButton, QWidget#panelButtons QToolButton {"
-		"   background-color: #27352A;"
+		"   background-color: #FFFFFF;"
 		"   border: 1px solid #DCDDD2;"
 		"   border-radius: 6px;"
 		"   padding: 4px 8px;"
@@ -553,7 +553,7 @@ MainWindow::MainWindow( VeyonMaster &masterCore, QWidget* parent ) :
 		"   font-size: 11px;"
 		"}"
 		"QMainWindow QLineEdit, QStatusBar QLineEdit, QLineEdit#filterLineEdit, QLineEdit#globalSearchEdit {"
-		"   background-color: #27352A;"
+		"   background-color: #FFFFFF;"
 		"   border: 1px solid #DCDDD2;"
 		"   border-radius: 6px;"
 		"   padding: 4px 10px;"
@@ -616,13 +616,13 @@ MainWindow::MainWindow( VeyonMaster &masterCore, QWidget* parent ) :
 		"   font-weight: 600;"
 		"}"
 		"QHeaderView::section {"
-		"   background-color: #27352A;"
+		"   background-color: #FFFFFF;"
 		"   color: #657064;"
 		"   border: 1px solid #DCDDD2;"
 		"   padding: 4px;"
 		"}"
 		"QPushButton {"
-		"   background-color: #27352A;"
+		"   background-color: #FFFFFF;"
 		"   border: 1px solid #DCDDD2;"
 		"   border-radius: 6px;"
 		"   padding: 4px 10px;"

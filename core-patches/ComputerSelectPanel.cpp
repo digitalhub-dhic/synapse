@@ -153,7 +153,7 @@ public:
 		if( hasChildren )
 		{
 			const bool isExpanded = m_treeView ? m_treeView->isExpanded( index ) : false;
-			painter->setPen( isSelected ? QColor(37, 99, 235) : QColor(139, 148, 158) );
+			painter->setPen( isSelected ? QColor(83, 123, 91) : QColor(101, 112, 100) );
 			painter->setFont( QFont( QStringLiteral("Segoe UI"), 7, QFont::Bold ) );
 			QRect chevronRect( indent, option.rect.top() + (option.rect.height() - 16) / 2, 12, 16 );
 			painter->drawText( chevronRect, Qt::AlignCenter, isExpanded ? QStringLiteral("▼") : QStringLiteral("▶") );
@@ -218,7 +218,7 @@ public:
 		}
 		else
 		{
-			QPen mPen( isSelected ? QColor( 0xFF, 0xFF, 0xFF ) : QColor( 0x8B, 0x94, 0x9E ), 1.4, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin );
+			QPen mPen( isSelected ? QColor( 0xFF, 0xFF, 0xFF ) : QColor( 0x65, 0x70, 0x64 ), 1.4, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin );
 			painter->setPen( mPen );
 			painter->setBrush( Qt::NoBrush );
 			painter->drawRoundedRect( QRectF( iconRect.left() + 1.0, iconRect.top() + 2.0, 14.0, 9.0 ), 1.5, 1.5 );
@@ -241,17 +241,17 @@ public:
 
 			if( isSelected )
 			{
-				painter->setBrush( QColor(37, 99, 235) );
+				painter->setBrush( QColor(83, 123, 91) );
 				painter->setPen( Qt::NoPen );
 				painter->drawRoundedRect( badgeRect, 10, 10 );
-				painter->setPen( QColor( 0xFF, 0xFF, 0xFF ) );
+				painter->setPen( QColor( 0x27, 0x35, 0x2A ) );
 			}
 			else
 			{
 				painter->setBrush( QColor(15, 23, 42) );
 				painter->setPen( QColor(42, 50, 61) );
 				painter->drawRoundedRect( badgeRect, 10, 10 );
-				painter->setPen( QColor(37, 99, 235) );
+				painter->setPen( QColor(83, 123, 91) );
 			}
 
 			painter->setFont( badgeFont );
@@ -264,7 +264,7 @@ public:
 		QRect textRect( indent, option.rect.top(), qMax( 10, rightLimit - indent ), option.rect.height() );
 		QFont textFont( QStringLiteral("Segoe UI"), 10, isSelected ? QFont::DemiBold : QFont::Medium );
 		painter->setFont( textFont );
-		painter->setPen( isSelected ? QColor(248, 250, 252) : QColor(230, 237, 243) );
+		painter->setPen( isSelected ? QColor(39, 53, 42) : QColor(39, 53, 42) );
 		painter->drawText( textRect, Qt::AlignVCenter | Qt::AlignLeft, painter->fontMetrics().elidedText( text, Qt::ElideRight, textRect.width() ) );
 
 		painter->restore();
@@ -349,7 +349,7 @@ ComputerSelectPanel::ComputerSelectPanel( ComputerManager& computerManager, QWid
 		"   background: transparent;"
 		"}"
 		"QLineEdit {"
-		"   background-color: #27352A;"
+		"   background-color: #FFFFFF;"
 		"   border: 1px solid #DCDDD2;"
 		"   border-radius: 6px;"
 		"   padding: 4px 10px;"
@@ -362,7 +362,7 @@ ComputerSelectPanel::ComputerSelectPanel( ComputerManager& computerManager, QWid
 		"   background-color: #F3F2EB;"
 		"}"
 		"QPushButton {"
-		"   background-color: #27352A;"
+		"   background-color: #FFFFFF;"
 		"   border: 1px solid #DCDDD2;"
 		"   border-radius: 6px;"
 		"   margin: 0px 8px;"
