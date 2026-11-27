@@ -124,7 +124,7 @@ public:
 		// 1. Draw rounded background pill
 		if( isSelected )
 		{
-			painter->setBrush( QColor(48, 48, 54) ); // #303036 WCAG AA selection
+			painter->setBrush( QColor(41, 41, 46) ); // #29292E WCAG AA selection
 			painter->setPen( QPen( QColor(250, 250, 250), 1 ) );
 			painter->drawRoundedRect( rowRect, 6, 6 );
 		}
@@ -153,7 +153,7 @@ public:
 		if( hasChildren )
 		{
 			const bool isExpanded = m_treeView ? m_treeView->isExpanded( index ) : false;
-			painter->setPen( isSelected ? QColor(250, 250, 250) : QColor(212, 212, 216) );
+			painter->setPen( isSelected ? QColor(250, 250, 250) : QColor(52, 52, 58) );
 			painter->setFont( QFont( QStringLiteral("Segoe UI"), 7, QFont::Bold ) );
 			QRect chevronRect( indent, option.rect.top() + (option.rect.height() - 16) / 2, 12, 16 );
 			painter->drawText( chevronRect, Qt::AlignCenter, isExpanded ? QStringLiteral("▼") : QStringLiteral("▶") );
@@ -218,7 +218,7 @@ public:
 		}
 		else
 		{
-			QPen mPen( isSelected ? QColor( 0xFA, 0xFA, 0xFA ) : QColor( 0xD4, 0xD4, 0xD8 ), 1.4, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin );
+			QPen mPen( isSelected ? QColor( 0xFA, 0xFA, 0xFA ) : QColor( 0x29, 0x29, 0x2E ), 1.4, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin );
 			painter->setPen( mPen );
 			painter->setBrush( Qt::NoBrush );
 			painter->drawRoundedRect( QRectF( iconRect.left() + 1.0, iconRect.top() + 2.0, 14.0, 9.0 ), 1.5, 1.5 );
@@ -248,8 +248,8 @@ public:
 			}
 			else
 			{
-				painter->setBrush( QColor( 0x30, 0x30, 0x36 ) );
-				painter->setPen( QColor( 0x30, 0x30, 0x36 ) );
+				painter->setBrush( QColor( 0x29, 0x29, 0x2E ) );
+				painter->setPen( QColor( 0x29, 0x29, 0x2E ) );
 				painter->drawRoundedRect( badgeRect, 10, 10 );
 				painter->setPen( QColor( 0xFA, 0xFA, 0xFA ) );
 			}
@@ -296,7 +296,7 @@ ComputerSelectPanel::ComputerSelectPanel( ComputerManager& computerManager, QWid
 
 	auto* selectHeader = new QFrame( this );
 	selectHeader->setFixedHeight( 32 );
-	selectHeader->setStyleSheet( QStringLiteral( "QFrame { background-color: #121214; border-bottom: 1px solid #303036; }" ) );
+	selectHeader->setStyleSheet( QStringLiteral( "QFrame { background-color: #111113; border-bottom: 1px solid #29292E; }" ) );
 	auto* headerLayout = new QHBoxLayout( selectHeader );
 	headerLayout->setContentsMargins( 12, 0, 8, 0 );
 	headerLayout->setSpacing( 6 );
@@ -313,7 +313,7 @@ ComputerSelectPanel::ComputerSelectPanel( ComputerManager& computerManager, QWid
 	closeButton->setStyleSheet( QStringLiteral(
 		"QPushButton {"
 		"   background: transparent; border: none; border-radius: 4px;"
-		"   color: #D4D4D8; font-size: 11px; font-weight: bold; padding: 0px;"
+		"   color: #29292E; font-size: 11px; font-weight: bold; padding: 0px;"
 		"}"
 		"QPushButton:hover { background: #F87171; color: #18181B; }"
 	) );
@@ -336,11 +336,11 @@ ComputerSelectPanel::ComputerSelectPanel( ComputerManager& computerManager, QWid
 
 		setStyleSheet( QStringLiteral(
 		"ComputerSelectPanel, QWidget#ComputerSelectPanel {"
-		"   background-color: #121214;"
+		"   background-color: #111113;"
 		"   border-right: 1px solid #E1E3E8;"
 		"}"
 		"QTreeView {"
-		"   background-color: #121214;"
+		"   background-color: #111113;"
 		"   color: #FAFAFA;"
 		"   border: none;"
 		"   outline: none;"
@@ -359,7 +359,7 @@ ComputerSelectPanel::ComputerSelectPanel( ComputerManager& computerManager, QWid
 		"}"
 		"QLineEdit:focus {"
 		"   border: 1px solid #FAFAFA;"
-		"   background-color: #121214;"
+		"   background-color: #111113;"
 		"}"
 		"QPushButton {"
 		"   background-color: #18181B;"
@@ -372,12 +372,12 @@ ComputerSelectPanel::ComputerSelectPanel( ComputerManager& computerManager, QWid
 		"   padding: 4px 10px;"
 		"}"
 		"QPushButton:hover {"
-		"   background-color: #303036;"
+		"   background-color: #29292E;"
 		"   border-color: #FAFAFA;"
 		"   color: #FAFAFA;"
 		"}"
 	) );
-	ui->treeView->viewport()->setStyleSheet( QStringLiteral( "background-color: #121214;" ) );
+	ui->treeView->viewport()->setStyleSheet( QStringLiteral( "background-color: #111113;" ) );
 
 	// Hide table header and style tree view
 	ui->treeView->setHeaderHidden( true );

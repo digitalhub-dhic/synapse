@@ -848,7 +848,7 @@ void PowerControlFeaturePlugin::displayShutdownTimeout( int shutdownTimeout )
 	auto* progressHeaderLayout = new QHBoxLayout( progressHeader );
 	progressHeaderLayout->setContentsMargins( 0, 0, 0, 0 );
 	auto* pTitle = new QLabel( tr( "Shutdown Countdown" ), progressHeader );
-	pTitle->setStyleSheet( QStringLiteral( "color: #D4D4D8; font-size: 11px; font-weight: 600;" ) );
+	pTitle->setStyleSheet( QStringLiteral( "color: #29292E; font-size: 11px; font-weight: 600;" ) );
 	m_clientRemainingTimeLabel = new QLabel( progressHeader );
 	m_clientRemainingTimeLabel->setStyleSheet( QStringLiteral( "color: #F87171; font-size: 11px; font-weight: 700; font-family: monospace;" ) );
 	progressHeaderLayout->addWidget( pTitle );

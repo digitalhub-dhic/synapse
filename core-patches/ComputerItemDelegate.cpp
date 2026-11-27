@@ -66,8 +66,8 @@ void ComputerItemDelegate::paint(QPainter* painter, const QStyleOptionViewItem& 
 
 	if (isSelected)
 	{
-		painter->fillPath(cardPath, QColor(39, 39, 42)); // #303036 WCAG AA selection
-		painter->setPen(QPen(QColor(250, 250, 250), 1.5)); // #E4E4E7 focus border
+		painter->fillPath(cardPath, QColor(39, 39, 42)); // #29292E WCAG AA selection
+		painter->setPen(QPen(QColor(250, 250, 250), 1.5)); // #27272A focus border
 		painter->drawPath(cardPath);
 	}
 	else if (isHovered)
@@ -78,8 +78,8 @@ void ComputerItemDelegate::paint(QPainter* painter, const QStyleOptionViewItem& 
 	}
 	else
 	{
-		painter->fillPath(cardPath, QColor(31, 31, 35)); // #18181B surface
-		painter->setPen(QPen(QColor(48, 48, 54), 1.0)); // #27272A subtle border
+		painter->fillPath(cardPath, QColor(27, 27, 31)); // #18181B surface
+		painter->setPen(QPen(QColor(41, 41, 46), 1.0)); // #27272A subtle border
 		painter->drawPath(cardPath);
 	}
 
@@ -195,7 +195,7 @@ void ComputerItemDelegate::paint(QPainter* painter, const QStyleOptionViewItem& 
 	{
 		// Quiet Connecting State - Subtle border & compact status without radar noise
 		painter->fillRect(previewRect, QColor(250, 250, 250));
-		painter->setPen(QPen(QColor(48, 48, 54), 1));
+		painter->setPen(QPen(QColor(41, 41, 46), 1));
 		painter->drawRect(previewRect.adjusted(0, 0, -1, -1));
 
 		const int cx = previewRect.center().x();
@@ -206,7 +206,7 @@ void ComputerItemDelegate::paint(QPainter* painter, const QStyleOptionViewItem& 
 		painter->drawEllipse(QPoint(cx, cy - 8), 4, 4);
 
 		painter->setFont(QFont(QStringLiteral("Segoe UI"), 8, QFont::DemiBold));
-		painter->setPen(QColor(212, 212, 216));
+		painter->setPen(QColor(52, 52, 58));
 		painter->drawText(QRect(previewRect.left(), cy + 2, previewRect.width(), 16),
 						  Qt::AlignCenter, tr("Connecting..."));
 	}
@@ -216,15 +216,15 @@ void ComputerItemDelegate::paint(QPainter* painter, const QStyleOptionViewItem& 
 		painter->fillRect(previewRect, QColor(250, 250, 250));
 
 		// Subtle grid accent line inside preview
-		painter->setPen(QPen(QColor(48, 48, 54), 1));
+		painter->setPen(QPen(QColor(41, 41, 46), 1));
 		painter->drawRect(previewRect.adjusted(0, 0, -1, -1));
 
 		const int cx = previewRect.center().x();
 		const int cy = previewRect.center().y() - 14;
 
 		// Modern sleek monitor glyph
-		painter->setPen(QPen(QColor(212, 212, 216), 1.4));
-		painter->setBrush(QColor(31, 31, 35));
+		painter->setPen(QPen(QColor(52, 52, 58), 1.4));
+		painter->setBrush(QColor(27, 27, 31));
 		painter->drawRoundedRect(QRect(cx - 16, cy - 10, 32, 20), 2, 2);
 		// Stand & Base
 		painter->drawLine(cx, cy + 10, cx, cy + 14);
@@ -232,12 +232,12 @@ void ComputerItemDelegate::paint(QPainter* painter, const QStyleOptionViewItem& 
 
 		// Status text
 		painter->setFont(QFont(QStringLiteral("Segoe UI"), 8, QFont::DemiBold));
-		painter->setPen(QColor(212, 212, 216));
+		painter->setPen(QColor(52, 52, 58));
 		painter->drawText(QRect(previewRect.left(), cy + 18, previewRect.width(), 16),
 						  Qt::AlignCenter, tr("Computer Offline"));
 
 		painter->setFont(QFont(QStringLiteral("Segoe UI"), 7));
-		painter->setPen(QColor(212, 212, 216));
+		painter->setPen(QColor(52, 52, 58));
 		painter->drawText(QRect(previewRect.left(), cy + 34, previewRect.width(), 14),
 						  Qt::AlignCenter, tr("Standby • Ready for WOL"));
 	}
@@ -246,7 +246,7 @@ void ComputerItemDelegate::paint(QPainter* painter, const QStyleOptionViewItem& 
 	if (isHovered && previewRect.height() >= 65)
 	{
 		const QRect hoverBar(previewRect.left() + 4, previewRect.bottom() - 22, previewRect.width() - 8, 20);
-		painter->setBrush(QColor(31, 31, 35, 245));
+		painter->setBrush(QColor(27, 27, 31, 245));
 		painter->setPen(QPen(QColor(250, 250, 250, 200), 1));
 		painter->drawRoundedRect(hoverBar, 4, 4);
 
@@ -261,7 +261,7 @@ void ComputerItemDelegate::paint(QPainter* painter, const QStyleOptionViewItem& 
 			painter->drawText(rView, Qt::AlignCenter, tr("View"));
 			painter->drawText(rCtrl, Qt::AlignCenter, tr("Control"));
 			painter->drawText(rMsg, Qt::AlignCenter, tr("Message"));
-			painter->setPen(QColor(48, 48, 54));
+			painter->setPen(QColor(41, 41, 46));
 			painter->drawLine(rCtrl.left(), hoverBar.top() + 3, rCtrl.left(), hoverBar.bottom() - 3);
 			painter->drawLine(rMsg.left(), hoverBar.top() + 3, rMsg.left(), hoverBar.bottom() - 3);
 		}
@@ -313,10 +313,10 @@ void ComputerItemDelegate::paint(QPainter* painter, const QStyleOptionViewItem& 
 		// Pill badge in top right: "OFFLINE"
 		const QRect badgeRect(previewRect.right() - 54, previewRect.top() + 5, 50, 16);
 		painter->setBrush(QColor(250, 250, 250, 240));
-		painter->setPen(QPen(QColor(48, 48, 54), 1));
+		painter->setPen(QPen(QColor(41, 41, 46), 1));
 		painter->drawRoundedRect(badgeRect, 8, 8);
 
-		painter->setPen(QColor(212, 212, 216));
+		painter->setPen(QColor(52, 52, 58));
 		painter->setFont(QFont(QStringLiteral("Segoe UI"), 6, QFont::DemiBold));
 		painter->drawText(badgeRect, Qt::AlignCenter, QStringLiteral("OFFLINE"));
 	}
@@ -349,7 +349,7 @@ void ComputerItemDelegate::paint(QPainter* painter, const QStyleOptionViewItem& 
 	}
 	else if (isConnecting)
 	{
-		statusDotColor = QColor(251, 191, 36); // #FBBF24 Warning Amber
+		statusDotColor = QColor(251, 191, 36); // #E5BD65 Warning Amber
 		painter->setBrush(QColor(213, 138, 69, 35));
 		painter->setPen(Qt::NoPen);
 		painter->drawEllipse(dotCenter, 6, 6);
@@ -365,7 +365,7 @@ void ComputerItemDelegate::paint(QPainter* painter, const QStyleOptionViewItem& 
 
 	// Text beside dot
 	painter->setFont(QFont(QStringLiteral("Segoe UI"), 8));
-	painter->setPen(QColor(212, 212, 216));
+	painter->setPen(QColor(52, 52, 58));
 
 	QString detailsText;
 	if (isOnline)
@@ -547,7 +547,7 @@ void ComputerItemDelegate::drawFeatureIcons(QPainter* painter, const QPoint& pos
 
 		painter->save();
 		painter->setRenderHint(QPainter::Antialiasing);
-		painter->setBrush(QColor(31, 31, 35, 240));
+		painter->setBrush(QColor(27, 27, 31, 240));
 		painter->setPen(QPen(QColor(250, 250, 250), 1));
 		painter->drawRoundedRect(QRect(x, y, count * (OverlayIconSize + OverlayIconSpacing) + 4, OverlayIconSize + 4),
 								 OverlayIconsRadius, OverlayIconsRadius);

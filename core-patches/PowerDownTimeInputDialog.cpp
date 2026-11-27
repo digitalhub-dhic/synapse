@@ -86,7 +86,7 @@ PowerDownTimeInputDialog::PowerDownTimeInputDialog( QWidget *parent, int compute
 	mainLayout->addWidget( divider1 );
 
 	auto* promptLabel = new QLabel( tr( "Shutdown after:" ), this );
-	promptLabel->setStyleSheet( QStringLiteral( "font-size: 12px; font-weight: 500; color: #D4D4D8; padding-top: 2px;" ) );
+	promptLabel->setStyleSheet( QStringLiteral( "font-size: 12px; font-weight: 500; color: #29292E; padding-top: 2px;" ) );
 	mainLayout->addWidget( promptLabel );
 
 	ui->minutesSpinBox->setAlignment( Qt::AlignCenter );
@@ -129,7 +129,7 @@ PowerDownTimeInputDialog::PowerDownTimeInputDialog( QWidget *parent, int compute
 		"   background: transparent;"
 		"}"
 		"QLabel#label, QLabel#label_2 {"
-		"   color: #D4D4D8;"
+		"   color: #29292E;"
 		"   font-size: 12px;"
 		"   font-weight: 500;"
 		"   margin-left: 3px;"
@@ -158,7 +158,7 @@ PowerDownTimeInputDialog::PowerDownTimeInputDialog( QWidget *parent, int compute
 		"   border-left: 1px solid #E1E3E8;"
 		"}"
 		"QSpinBox::up-button:hover, QSpinBox::down-button:hover {"
-		"   background: #E4E4E7;"
+		"   background: #27272A;"
 		"}"
 		"QPushButton {"
 		"   background-color: #F87171;"
@@ -175,7 +175,7 @@ PowerDownTimeInputDialog::PowerDownTimeInputDialog( QWidget *parent, int compute
 		"QPushButton:disabled { background-color: #451A1A; color: #7F1D1D; }"
 		"QPushButton[text*=\"Cancel\"] {"
 		"   background-color: #27272A;"
-		"   color: #D4D4D8;"
+		"   color: #29292E;"
 		"   border: 1px solid #E1E3E8;"
 		"   font-weight: 500;"
 		"   min-width: 80px;"
