@@ -1084,7 +1084,33 @@ MainWindow::MainWindow( VeyonMaster &masterCore, QWidget* parent ) :
 	auto* inspectorPanelButton = new QToolButton( ui->panelButtons );
 	inspectorPanelButton->setObjectName( QStringLiteral("inspectorPanelButton") );
 	inspectorPanelButton->setText( tr( "Inspector" ) );
-	inspectorPanelButton->setIcon( QIcon( QStringLiteral(":/core/icon32.png") ) );
+	auto makeFooterIcon = []( const QString& kind ) -> QIcon {
+		QPixmap px( 16, 16 );
+		px.fill( Qt::transparent );
+		QPainter p( &px );
+		p.setRenderHint( QPainter::Antialiasing );
+		p.setPen( QPen( QColor( 0x53, 0x7B, 0x5B ), 1.5, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin ) );
+		p.setBrush( Qt::NoBrush );
+		if( kind == QLatin1String("locations") )
+		{
+			p.drawRoundedRect( QRectF( 2.0, 3.0, 12.0, 10.0 ), 1.8, 1.8 );
+			p.drawLine( QPointF( 5.5, 3.0 ), QPointF( 5.5, 13.0 ) );
+		}
+		else if( kind == QLatin1String("screenshots") )
+		{
+			p.drawRoundedRect( QRectF( 2.0, 4.0, 12.0, 9.0 ), 1.8, 1.8 );
+			p.drawEllipse( QPointF( 8.0, 8.5 ), 2.2, 2.2 );
+		}
+		else
+		{
+			p.drawRoundedRect( QRectF( 2.0, 3.0, 12.0, 10.0 ), 1.8, 1.8 );
+			p.drawLine( QPointF( 10.5, 3.0 ), QPointF( 10.5, 13.0 ) );
+		}
+		return QIcon( px );
+	};
+	ui->computerSelectPanelButton->setIcon( makeFooterIcon( QStringLiteral("locations") ) );
+	ui->screenshotManagementPanelButton->setIcon( makeFooterIcon( QStringLiteral("screenshots") ) );
+	inspectorPanelButton->setIcon( makeFooterIcon( QStringLiteral("inspector") ) );
 	inspectorPanelButton->setCheckable( true );
 	inspectorPanelButton->setToolButtonStyle( Qt::ToolButtonTextBesideIcon );
 	inspectorPanelButton->setStyleSheet( QStringLiteral(
