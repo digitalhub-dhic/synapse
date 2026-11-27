@@ -67,13 +67,13 @@ void ComputerItemDelegate::paint(QPainter* painter, const QStyleOptionViewItem& 
 	if (isSelected)
 	{
 		painter->fillPath(cardPath, QColor(39, 39, 42)); // #29292E WCAG AA selection
-		painter->setPen(QPen(QColor(23, 25, 26), 1.5)); // #27272A focus border
+		painter->setPen(QPen(QColor(105, 123, 60), 1.5)); // #697B3C Signal Lime focus border
 		painter->drawPath(cardPath);
 	}
 	else if (isHovered)
 	{
 		painter->fillPath(cardPath, QColor(39, 39, 42)); // #18181B elevated hover
-		painter->setPen(QPen(QColor(23, 25, 26), 1.0));
+		painter->setPen(QPen(QColor(72, 72, 79), 1.0));
 		painter->drawPath(cardPath);
 	}
 	else
@@ -223,7 +223,7 @@ void ComputerItemDelegate::paint(QPainter* painter, const QStyleOptionViewItem& 
 		const int cy = previewRect.center().y() - 14;
 
 		// Modern sleek monitor glyph
-		painter->setPen(QPen(QColor(52, 52, 58), 1.4));
+		painter->setPen(QPen(QColor(113, 113, 122), 1.4));
 		painter->setBrush(QColor(27, 27, 31));
 		painter->drawRoundedRect(QRect(cx - 16, cy - 10, 32, 20), 2, 2);
 		// Stand & Base
@@ -247,7 +247,7 @@ void ComputerItemDelegate::paint(QPainter* painter, const QStyleOptionViewItem& 
 	{
 		const QRect hoverBar(previewRect.left() + 4, previewRect.bottom() - 22, previewRect.width() - 8, 20);
 		painter->setBrush(QColor(27, 27, 31, 245));
-		painter->setPen(QPen(QColor(250, 250, 250, 200), 1));
+		painter->setPen(QPen(QColor(105, 123, 60), 1));
 		painter->drawRoundedRect(hoverBar, 4, 4);
 
 		painter->setFont(QFont(QStringLiteral("Segoe UI"), 7, QFont::DemiBold));
@@ -312,7 +312,7 @@ void ComputerItemDelegate::paint(QPainter* painter, const QStyleOptionViewItem& 
 	{
 		// Pill badge in top right: "OFFLINE"
 		const QRect badgeRect(previewRect.right() - 54, previewRect.top() + 5, 50, 16);
-		painter->setBrush(QColor(250, 250, 250, 240));
+		painter->setBrush(QColor(48, 48, 54, 235));
 		painter->setPen(QPen(QColor(41, 41, 46), 1));
 		painter->drawRoundedRect(badgeRect, 8, 8);
 
@@ -330,7 +330,7 @@ void ComputerItemDelegate::paint(QPainter* painter, const QStyleOptionViewItem& 
 
 	// Computer Name
 	painter->setFont(QFont(QStringLiteral("Segoe UI"), 9, QFont::Bold));
-	painter->setPen(isSelected ? QColor(23, 25, 26) : QColor(23, 25, 26));
+	painter->setPen(QColor(244, 244, 245));
 	QFontMetrics fmName(painter->font());
 	const QString elidedName = fmName.elidedText(compName, Qt::ElideRight, infoRect.width());
 	painter->drawText(QRect(infoRect.left(), infoRect.top(), infoRect.width(), 16), Qt::AlignLeft | Qt::AlignVCenter, elidedName);

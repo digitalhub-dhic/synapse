@@ -334,11 +334,11 @@ bool ScreenLockFeaturePlugin::startFeature( VeyonMasterInterface& master, const 
 		dialog.setStyleSheet( QStringLiteral(
 			"QDialog { background-color: #18181B; color: #FAFAFA; }"
 			"QLabel { color: #FAFAFA; font-size: 13px; }"
-			"QComboBox, QSpinBox { background-color: #27272A; color: #FAFAFA; border: 1px solid #E1E3E8; border-radius: 4px; padding: 6px 10px; font-size: 13px; }"
+			"QComboBox, QSpinBox { background-color: #27272A; color: #FAFAFA; border: 1px solid #29292E; border-radius: 4px; padding: 6px 10px; font-size: 13px; }"
 			"QPushButton { background-color: #FAFAFA; color: #18181B; border: 1px solid #27272A; border-radius: 4px; padding: 7px 16px; font-weight: 600; font-size: 13px; }"
 			"QPushButton:hover { background-color: #1D4ED8; }"
-			"QPushButton#btnCancel { background-color: #27272A; color: #D4D4D8; border: 1px solid #E1E3E8; }"
-			"QPushButton#btnCancel:hover { background-color: #E1E3E8; color: #18181B; }"
+			"QPushButton#btnCancel { background-color: #27272A; color: #D4D4D8; border: 1px solid #29292E; }"
+			"QPushButton#btnCancel:hover { background-color: #29292E; color: #18181B; }"
 		) );
 
 		auto* layout = new QVBoxLayout( &dialog );
