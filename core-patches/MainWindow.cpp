@@ -1762,19 +1762,134 @@ void MainWindow::addFeaturesToToolBar()
 		const QString featName = feature.name();
 		const QString k = featName.toLower().remove( QLatin1Char(' ') ).remove( QLatin1Char('_') ).remove( QLatin1Char('-') );
 
+		auto drawFeatureGlyph = []( const QString& key, const QColor& fg, const QColor& bgBadge ) -> QPixmap {
+			QPixmap px( 24, 24 );
+			px.fill( Qt::transparent );
+			QPainter p( &px );
+			p.setRenderHint( QPainter::Antialiasing );
+			p.setPen( Qt::NoPen );
+			p.setBrush( bgBadge );
+			p.drawRoundedRect( QRectF( 1.0, 1.0, 22.0, 22.0 ), 6.0, 6.0 );
+
+			p.setPen( QPen( fg, 1.7, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin ) );
+			p.setBrush( Qt::NoBrush );
+
+			if( key.contains( QStringLiteral("monitor") ) )
+			{
+				p.drawRoundedRect( QRectF( 5.0, 5.0, 6.0, 6.0 ), 1.2, 1.2 );
+				p.drawRoundedRect( QRectF( 13.0, 5.0, 6.0, 6.0 ), 1.2, 1.2 );
+				p.drawRoundedRect( QRectF( 5.0, 13.0, 6.0, 6.0 ), 1.2, 1.2 );
+				p.drawRoundedRect( QRectF( 13.0, 13.0, 6.0, 6.0 ), 1.2, 1.2 );
+			}
+			else if( key.contains( QStringLiteral("remote") ) || key.contains( QStringLiteral("vnc") ) )
+			{
+				p.drawRoundedRect( QRectF( 4.5, 5.5, 15.0, 10.0 ), 2.0, 2.0 );
+				p.drawLine( QPointF( 9.5, 18.5 ), QPointF( 14.5, 18.5 ) );
+				p.drawLine( QPointF( 12.0, 15.5 ), QPointF( 12.0, 18.5 ) );
+				p.drawLine( QPointF( 9.0, 10.5 ), QPointF( 15.0, 10.5 ) );
+			}
+			else if( key.contains( QStringLiteral("timedlock") ) || key.contains( QStringLiteral("timedfreeze") ) )
+			{
+				p.drawEllipse( QPointF( 12.0, 12.5 ), 6.2, 6.2 );
+				p.drawLine( QPointF( 12.0, 9.0 ), QPointF( 12.0, 12.5 ) );
+				p.drawLine( QPointF( 12.0, 12.5 ), QPointF( 14.8, 14.0 ) );
+			}
+			else if( key.contains( QStringLiteral("freeze") ) || key.contains( QStringLiteral("lock") ) )
+			{
+				p.drawRoundedRect( QRectF( 6.5, 11.0, 11.0, 8.0 ), 2.0, 2.0 );
+				p.drawArc( QRectF( 8.5, 5.5, 7.0, 8.0 ), 0, 180 * 16 );
+			}
+			else if( key.contains( QStringLiteral("poweron") ) )
+			{
+				p.drawArc( QRectF( 6.0, 6.5, 12.0, 12.0 ), 125 * 16, 290 * 16 );
+				p.drawLine( QPointF( 12.0, 5.0 ), QPointF( 12.0, 11.5 ) );
+			}
+			else if( key.contains( QStringLiteral("reboot") ) )
+			{
+				p.drawArc( QRectF( 6.0, 6.0, 12.0, 12.0 ), 35 * 16, 285 * 16 );
+				p.drawLine( QPointF( 16.5, 6.5 ), QPointF( 18.0, 10.0 ) );
+				p.drawLine( QPointF( 16.5, 6.5 ), QPointF( 13.2, 7.5 ) );
+			}
+			else if( key.contains( QStringLiteral("powerdown") ) )
+			{
+				p.drawArc( QRectF( 6.0, 6.5, 12.0, 12.0 ), 125 * 16, 290 * 16 );
+				p.drawLine( QPointF( 12.0, 5.0 ), QPointF( 12.0, 11.5 ) );
+				p.drawLine( QPointF( 7.0, 17.0 ), QPointF( 17.0, 7.0 ) );
+			}
+			else if( key.contains( QStringLiteral("login") ) )
+			{
+				p.drawEllipse( QPointF( 10.0, 8.0 ), 2.5, 2.5 );
+				p.drawArc( QRectF( 5.5, 12.5, 9.0, 6.0 ), 0, 180 * 16 );
+				p.drawLine( QPointF( 15.0, 12.0 ), QPointF( 19.0, 12.0 ) );
+				p.drawLine( QPointF( 17.0, 10.0 ), QPointF( 19.0, 12.0 ) );
+				p.drawLine( QPointF( 17.0, 14.0 ), QPointF( 19.0, 12.0 ) );
+			}
+			else if( key.contains( QStringLiteral("logoff") ) )
+			{
+				p.drawEllipse( QPointF( 9.5, 8.0 ), 2.5, 2.5 );
+				p.drawArc( QRectF( 5.0, 12.5, 9.0, 6.0 ), 0, 180 * 16 );
+				p.drawLine( QPointF( 19.0, 12.0 ), QPointF( 15.0, 12.0 ) );
+				p.drawLine( QPointF( 17.0, 10.0 ), QPointF( 19.0, 12.0 ) );
+				p.drawLine( QPointF( 17.0, 14.0 ), QPointF( 19.0, 12.0 ) );
+			}
+			else if( key.contains( QStringLiteral("textmessage") ) )
+			{
+				p.drawRoundedRect( QRectF( 5.0, 6.0, 14.0, 9.5 ), 2.2, 2.2 );
+				p.drawLine( QPointF( 8.0, 15.5 ), QPointF( 7.0, 19.0 ) );
+				p.drawLine( QPointF( 7.0, 19.0 ), QPointF( 11.5, 15.5 ) );
+				p.drawLine( QPointF( 8.0, 9.5 ), QPointF( 16.0, 9.5 ) );
+				p.drawLine( QPointF( 8.0, 12.2 ), QPointF( 13.5, 12.2 ) );
+			}
+			else if( key.contains( QStringLiteral("startapp") ) )
+			{
+				p.drawRoundedRect( QRectF( 5.0, 5.5, 14.0, 13.0 ), 2.2, 2.2 );
+				p.drawLine( QPointF( 5.0, 9.0 ), QPointF( 19.0, 9.0 ) );
+				QPolygonF play;
+				play << QPointF( 10.5, 11.5 ) << QPointF( 15.0, 13.8 ) << QPointF( 10.5, 16.0 );
+				p.setBrush( fg );
+				p.drawPolygon( play );
+			}
+			else if( key.contains( QStringLiteral("filetransfer") ) || key.contains( QStringLiteral("distribute") ) )
+			{
+				p.drawRoundedRect( QRectF( 5.0, 6.0, 14.0, 12.0 ), 2.0, 2.0 );
+				p.drawLine( QPointF( 12.0, 15.0 ), QPointF( 12.0, 9.0 ) );
+				p.drawLine( QPointF( 9.5, 11.5 ), QPointF( 12.0, 9.0 ) );
+				p.drawLine( QPointF( 14.5, 11.5 ), QPointF( 12.0, 9.0 ) );
+			}
+			else
+			{
+				p.drawEllipse( QPointF( 12.0, 12.0 ), 6.0, 6.0 );
+				p.drawLine( QPointF( 6.5, 12.0 ), QPointF( 17.5, 12.0 ) );
+			}
+			return px;
+		};
+
+		QColor accentFg( 0x53, 0x7B, 0x5B ); // Botanical Sage
+		QColor accentBg( 0xE5, 0xEDE1 );
+		if( k.contains( QStringLiteral("timedlock") ) || k.contains( QStringLiteral("timedfreeze") ) || k.contains( QStringLiteral("reboot") ) )
+		{
+			accentFg = QColor( 0xB7, 0x83, 0x32 ); // Warm Amber
+			accentBg = QColor( 0xF8, 0xEE, 0xD9 );
+		}
+		else if( k.contains( QStringLiteral("freeze") ) || k.contains( QStringLiteral("lock") ) || k.contains( QStringLiteral("powerdown") ) )
+		{
+			accentFg = QColor( 0xA6, 0x4F, 0x42 ); // Muted Terracotta
+			accentBg = QColor( 0xF5, 0xE5, 0xE0 );
+		}
+		else if( k.contains( QStringLiteral("poweron") ) )
+		{
+			accentFg = QColor( 0x39, 0x84, 0x5B ); // Semantic Online Green
+			accentBg = QColor( 0xE4, 0xF1, 0xE7 );
+		}
+		else if( k.contains( QStringLiteral("logoff") ) )
+		{
+			accentFg = QColor( 0xC6, 0x6C, 0x36 ); // Warm Warning
+			accentBg = QColor( 0xF9, 0xE9, 0xDE );
+		}
+
 		QIcon richIcon;
-		if( k.contains( QStringLiteral("monitor") ) )
-		{
-			richIcon = QIcon( QStringLiteral(":/remoteaccess/preferences-system-windows-effect-desktopgrid.png") );
-		}
-		else
-		{
-			richIcon = QIcon( feature.iconUrl() );
-		}
-		if( richIcon.isNull() )
-		{
-			richIcon = QIcon( feature.iconUrl() );
-		}
+		richIcon.addPixmap( drawFeatureGlyph( k, accentFg, accentBg ), QIcon::Normal, QIcon::Off );
+		richIcon.addPixmap( drawFeatureGlyph( k, Qt::white, QColor( 0x42, 0x67, 0x49 ) ), QIcon::Normal, QIcon::On );
 
 		QString text = feature.displayName();
 		if( k.contains( QStringLiteral("monitor") ) )
