@@ -374,7 +374,7 @@ QWidget* ComputerInspectorPanel::createGlobalTabWidget()
 		statsLayout->addLayout( row );
 	};
 
-	addStatRow( tr( "Total Workstations" ), m_statTotalVal, QStringLiteral( "#FAF5EF" ) );
+	addStatRow( tr( "Total Workstations" ), m_statTotalVal, QStringLiteral( "#27352A" ) );
 	addStatRow( tr( "Online Connected" ), m_statOnlineVal, QStringLiteral( "#39845B" ) );
 	addStatRow( tr( "Standby / Logon Screen" ), m_statIdleVal, QStringLiteral( "#B78332" ) );
 	addStatRow( tr( "Offline" ), m_statOfflineVal, QStringLiteral( "#92988C" ) );
@@ -413,7 +413,7 @@ QWidget* ComputerInspectorPanel::createGlobalTabWidget()
 		auto* ic = new QLabel( iconText, btn );
 		ic->setStyleSheet( QStringLiteral( "font-size: 11px; border: none; background: transparent;" ) );
 		auto* txt = new QLabel( titleText, btn );
-		txt->setStyleSheet( QStringLiteral( "font-size: 11px; font-weight: 500; color: #FAF5EF; border: none; background: transparent;" ) );
+		txt->setStyleSheet( QStringLiteral( "font-size: 11px; font-weight: 500; color: #27352A; border: none; background: transparent;" ) );
 		auto* arr = new QLabel( QStringLiteral( "›" ), btn );
 		arr->setStyleSheet( QStringLiteral( "font-size: 13px; color: #92988C; font-weight: bold; border: none; background: transparent;" ) );
 

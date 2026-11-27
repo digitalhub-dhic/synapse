@@ -814,10 +814,10 @@ void PowerControlFeaturePlugin::displayShutdownTimeout( int shutdownTimeout )
 	m_clientShutdownDialog->setWindowTitle( tr( "Synapse Power Down" ) );
 	m_clientShutdownDialog->setFixedSize( 480, 180 );
 	m_clientShutdownDialog->setStyleSheet( QStringLiteral(
-		"QDialog { background-color: #0B1324; border: 2px solid #2563EB; border-radius: 12px; }"
+		"QDialog { background-color: #0B1324; border: 2px solid #537B5B; border-radius: 12px; }"
 		"QLabel { color: #FFFFFF; font-size: 13px; font-weight: 500; font-family: 'Segoe UI', Arial, sans-serif; }"
-		"QProgressBar { background-color: #1E293B; border: 1px solid #334155; border-radius: 4px; }"
-		"QProgressBar::chunk { background-color: #EF4444; border-radius: 3px; }"
+		"QProgressBar { background-color: #F0F4EB; border: 1px solid #DCDDD2; border-radius: 4px; }"
+		"QProgressBar::chunk { background-color: #A64F42; border-radius: 3px; }"
 	) );
 
 	if( auto* screen = QGuiApplication::primaryScreen() )
@@ -834,7 +834,7 @@ void PowerControlFeaturePlugin::displayShutdownTimeout( int shutdownTimeout )
 	auto* headerLayout = new QHBoxLayout( headerBar );
 	headerLayout->setContentsMargins( 0, 0, 0, 0 );
 	auto* headerTitle = new QLabel( QStringLiteral( "⏻  Synapse Power Down" ), headerBar );
-	headerTitle->setStyleSheet( QStringLiteral( "color: #60A5FA; font-size: 13px; font-weight: 700; font-family: 'Segoe UI', Arial, sans-serif; letter-spacing: 0.5px;" ) );
+	headerTitle->setStyleSheet( QStringLiteral( "color: #537B5B; font-size: 13px; font-weight: 700; font-family: 'Segoe UI', Arial, sans-serif; letter-spacing: 0.5px;" ) );
 	headerLayout->addWidget( headerTitle );
 	headerLayout->addStretch();
 	layout->addWidget( headerBar );
@@ -848,9 +848,9 @@ void PowerControlFeaturePlugin::displayShutdownTimeout( int shutdownTimeout )
 	auto* progressHeaderLayout = new QHBoxLayout( progressHeader );
 	progressHeaderLayout->setContentsMargins( 0, 0, 0, 0 );
 	auto* pTitle = new QLabel( tr( "Shutdown Countdown" ), progressHeader );
-	pTitle->setStyleSheet( QStringLiteral( "color: #94A3B8; font-size: 11px; font-weight: 600;" ) );
+	pTitle->setStyleSheet( QStringLiteral( "color: #657064; font-size: 11px; font-weight: 600;" ) );
 	m_clientRemainingTimeLabel = new QLabel( progressHeader );
-	m_clientRemainingTimeLabel->setStyleSheet( QStringLiteral( "color: #F87171; font-size: 11px; font-weight: 700; font-family: monospace;" ) );
+	m_clientRemainingTimeLabel->setStyleSheet( QStringLiteral( "color: #A64F42; font-size: 11px; font-weight: 700; font-family: monospace;" ) );
 	progressHeaderLayout->addWidget( pTitle );
 	progressHeaderLayout->addStretch();
 	progressHeaderLayout->addWidget( m_clientRemainingTimeLabel );

@@ -124,13 +124,13 @@ public:
 		// 1. Draw rounded background pill
 		if( isSelected )
 		{
-			painter->setBrush( QColor(23, 37, 84) ); // #E5EDE1 WCAG AA selection
-			painter->setPen( QPen( QColor(59, 130, 246), 1 ) );
+			painter->setBrush( QColor(229, 237, 225) ); // #E5EDE1 WCAG AA selection
+			painter->setPen( QPen( QColor(83, 123, 91), 1 ) );
 			painter->drawRoundedRect( rowRect, 6, 6 );
 		}
 		else if( isHovered )
 		{
-			painter->setBrush( QColor(22, 32, 50) ); // #F8F7F1 elevated hover
+			painter->setBrush( QColor(248, 247, 241) ); // #F8F7F1 elevated hover
 			painter->setPen( Qt::NoPen );
 			painter->drawRoundedRect( rowRect, 6, 6 );
 		}
@@ -203,7 +203,7 @@ public:
 		painter->setRenderHint( QPainter::Antialiasing );
 		if( isLocation )
 		{
-			QPen fPen( isSelected ? QColor( 0xFF, 0xFF, 0xFF ) : QColor( 0x42, 0x67, 0x49 ), 1.5, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin );
+			QPen fPen( isSelected ? QColor( 0x27, 0x35, 0x2A ) : QColor( 0x42, 0x67, 0x49 ), 1.5, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin );
 			painter->setPen( fPen );
 			painter->setBrush( Qt::NoBrush );
 			QPainterPath fp;
@@ -218,7 +218,7 @@ public:
 		}
 		else
 		{
-			QPen mPen( isSelected ? QColor( 0xFF, 0xFF, 0xFF ) : QColor( 0x65, 0x70, 0x64 ), 1.4, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin );
+			QPen mPen( isSelected ? QColor( 0x27, 0x35, 0x2A ) : QColor( 0x65, 0x70, 0x64 ), 1.4, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin );
 			painter->setPen( mPen );
 			painter->setBrush( Qt::NoBrush );
 			painter->drawRoundedRect( QRectF( iconRect.left() + 1.0, iconRect.top() + 2.0, 14.0, 9.0 ), 1.5, 1.5 );
