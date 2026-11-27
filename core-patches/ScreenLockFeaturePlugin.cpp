@@ -332,13 +332,13 @@ bool ScreenLockFeaturePlugin::startFeature( VeyonMasterInterface& master, const 
 		dialog.setWindowTitle( tr( "Timed Lock / Focus Session" ) );
 		dialog.setMinimumWidth( 400 );
 		dialog.setStyleSheet( QStringLiteral(
-			"QDialog { background-color: #FFFFFF; color: #27352A; }"
-			"QLabel { color: #27352A; font-size: 13px; }"
-			"QComboBox, QSpinBox { background-color: #F0F4EB; color: #27352A; border: 1px solid #DCDDD2; border-radius: 4px; padding: 6px 10px; font-size: 13px; }"
-			"QPushButton { background-color: #537B5B; color: #FFFFFF; border: 1px solid #426749; border-radius: 4px; padding: 7px 16px; font-weight: 600; font-size: 13px; }"
+			"QDialog { background-color: #FFFFFF; color: #18181B; }"
+			"QLabel { color: #18181B; font-size: 13px; }"
+			"QComboBox, QSpinBox { background-color: #F5F3FF; color: #18181B; border: 1px solid #E1E3E8; border-radius: 4px; padding: 6px 10px; font-size: 13px; }"
+			"QPushButton { background-color: #6D28D9; color: #FFFFFF; border: 1px solid #5B21B6; border-radius: 4px; padding: 7px 16px; font-weight: 600; font-size: 13px; }"
 			"QPushButton:hover { background-color: #1D4ED8; }"
-			"QPushButton#btnCancel { background-color: #F0F4EB; color: #657064; border: 1px solid #DCDDD2; }"
-			"QPushButton#btnCancel:hover { background-color: #DCDDD2; color: #FFFFFF; }"
+			"QPushButton#btnCancel { background-color: #F5F3FF; color: #52525B; border: 1px solid #E1E3E8; }"
+			"QPushButton#btnCancel:hover { background-color: #E1E3E8; color: #FFFFFF; }"
 		) );
 
 		auto* layout = new QVBoxLayout( &dialog );
@@ -346,11 +346,11 @@ bool ScreenLockFeaturePlugin::startFeature( VeyonMasterInterface& master, const 
 		layout->setContentsMargins( 22, 22, 22, 22 );
 
 		auto* headerLabel = new QLabel( tr( "Select Focus Session Duration:" ), &dialog );
-		headerLabel->setStyleSheet( QStringLiteral("font-weight: 700; font-size: 14px; color: #27352A;") );
+		headerLabel->setStyleSheet( QStringLiteral("font-weight: 700; font-size: 14px; color: #18181B;") );
 		layout->addWidget( headerLabel );
 
 		auto* subLabel = new QLabel( tr( "The student screen displays the live countdown ONLY when this Timed Lock is used. Workstations automatically unlock when the timer reaches 00:00." ), &dialog );
-		subLabel->setStyleSheet( QStringLiteral("color: #657064; font-size: 12px; line-height: 1.4;") );
+		subLabel->setStyleSheet( QStringLiteral("color: #52525B; font-size: 12px; line-height: 1.4;") );
 		subLabel->setWordWrap( true );
 		layout->addWidget( subLabel );
 

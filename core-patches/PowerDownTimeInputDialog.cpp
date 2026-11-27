@@ -60,7 +60,7 @@ PowerDownTimeInputDialog::PowerDownTimeInputDialog( QWidget *parent, int compute
 	mainLayout->setSpacing( 10 );
 
 	auto* titleLabel = new QLabel( tr( "POWER DOWN COMPUTERS" ), this );
-	titleLabel->setStyleSheet( QStringLiteral( "font-size: 13px; font-weight: 700; color: #27352A; letter-spacing: 0.5px;" ) );
+	titleLabel->setStyleSheet( QStringLiteral( "font-size: 13px; font-weight: 700; color: #18181B; letter-spacing: 0.5px;" ) );
 	mainLayout->addWidget( titleLabel );
 
 	QString countText;
@@ -82,11 +82,11 @@ PowerDownTimeInputDialog::PowerDownTimeInputDialog( QWidget *parent, int compute
 
 	auto* divider1 = new QFrame( this );
 	divider1->setFrameShape( QFrame::HLine );
-	divider1->setStyleSheet( QStringLiteral( "background-color: #F0F4EB; max-height: 1px; border: none;" ) );
+	divider1->setStyleSheet( QStringLiteral( "background-color: #F5F3FF; max-height: 1px; border: none;" ) );
 	mainLayout->addWidget( divider1 );
 
 	auto* promptLabel = new QLabel( tr( "Shutdown after:" ), this );
-	promptLabel->setStyleSheet( QStringLiteral( "font-size: 12px; font-weight: 500; color: #657064; padding-top: 2px;" ) );
+	promptLabel->setStyleSheet( QStringLiteral( "font-size: 12px; font-weight: 500; color: #52525B; padding-top: 2px;" ) );
 	mainLayout->addWidget( promptLabel );
 
 	ui->minutesSpinBox->setAlignment( Qt::AlignCenter );
@@ -107,12 +107,12 @@ PowerDownTimeInputDialog::PowerDownTimeInputDialog( QWidget *parent, int compute
 
 	auto* noteLabel = new QLabel( tr( "This will power down the selected computers after the specified timeout." ), this );
 	noteLabel->setWordWrap( true );
-	noteLabel->setStyleSheet( QStringLiteral( "font-size: 11px; color: #92988C; padding-top: 2px; padding-bottom: 2px;" ) );
+	noteLabel->setStyleSheet( QStringLiteral( "font-size: 11px; color: #71717A; padding-top: 2px; padding-bottom: 2px;" ) );
 	mainLayout->addWidget( noteLabel );
 
 	auto* divider2 = new QFrame( this );
 	divider2->setFrameShape( QFrame::HLine );
-	divider2->setStyleSheet( QStringLiteral( "background-color: #F0F4EB; max-height: 1px; border: none;" ) );
+	divider2->setStyleSheet( QStringLiteral( "background-color: #F5F3FF; max-height: 1px; border: none;" ) );
 	mainLayout->addWidget( divider2 );
 
 	mainLayout->addWidget( ui->buttonBox );
@@ -120,8 +120,8 @@ PowerDownTimeInputDialog::PowerDownTimeInputDialog( QWidget *parent, int compute
 	setStyleSheet( QStringLiteral(
 		"QDialog {"
 		"   background-color: #FFFFFF;"
-		"   color: #27352A;"
-		"   border: 1px solid #DCDDD2;"
+		"   color: #18181B;"
+		"   border: 1px solid #E1E3E8;"
 		"   border-radius: 10px;"
 		"}"
 		"QLabel {"
@@ -129,16 +129,16 @@ PowerDownTimeInputDialog::PowerDownTimeInputDialog( QWidget *parent, int compute
 		"   background: transparent;"
 		"}"
 		"QLabel#label, QLabel#label_2 {"
-		"   color: #657064;"
+		"   color: #52525B;"
 		"   font-size: 12px;"
 		"   font-weight: 500;"
 		"   margin-left: 3px;"
 		"   margin-right: 12px;"
 		"}"
 		"QSpinBox {"
-		"   background-color: #F0F4EB;"
-		"   color: #27352A;"
-		"   border: 1px solid #DCDDD2;"
+		"   background-color: #F5F3FF;"
+		"   color: #18181B;"
+		"   border: 1px solid #E1E3E8;"
 		"   border-radius: 6px;"
 		"   padding: 2px 4px;"
 		"   font-size: 13px;"
@@ -155,13 +155,13 @@ PowerDownTimeInputDialog::PowerDownTimeInputDialog( QWidget *parent, int compute
 		"QSpinBox::up-button, QSpinBox::down-button {"
 		"   width: 16px;"
 		"   background: #243044;"
-		"   border-left: 1px solid #DCDDD2;"
+		"   border-left: 1px solid #E1E3E8;"
 		"}"
 		"QSpinBox::up-button:hover, QSpinBox::down-button:hover {"
-		"   background: #426749;"
+		"   background: #5B21B6;"
 		"}"
 		"QPushButton {"
-		"   background-color: #A64F42;"
+		"   background-color: #DC2626;"
 		"   color: #FFFFFF;"
 		"   font-weight: 600;"
 		"   font-size: 12px;"
@@ -171,16 +171,16 @@ PowerDownTimeInputDialog::PowerDownTimeInputDialog( QWidget *parent, int compute
 		"   min-width: 90px;"
 		"   min-height: 28px;"
 		"}"
-		"QPushButton:hover { background-color: #8F4035; }"
+		"QPushButton:hover { background-color: #B91C1C; }"
 		"QPushButton:disabled { background-color: #451A1A; color: #7F1D1D; }"
 		"QPushButton[text*=\"Cancel\"] {"
-		"   background-color: #F0F4EB;"
-		"   color: #657064;"
-		"   border: 1px solid #DCDDD2;"
+		"   background-color: #F5F3FF;"
+		"   color: #52525B;"
+		"   border: 1px solid #E1E3E8;"
 		"   font-weight: 500;"
 		"   min-width: 80px;"
 		"}"
-		"QPushButton[text*=\"Cancel\"]:hover { background-color: #DCDDD2; color: #27352A; }"
+		"QPushButton[text*=\"Cancel\"]:hover { background-color: #E1E3E8; color: #18181B; }"
 	) );
 
 	auto* okBtn = ui->buttonBox->button( QDialogButtonBox::Ok );

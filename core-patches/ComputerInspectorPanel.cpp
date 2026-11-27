@@ -64,7 +64,7 @@ protected:
 		const int baseY = cy + 16;
 		QPainterPath basePath;
 		basePath.addRoundedRect( cx - baseW / 2, baseY, baseW, baseH, 4, 4 );
-		p.setBrush( QColor( 0xF8, 0xF7, 0xF1 ) );
+		p.setBrush( QColor( 0xF9, 0xFA, 0xFB ) );
 		p.setPen( QPen( QColor( 0x3b, 0x82, 0xf6 ), 1.2 ) );
 		p.drawPath( basePath );
 
@@ -75,17 +75,17 @@ protected:
 		QPainterPath screenPath;
 		screenPath.addRoundedRect( cx - screenW / 2, screenY, screenW, screenH, 5, 5 );
 		p.setBrush( QColor( 0xFF, 0xFF, 0xFF ) );
-		p.setPen( QPen( QColor( 0xDC, 0xDD, 0xD2 ), 1.5 ) );
+		p.setPen( QPen( QColor( 0xE1, 0xE3, 0xE8 ), 1.5 ) );
 		p.drawPath( screenPath );
 
 		// Screen inner display
-		p.setBrush( QColor( 0xEA, 0xEC, 0xE3 ) );
+		p.setBrush( QColor( 0xEC, 0xED, 0xF0 ) );
 		p.setPen( Qt::NoPen );
 		p.drawRoundedRect( cx - screenW / 2 + 4, screenY + 4, screenW - 8, screenH - 8, 3, 3 );
 
 		// Glowing green checkmark badge in center
 		const int badgeRadius = 11;
-		p.setBrush( QColor( 0x39, 0x84, 0x5B ) );
+		p.setBrush( QColor( 0x16, 0xA3, 0x4A ) );
 		p.setPen( QPen( QColor( 0x34, 0xd3, 0x99 ), 1.5 ) );
 		p.drawEllipse( QPoint( cx, screenY + screenH / 2 ), badgeRadius, badgeRadius );
 
@@ -123,20 +123,20 @@ void ComputerInspectorPanel::setupUi()
 	setMaximumWidth( 320 );
 	setStyleSheet( QStringLiteral(
 		"ComputerInspectorPanel, QWidget#ComputerInspectorPanel {"
-		"   background-color: #F3F2EB;"
-		"   border-left: 1px solid #DCDDD2;"
+		"   background-color: #F4F5F7;"
+		"   border-left: 1px solid #E1E3E8;"
 		"}"
 		"QScrollArea, QScrollArea > QWidget, QWidget#qt_scrollarea_viewport, QStackedWidget {"
-		"   background-color: #F3F2EB;"
+		"   background-color: #F4F5F7;"
 		"}"
-		"QScrollArea { border: none; background-color: #F3F2EB; }"
+		"QScrollArea { border: none; background-color: #F4F5F7; }"
 		"QScrollBar:vertical {"
-		"   border: none; background: #F3F2EB; width: 6px; margin: 0px;"
+		"   border: none; background: #F4F5F7; width: 6px; margin: 0px;"
 		"}"
 		"QScrollBar::handle:vertical {"
-		"   background: #FFFFFF; min-height: 20px; border-radius: 3px; border: 1px solid #DCDDD2;"
+		"   background: #FFFFFF; min-height: 20px; border-radius: 3px; border: 1px solid #E1E3E8;"
 		"}"
-		"QScrollBar::handle:vertical:hover { background: #39845B; }"
+		"QScrollBar::handle:vertical:hover { background: #16A34A; }"
 	) );
 
 	auto* mainLayout = new QVBoxLayout( this );
@@ -146,18 +146,18 @@ void ComputerInspectorPanel::setupUi()
 	// 1. Header Frame (Exact 32px flush subheader matching simulator)
 	auto* inspectorHeader = new QFrame( this );
 	inspectorHeader->setFixedHeight( 32 );
-	inspectorHeader->setStyleSheet( QStringLiteral( "QFrame { background-color: #F3F2EB; border-bottom: 1px solid #DCDDD2; }" ) );
+	inspectorHeader->setStyleSheet( QStringLiteral( "QFrame { background-color: #F4F5F7; border-bottom: 1px solid #E1E3E8; }" ) );
 
 	auto* headerLayout = new QHBoxLayout( inspectorHeader );
 	headerLayout->setContentsMargins( 12, 0, 12, 0 );
 	headerLayout->setSpacing( 8 );
 
 	auto* titleLabel = new QLabel( tr( "Inspector" ), inspectorHeader );
-	titleLabel->setStyleSheet( QStringLiteral( "font-size: 12px; font-weight: 700; color: #27352A;" ) );
+	titleLabel->setStyleSheet( QStringLiteral( "font-size: 12px; font-weight: 700; color: #18181B;" ) );
 
 	auto* subtitleLabel = new QLabel( tr( "Fleet Overview" ), inspectorHeader );
 	subtitleLabel->setObjectName( QStringLiteral("inspectorSubtitleLabel") );
-	subtitleLabel->setStyleSheet( QStringLiteral( "font-size: 10px; color: #657064;" ) );
+	subtitleLabel->setStyleSheet( QStringLiteral( "font-size: 10px; color: #52525B;" ) );
 
 	headerLayout->addWidget( titleLabel );
 	headerLayout->addStretch( 1 );
@@ -174,7 +174,7 @@ void ComputerInspectorPanel::setupUi()
 	auto* navFrame = new QFrame( contentWidget );
 	navFrame->setStyleSheet( QStringLiteral(
 		"QFrame {"
-		"   background-color: #FFFFFF; border: 1px solid #DCDDD2; border-radius: 6px; padding: 2px;"
+		"   background-color: #FFFFFF; border: 1px solid #E1E3E8; border-radius: 6px; padding: 2px;"
 		"}"
 	) );
 	auto* navLayout = new QHBoxLayout( navFrame );
@@ -215,16 +215,16 @@ void ComputerInspectorPanel::switchTab( InspectorTab tab )
 {
 	const QString activeStyle = QStringLiteral(
 		"QPushButton {"
-		"   background-color: #537B5B; color: #ffffff; font-weight: bold; font-size: 11px;"
+		"   background-color: #6D28D9; color: #ffffff; font-weight: bold; font-size: 11px;"
 		"   border: none; border-radius: 6px; padding: 4px 8px;"
 		"}"
 	);
 	const QString inactiveStyle = QStringLiteral(
 		"QPushButton {"
-		"   background-color: transparent; color: #657064; font-weight: 600; font-size: 11px;"
+		"   background-color: transparent; color: #52525B; font-weight: 600; font-size: 11px;"
 		"   border: none; border-radius: 6px; padding: 4px 8px;"
 		"}"
-		"QPushButton:hover { background-color: #F8F7F1; color: #27352A; }"
+		"QPushButton:hover { background-color: #F9FAFB; color: #18181B; }"
 	);
 
 	m_btnGlobal->setStyleSheet( tab == InspectorTab::Global ? activeStyle : inactiveStyle );
@@ -326,10 +326,10 @@ QWidget* ComputerInspectorPanel::createGlobalTabWidget()
 	auto* scrollArea = new QScrollArea( this );
 	scrollArea->setWidgetResizable( true );
 	scrollArea->setHorizontalScrollBarPolicy( Qt::ScrollBarAlwaysOff );
-	scrollArea->setStyleSheet( QStringLiteral( "QScrollArea, QWidget#qt_scrollarea_viewport { background-color: #F3F2EB; border: none; }" ) );
+	scrollArea->setStyleSheet( QStringLiteral( "QScrollArea, QWidget#qt_scrollarea_viewport { background-color: #F4F5F7; border: none; }" ) );
 
 	auto* container = new QWidget();
-	container->setStyleSheet( QStringLiteral( "background-color: #F3F2EB;" ) );
+	container->setStyleSheet( QStringLiteral( "background-color: #F4F5F7;" ) );
 	auto* layout = new QVBoxLayout( container );
 	layout->setContentsMargins( 0, 4, 0, 4 );
 	layout->setSpacing( 10 );
@@ -346,7 +346,7 @@ QWidget* ComputerInspectorPanel::createGlobalTabWidget()
 	auto* statsCard = new QFrame( container );
 	statsCard->setStyleSheet( QStringLiteral(
 		"QFrame {"
-		"   background-color: #FFFFFF; border: 1px solid #DCDDD2; border-radius: 8px; padding: 6px;"
+		"   background-color: #FFFFFF; border: 1px solid #E1E3E8; border-radius: 8px; padding: 6px;"
 		"}"
 	) );
 	auto* statsLayout = new QVBoxLayout( statsCard );
@@ -354,7 +354,7 @@ QWidget* ComputerInspectorPanel::createGlobalTabWidget()
 	statsLayout->setSpacing( 6 );
 
 	auto* statsTitle = new QLabel( tr( "QUICK STATS" ), statsCard );
-	statsTitle->setStyleSheet( QStringLiteral( "font-size: 10px; font-weight: 700; color: #657064; border: none; letter-spacing: 0.5px;" ) );
+	statsTitle->setStyleSheet( QStringLiteral( "font-size: 10px; font-weight: 700; color: #52525B; border: none; letter-spacing: 0.5px;" ) );
 	statsLayout->addWidget( statsTitle );
 
 	auto addStatRow = [&]( const QString& labelText, QLabel*& valLabel, const QString& valColor ) {
@@ -362,7 +362,7 @@ QWidget* ComputerInspectorPanel::createGlobalTabWidget()
 		row->setSpacing( 8 );
 
 		auto* nameLbl = new QLabel( labelText, statsCard );
-		nameLbl->setStyleSheet( QStringLiteral( "font-size: 11px; color: #657064; border: none;" ) );
+		nameLbl->setStyleSheet( QStringLiteral( "font-size: 11px; color: #52525B; border: none;" ) );
 
 		valLabel = new QLabel( QStringLiteral( "0" ), statsCard );
 		valLabel->setAlignment( Qt::AlignRight | Qt::AlignVCenter );
@@ -374,10 +374,10 @@ QWidget* ComputerInspectorPanel::createGlobalTabWidget()
 		statsLayout->addLayout( row );
 	};
 
-	addStatRow( tr( "Total Workstations" ), m_statTotalVal, QStringLiteral( "#27352A" ) );
-	addStatRow( tr( "Online Connected" ), m_statOnlineVal, QStringLiteral( "#39845B" ) );
-	addStatRow( tr( "Standby / Logon Screen" ), m_statIdleVal, QStringLiteral( "#B78332" ) );
-	addStatRow( tr( "Offline" ), m_statOfflineVal, QStringLiteral( "#92988C" ) );
+	addStatRow( tr( "Total Workstations" ), m_statTotalVal, QStringLiteral( "#18181B" ) );
+	addStatRow( tr( "Online Connected" ), m_statOnlineVal, QStringLiteral( "#16A34A" ) );
+	addStatRow( tr( "Standby / Logon Screen" ), m_statIdleVal, QStringLiteral( "#D97706" ) );
+	addStatRow( tr( "Offline" ), m_statOfflineVal, QStringLiteral( "#71717A" ) );
 
 	layout->addWidget( statsCard );
 
@@ -385,7 +385,7 @@ QWidget* ComputerInspectorPanel::createGlobalTabWidget()
 	auto* actionsCard = new QFrame( container );
 	actionsCard->setStyleSheet( QStringLiteral(
 		"QFrame {"
-		"   background-color: #FFFFFF; border: 1px solid #DCDDD2; border-radius: 8px; padding: 6px;"
+		"   background-color: #FFFFFF; border: 1px solid #E1E3E8; border-radius: 8px; padding: 6px;"
 		"}"
 	) );
 	auto* actionsLayout = new QVBoxLayout( actionsCard );
@@ -393,7 +393,7 @@ QWidget* ComputerInspectorPanel::createGlobalTabWidget()
 	actionsLayout->setSpacing( 6 );
 
 	auto* actionsTitle = new QLabel( tr( "COMMON ACTIONS" ), actionsCard );
-	actionsTitle->setStyleSheet( QStringLiteral( "font-size: 10px; font-weight: 700; color: #657064; border: none; letter-spacing: 0.5px;" ) );
+	actionsTitle->setStyleSheet( QStringLiteral( "font-size: 10px; font-weight: 700; color: #52525B; border: none; letter-spacing: 0.5px;" ) );
 	actionsLayout->addWidget( actionsTitle );
 
 	auto addActionRow = [&]( const QString& iconText, const QString& titleText, const QString& featureName ) {
@@ -402,10 +402,10 @@ QWidget* ComputerInspectorPanel::createGlobalTabWidget()
 		btn->setCursor( Qt::PointingHandCursor );
 		btn->setStyleSheet( QStringLiteral(
 			"QPushButton {"
-			"   background-color: #FFFFFF; border: 1px solid #DCDDD2; border-radius: 6px;"
+			"   background-color: #FFFFFF; border: 1px solid #E1E3E8; border-radius: 6px;"
 			"   padding: 0px 8px; text-align: left;"
 			"}"
-			"QPushButton:hover { background-color: #E5EDE1; border-color: #39845B; }"
+			"QPushButton:hover { background-color: #EDE9FE; border-color: #16A34A; }"
 		) );
 
 		auto* bLayout = new QHBoxLayout( btn );
@@ -413,9 +413,9 @@ QWidget* ComputerInspectorPanel::createGlobalTabWidget()
 		auto* ic = new QLabel( iconText, btn );
 		ic->setStyleSheet( QStringLiteral( "font-size: 11px; border: none; background: transparent;" ) );
 		auto* txt = new QLabel( titleText, btn );
-		txt->setStyleSheet( QStringLiteral( "font-size: 11px; font-weight: 500; color: #27352A; border: none; background: transparent;" ) );
+		txt->setStyleSheet( QStringLiteral( "font-size: 11px; font-weight: 500; color: #18181B; border: none; background: transparent;" ) );
 		auto* arr = new QLabel( QStringLiteral( "›" ), btn );
-		arr->setStyleSheet( QStringLiteral( "font-size: 13px; color: #92988C; font-weight: bold; border: none; background: transparent;" ) );
+		arr->setStyleSheet( QStringLiteral( "font-size: 13px; color: #71717A; font-weight: bold; border: none; background: transparent;" ) );
 
 		bLayout->addWidget( ic );
 		bLayout->addWidget( txt );
@@ -480,10 +480,10 @@ QWidget* ComputerInspectorPanel::createComputerTabWidget()
 	auto* scrollArea = new QScrollArea( this );
 	scrollArea->setWidgetResizable( true );
 	scrollArea->setHorizontalScrollBarPolicy( Qt::ScrollBarAlwaysOff );
-	scrollArea->setStyleSheet( QStringLiteral( "QScrollArea, QWidget#qt_scrollarea_viewport { background-color: #F3F2EB; border: none; }" ) );
+	scrollArea->setStyleSheet( QStringLiteral( "QScrollArea, QWidget#qt_scrollarea_viewport { background-color: #F4F5F7; border: none; }" ) );
 
 	m_computerContentContainer = new QWidget();
-	m_computerContentContainer->setStyleSheet( QStringLiteral( "background-color: #F3F2EB;" ) );
+	m_computerContentContainer->setStyleSheet( QStringLiteral( "background-color: #F4F5F7;" ) );
 	auto* layout = new QVBoxLayout( m_computerContentContainer );
 	layout->setContentsMargins( 0, 4, 0, 4 );
 	layout->setSpacing( 10 );
@@ -521,7 +521,7 @@ void ComputerInspectorPanel::rebuildComputerTab()
 		auto* emptyCard = new QFrame( m_computerContentContainer );
 		emptyCard->setStyleSheet( QStringLiteral(
 			"QFrame {"
-			"   background-color: #FFFFFF; border: 1px dashed #DCDDD2; border-radius: 10px; padding: 20px;"
+			"   background-color: #FFFFFF; border: 1px dashed #E1E3E8; border-radius: 10px; padding: 20px;"
 			"}"
 		) );
 		auto* eLayout = new QVBoxLayout( emptyCard );
@@ -530,26 +530,26 @@ void ComputerInspectorPanel::rebuildComputerTab()
 
 		auto* eIcon = new QLabel( QStringLiteral( "🖥" ), emptyCard );
 		eIcon->setAlignment( Qt::AlignCenter );
-		eIcon->setStyleSheet( QStringLiteral( "font-size: 36px; color: #39845B; border: none; padding-bottom: 4px;" ) );
+		eIcon->setStyleSheet( QStringLiteral( "font-size: 36px; color: #16A34A; border: none; padding-bottom: 4px;" ) );
 
 		auto* eTitle = new QLabel( tr( "No Computer Selected" ), emptyCard );
 		eTitle->setAlignment( Qt::AlignCenter );
-		eTitle->setStyleSheet( QStringLiteral( "font-size: 14px; font-weight: bold; color: #27352A; border: none;" ) );
+		eTitle->setStyleSheet( QStringLiteral( "font-size: 14px; font-weight: bold; color: #18181B; border: none;" ) );
 
 		auto* eDesc = new QLabel( tr( "Click on any computer in the grid to inspect its separate live controls, countdown timer, and screen telemetry." ), emptyCard );
 		eDesc->setAlignment( Qt::AlignCenter );
 		eDesc->setWordWrap( true );
-		eDesc->setStyleSheet( QStringLiteral( "font-size: 11px; color: #657064; border: none;" ) );
+		eDesc->setStyleSheet( QStringLiteral( "font-size: 11px; color: #52525B; border: none;" ) );
 
 		auto* btnGlobalSwitch = new QPushButton( tr( "🌐 View Global Lab Stats" ), emptyCard );
 		btnGlobalSwitch->setFixedHeight( 32 );
 		btnGlobalSwitch->setCursor( Qt::PointingHandCursor );
 		btnGlobalSwitch->setStyleSheet( QStringLiteral(
 			"QPushButton {"
-			"   background-color: #39845B; color: #ffffff; font-weight: bold; font-size: 11px;"
+			"   background-color: #16A34A; color: #ffffff; font-weight: bold; font-size: 11px;"
 			"   border: none; border-radius: 6px; padding: 4px 12px; margin-top: 6px;"
 			"}"
-			"QPushButton:hover { background-color: #39845B; }"
+			"QPushButton:hover { background-color: #16A34A; }"
 		) );
 		connect( btnGlobalSwitch, &QPushButton::clicked, this, [this]() { switchTab( InspectorTab::Global ); } );
 
@@ -568,24 +568,24 @@ void ComputerInspectorPanel::rebuildComputerTab()
 	{
 		auto* selectorCard = new QFrame( m_computerContentContainer );
 		selectorCard->setStyleSheet( QStringLiteral(
-			"QFrame { background-color: #FFFFFF; border: 1px solid #DCDDD2; border-radius: 8px; padding: 4px; }"
+			"QFrame { background-color: #FFFFFF; border: 1px solid #E1E3E8; border-radius: 8px; padding: 4px; }"
 		) );
 		auto* sLayout = new QHBoxLayout( selectorCard );
 		sLayout->setContentsMargins( 6, 4, 6, 4 );
 
 		auto* sLbl = new QLabel( tr( "Inspect:" ), selectorCard );
-		sLbl->setStyleSheet( QStringLiteral( "font-size: 11px; font-weight: bold; color: #657064; border: none;" ) );
+		sLbl->setStyleSheet( QStringLiteral( "font-size: 11px; font-weight: bold; color: #52525B; border: none;" ) );
 
 		m_computerSelectorCombo = new QComboBox( selectorCard );
 		m_computerSelectorCombo->setFixedHeight( 28 );
 		m_computerSelectorCombo->setStyleSheet( QStringLiteral(
 			"QComboBox {"
-			"   background-color: #FFFFFF; border: 1px solid #DCDDD2; border-radius: 6px;"
-			"   color: #27352A; font-size: 11px; font-weight: 600; padding: 2px 8px;"
+			"   background-color: #FFFFFF; border: 1px solid #E1E3E8; border-radius: 6px;"
+			"   color: #18181B; font-size: 11px; font-weight: 600; padding: 2px 8px;"
 			"}"
 			"QComboBox::drop-down { border: none; width: 20px; }"
 			"QComboBox QAbstractItemView {"
-			"   background-color: #FFFFFF; color: #27352A; selection-background-color: #39845B; border: 1px solid #DCDDD2;"
+			"   background-color: #FFFFFF; color: #18181B; selection-background-color: #16A34A; border: 1px solid #E1E3E8;"
 			"}"
 		) );
 
@@ -646,13 +646,13 @@ void ComputerInspectorPanel::rebuildComputerTab()
 		// Group info card
 		auto* grpCard = new QFrame( m_computerContentContainer );
 		grpCard->setStyleSheet( QStringLiteral(
-			"QFrame { background-color: #FFFFFF; border: 1px solid #DCDDD2; border-radius: 10px; padding: 10px; }"
+			"QFrame { background-color: #FFFFFF; border: 1px solid #E1E3E8; border-radius: 10px; padding: 10px; }"
 		) );
 		auto* gLayout = new QVBoxLayout( grpCard );
 		auto* gTitle = new QLabel( tr( "Batch Control: %1 Computers" ).arg( targets.size() ), grpCard );
-		gTitle->setStyleSheet( QStringLiteral( "font-size: 13px; font-weight: bold; color: #27352A; border: none;" ) );
+		gTitle->setStyleSheet( QStringLiteral( "font-size: 13px; font-weight: bold; color: #18181B; border: none;" ) );
 		auto* gSub = new QLabel( tr( "Any action taken here applies simultaneously to all selected computers." ), grpCard );
-		gSub->setStyleSheet( QStringLiteral( "font-size: 11px; color: #657064; border: none;" ) );
+		gSub->setStyleSheet( QStringLiteral( "font-size: 11px; color: #52525B; border: none;" ) );
 		gLayout->addWidget( gTitle );
 		gLayout->addWidget( gSub );
 		m_computerContentLayout->addWidget( grpCard );
@@ -665,7 +665,7 @@ void ComputerInspectorPanel::rebuildComputerTab()
 	}
 
 	// 3. Power Operations Hub Card
-	auto* powerCard = createActionHubCard( m_computerContentContainer, tr( "Power Operations" ), QStringLiteral( "#A64F42" ) );
+	auto* powerCard = createActionHubCard( m_computerContentContainer, tr( "Power Operations" ), QStringLiteral( "#DC2626" ) );
 	auto* powerGrid = new QGridLayout();
 	powerGrid->setSpacing( 6 );
 
@@ -676,10 +676,10 @@ void ComputerInspectorPanel::rebuildComputerTab()
 
 	const QString actionBtnStyle = QStringLiteral(
 		"QPushButton {"
-		"   background: #FFFFFF; border: 1px solid #DCDDD2; border-radius: 6px;"
-		"   font-size: 11px; font-weight: 500; color: #27352A; padding: 4px 6px; min-height: 26px;"
+		"   background: #FFFFFF; border: 1px solid #E1E3E8; border-radius: 6px;"
+		"   font-size: 11px; font-weight: 500; color: #18181B; padding: 4px 6px; min-height: 26px;"
 		"}"
-		"QPushButton:hover { background: #E5EDE1; border-color: #39845B; }"
+		"QPushButton:hover { background: #EDE9FE; border-color: #16A34A; }"
 	);
 	for( auto* b : { btnWOL, btnReboot, btnPowerDown, btnTimed } )
 	{
@@ -700,7 +700,7 @@ void ComputerInspectorPanel::rebuildComputerTab()
 	m_computerContentLayout->addWidget( powerCard );
 
 	// 4. Freeze & Screen Lock Card
-	auto* freezeCard = createActionHubCard( m_computerContentContainer, tr( "Freeze & Screen Lock" ), QStringLiteral( "#39845B" ) );
+	auto* freezeCard = createActionHubCard( m_computerContentContainer, tr( "Freeze & Screen Lock" ), QStringLiteral( "#16A34A" ) );
 	auto* freezeGrid = new QGridLayout();
 	freezeGrid->setSpacing( 6 );
 
@@ -728,7 +728,7 @@ void ComputerInspectorPanel::rebuildComputerTab()
 	m_computerContentLayout->addWidget( freezeCard );
 
 	// 5. Remote Access & Control Card
-	auto* remoteCard = createActionHubCard( m_computerContentContainer, tr( "Remote Access & Control" ), QStringLiteral( "#537B5B" ) );
+	auto* remoteCard = createActionHubCard( m_computerContentContainer, tr( "Remote Access & Control" ), QStringLiteral( "#6D28D9" ) );
 	auto* remoteGrid = new QGridLayout();
 	remoteGrid->setSpacing( 6 );
 
@@ -750,7 +750,7 @@ void ComputerInspectorPanel::rebuildComputerTab()
 	m_computerContentLayout->addWidget( remoteCard );
 
 	// 6. Classroom Tools Card
-	auto* toolsCard = createActionHubCard( m_computerContentContainer, tr( "Classroom Tools" ), QStringLiteral( "#537B5B" ) );
+	auto* toolsCard = createActionHubCard( m_computerContentContainer, tr( "Classroom Tools" ), QStringLiteral( "#6D28D9" ) );
 	auto* toolsGrid = new QGridLayout();
 	toolsGrid->setSpacing( 6 );
 
@@ -785,10 +785,10 @@ QWidget* ComputerInspectorPanel::createDetailsTabWidget()
 	auto* scrollArea = new QScrollArea( this );
 	scrollArea->setWidgetResizable( true );
 	scrollArea->setHorizontalScrollBarPolicy( Qt::ScrollBarAlwaysOff );
-	scrollArea->setStyleSheet( QStringLiteral( "QScrollArea, QWidget#qt_scrollarea_viewport { background-color: #F3F2EB; border: none; }" ) );
+	scrollArea->setStyleSheet( QStringLiteral( "QScrollArea, QWidget#qt_scrollarea_viewport { background-color: #F4F5F7; border: none; }" ) );
 
 	auto* container = new QWidget();
-	container->setStyleSheet( QStringLiteral( "background-color: #F3F2EB;" ) );
+	container->setStyleSheet( QStringLiteral( "background-color: #F4F5F7;" ) );
 	auto* layout = new QVBoxLayout( container );
 	layout->setContentsMargins( 0, 4, 0, 4 );
 	layout->setSpacing( 10 );
@@ -796,19 +796,19 @@ QWidget* ComputerInspectorPanel::createDetailsTabWidget()
 	// Telemetry Card
 	auto* telemCard = new QFrame( container );
 	telemCard->setStyleSheet( QStringLiteral(
-		"QFrame { background-color: #FFFFFF; border: 1px solid #DCDDD2; border-radius: 10px; padding: 12px; }"
+		"QFrame { background-color: #FFFFFF; border: 1px solid #E1E3E8; border-radius: 10px; padding: 12px; }"
 	) );
 	auto* tLayout = new QVBoxLayout( telemCard );
 	tLayout->setSpacing( 8 );
 
 	auto* tTitle = new QLabel( tr( "Synapse Command Engine" ), telemCard );
-	tTitle->setStyleSheet( QStringLiteral( "font-size: 13px; font-weight: bold; color: #27352A; border: none;" ) );
+	tTitle->setStyleSheet( QStringLiteral( "font-size: 13px; font-weight: bold; color: #18181B; border: none;" ) );
 	tLayout->addWidget( tTitle );
 
-	auto addDetailRow = [&]( const QString& key, QLabel*& valOut, const QString& val, const QString& color = QStringLiteral( "#657064" ) ) {
+	auto addDetailRow = [&]( const QString& key, QLabel*& valOut, const QString& val, const QString& color = QStringLiteral( "#52525B" ) ) {
 		auto* row = new QHBoxLayout();
 		auto* kLbl = new QLabel( key, telemCard );
-		kLbl->setStyleSheet( QStringLiteral( "font-size: 11px; color: #657064; border: none;" ) );
+		kLbl->setStyleSheet( QStringLiteral( "font-size: 11px; color: #52525B; border: none;" ) );
 		valOut = new QLabel( val, telemCard );
 		valOut->setAlignment( Qt::AlignRight | Qt::AlignVCenter );
 		valOut->setStyleSheet( QStringLiteral( "font-size: 11px; font-weight: 600; color: %1; border: none;" ).arg( color ) );
@@ -818,12 +818,12 @@ QWidget* ComputerInspectorPanel::createDetailsTabWidget()
 		tLayout->addLayout( row );
 	};
 
-	addDetailRow( tr( "Engine Version" ), m_detailVersionVal, VeyonCore::versionString(), QStringLiteral( "#39845B" ) );
-	addDetailRow( tr( "Active Target" ), m_detailTargetVal, tr( "Global Fleet" ), QStringLiteral( "#27352A" ) );
-	addDetailRow( tr( "Host Address" ), m_detailIpVal, tr( "All Subnets" ), QStringLiteral( "#426749" ) );
-	addDetailRow( tr( "Logged-In User" ), m_detailUserVal, QStringLiteral( "—" ), QStringLiteral( "#27352A" ) );
-	addDetailRow( tr( "Link State" ), m_detailStateVal, tr( "Monitoring" ), QStringLiteral( "#39845B" ) );
-	addDetailRow( tr( "Displays" ), m_detailScreensVal, QStringLiteral( "—" ), QStringLiteral( "#657064" ) );
+	addDetailRow( tr( "Engine Version" ), m_detailVersionVal, VeyonCore::versionString(), QStringLiteral( "#16A34A" ) );
+	addDetailRow( tr( "Active Target" ), m_detailTargetVal, tr( "Global Fleet" ), QStringLiteral( "#18181B" ) );
+	addDetailRow( tr( "Host Address" ), m_detailIpVal, tr( "All Subnets" ), QStringLiteral( "#5B21B6" ) );
+	addDetailRow( tr( "Logged-In User" ), m_detailUserVal, QStringLiteral( "—" ), QStringLiteral( "#18181B" ) );
+	addDetailRow( tr( "Link State" ), m_detailStateVal, tr( "Monitoring" ), QStringLiteral( "#16A34A" ) );
+	addDetailRow( tr( "Displays" ), m_detailScreensVal, QStringLiteral( "—" ), QStringLiteral( "#52525B" ) );
 	updateQuickStats();
 
 	layout->addWidget( telemCard );
@@ -934,7 +934,7 @@ QWidget* ComputerInspectorPanel::createActiveOperationSummaryCard( QWidget* pare
 	card->setStyleSheet( QStringLiteral(
 		"QFrame {"
 		"   background-color: #FFFFFF;"
-		"   border: 1px solid #DCDDD2;"
+		"   border: 1px solid #E1E3E8;"
 		"   border-radius: 8px;"
 		"   padding: 2px;"
 		"}"
@@ -950,12 +950,12 @@ QWidget* ComputerInspectorPanel::createActiveOperationSummaryCard( QWidget* pare
 
 	auto* titleLbl = new QLabel( tr( "POWER DOWN" ), card );
 	titleLbl->setStyleSheet( QStringLiteral(
-		"font-size: 11px; font-weight: 700; color: #27352A; letter-spacing: 0.5px; border: none; background: transparent;"
+		"font-size: 11px; font-weight: 700; color: #18181B; letter-spacing: 0.5px; border: none; background: transparent;"
 	) );
 
 	auto* statusTag = new QLabel( tr( "● Active" ), card );
 	statusTag->setStyleSheet( QStringLiteral(
-		"font-size: 9px; font-weight: 600; color: #B78332; background-color: #F8EED9; border: 1px solid #D58A45; border-radius: 4px; padding: 1px 5px;"
+		"font-size: 9px; font-weight: 600; color: #D97706; background-color: #FEF3C7; border: 1px solid #F59E0B; border-radius: 4px; padding: 1px 5px;"
 	) );
 
 	headerRow->addWidget( titleLbl );
@@ -966,7 +966,7 @@ QWidget* ComputerInspectorPanel::createActiveOperationSummaryCard( QWidget* pare
 	// Divider
 	auto* div1 = new QFrame( card );
 	div1->setFrameShape( QFrame::HLine );
-	div1->setStyleSheet( QStringLiteral( "background-color: #F0F4EB; max-height: 1px; border: none;" ) );
+	div1->setStyleSheet( QStringLiteral( "background-color: #F5F3FF; max-height: 1px; border: none;" ) );
 	layout->addWidget( div1 );
 
 	// Row 2: Overview metrics: Count and Pending
@@ -976,12 +976,12 @@ QWidget* ComputerInspectorPanel::createActiveOperationSummaryCard( QWidget* pare
 	const int numComputers = m_activeCountdowns.size();
 	auto* countLbl = new QLabel( tr( "%1 computers" ).arg( numComputers ), card );
 	countLbl->setStyleSheet( QStringLiteral(
-		"font-size: 11px; font-weight: 600; color: #27352A; border: none; background: transparent;"
+		"font-size: 11px; font-weight: 600; color: #18181B; border: none; background: transparent;"
 	) );
 
 	auto* pendingLbl = new QLabel( tr( "● %1 pending" ).arg( numComputers ), card );
 	pendingLbl->setStyleSheet( QStringLiteral(
-		"font-size: 10px; font-weight: 500; color: #B78332; border: none; background: transparent;"
+		"font-size: 10px; font-weight: 500; color: #D97706; border: none; background: transparent;"
 	) );
 
 	metricsRow->addWidget( countLbl );
@@ -1008,12 +1008,12 @@ QWidget* ComputerInspectorPanel::createActiveOperationSummaryCard( QWidget* pare
 
 	auto* timeLbl = new QLabel( timeStr, card );
 	timeLbl->setStyleSheet( QStringLiteral(
-		"font-size: 20px; font-weight: 700; color: #27352A; border: none; background: transparent; font-family: monospace;"
+		"font-size: 20px; font-weight: 700; color: #18181B; border: none; background: transparent; font-family: monospace;"
 	) );
 
 	auto* remLbl = new QLabel( tr( "remaining" ), card );
 	remLbl->setStyleSheet( QStringLiteral(
-		"font-size: 11px; color: #657064; border: none; background: transparent; padding-top: 4px;"
+		"font-size: 11px; color: #52525B; border: none; background: transparent; padding-top: 4px;"
 	) );
 
 	timeRow->addWidget( timeLbl );
@@ -1027,10 +1027,10 @@ QWidget* ComputerInspectorPanel::createActiveOperationSummaryCard( QWidget* pare
 	pBar->setTextVisible( false );
 	pBar->setStyleSheet( QStringLiteral(
 		"QProgressBar {"
-		"   background-color: #F0F4EB; border: none; border-radius: 2px;"
+		"   background-color: #F5F3FF; border: none; border-radius: 2px;"
 		"}"
 		"QProgressBar::chunk {"
-		"   background-color: #B78332; border-radius: 2px;"
+		"   background-color: #D97706; border-radius: 2px;"
 		"}"
 	) );
 	pBar->setMaximum( maxTotal );
@@ -1047,10 +1047,10 @@ QWidget* ComputerInspectorPanel::createActiveOperationSummaryCard( QWidget* pare
 
 	const QString adjBtnStyle = QStringLiteral(
 		"QPushButton {"
-		"   background-color: #F0F4EB; color: #27352A; font-size: 11px; font-weight: 500;"
-		"   border: 1px solid #DCDDD2; border-radius: 5px; padding: 3px 6px; min-height: 24px;"
+		"   background-color: #F5F3FF; color: #18181B; font-size: 11px; font-weight: 500;"
+		"   border: 1px solid #E1E3E8; border-radius: 5px; padding: 3px 6px; min-height: 24px;"
 		"}"
-		"QPushButton:hover { background-color: #DCDDD2; border-color: #657064; color: #FFFFFF; }"
+		"QPushButton:hover { background-color: #E1E3E8; border-color: #52525B; color: #FFFFFF; }"
 	);
 
 	for( auto* b : { btnM1, btnP1 } )
@@ -1073,10 +1073,10 @@ QWidget* ComputerInspectorPanel::createActiveOperationSummaryCard( QWidget* pare
 	btnCancelAll->setCursor( Qt::PointingHandCursor );
 	btnCancelAll->setStyleSheet( QStringLiteral(
 		"QPushButton {"
-		"   background-color: #A64F42; color: #FFFFFF; font-weight: 600; font-size: 11px;"
+		"   background-color: #DC2626; color: #FFFFFF; font-weight: 600; font-size: 11px;"
 		"   border: none; border-radius: 5px; padding: 4px 8px; min-height: 26px;"
 		"}"
-		"QPushButton:hover { background-color: #8F4035; }"
+		"QPushButton:hover { background-color: #B91C1C; }"
 	) );
 	btnCancelAll->setToolTip( tr( "Cancel power down and abort shutdown on all computers" ) );
 	connect( btnCancelAll, &QPushButton::clicked, this, [this]() { cancelAllCountdowns(); } );
@@ -1085,7 +1085,7 @@ QWidget* ComputerInspectorPanel::createActiveOperationSummaryCard( QWidget* pare
 	// Divider before Selected Computers
 	auto* div2 = new QFrame( card );
 	div2->setFrameShape( QFrame::HLine );
-	div2->setStyleSheet( QStringLiteral( "background-color: #F0F4EB; max-height: 1px; border: none; margin-top: 4px;" ) );
+	div2->setStyleSheet( QStringLiteral( "background-color: #F5F3FF; max-height: 1px; border: none; margin-top: 4px;" ) );
 	layout->addWidget( div2 );
 
 	// Subheader: SELECTED COMPUTERS
@@ -1094,12 +1094,12 @@ QWidget* ComputerInspectorPanel::createActiveOperationSummaryCard( QWidget* pare
 
 	auto* selTitle = new QLabel( tr( "SELECTED COMPUTERS" ), card );
 	selTitle->setStyleSheet( QStringLiteral(
-		"font-size: 10px; font-weight: 700; color: #657064; letter-spacing: 0.5px; border: none; background: transparent;"
+		"font-size: 10px; font-weight: 700; color: #52525B; letter-spacing: 0.5px; border: none; background: transparent;"
 	) );
 
 	auto* selCount = new QLabel( tr( "%1 selected" ).arg( numComputers ), card );
 	selCount->setStyleSheet( QStringLiteral(
-		"font-size: 10px; color: #92988C; border: none; background: transparent;"
+		"font-size: 10px; color: #71717A; border: none; background: transparent;"
 	) );
 
 	compHeaderRow->addWidget( selTitle );
@@ -1112,16 +1112,16 @@ QWidget* ComputerInspectorPanel::createActiveOperationSummaryCard( QWidget* pare
 	listScroll->setWidgetResizable( true );
 	listScroll->setHorizontalScrollBarPolicy( Qt::ScrollBarAlwaysOff );
 	listScroll->setStyleSheet( QStringLiteral(
-		"QScrollArea { background-color: #F3F2EB; border: 1px solid #F0F4EB; border-radius: 5px; }"
-		"QWidget#qt_scrollarea_viewport { background-color: #F3F2EB; }"
-		"QScrollBar:vertical { background: #F3F2EB; width: 6px; margin: 0; }"
-		"QScrollBar::handle:vertical { background: #DCDDD2; border-radius: 3px; min-height: 14px; }"
+		"QScrollArea { background-color: #F4F5F7; border: 1px solid #F5F3FF; border-radius: 5px; }"
+		"QWidget#qt_scrollarea_viewport { background-color: #F4F5F7; }"
+		"QScrollBar:vertical { background: #F4F5F7; width: 6px; margin: 0; }"
+		"QScrollBar::handle:vertical { background: #E1E3E8; border-radius: 3px; min-height: 14px; }"
 		"QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical { height: 0; }"
 	) );
 	listScroll->setMaximumHeight( 150 );
 
 	auto* listContainer = new QWidget();
-	listContainer->setStyleSheet( QStringLiteral( "background-color: #F3F2EB;" ) );
+	listContainer->setStyleSheet( QStringLiteral( "background-color: #F4F5F7;" ) );
 	auto* listLayout = new QVBoxLayout( listContainer );
 	listLayout->setContentsMargins( 6, 4, 6, 4 );
 	listLayout->setSpacing( 2 );
@@ -1145,10 +1145,10 @@ QWidget* ComputerInspectorPanel::createActiveOperationSummaryCard( QWidget* pare
 		}
 
 		auto* nameLbl = new QLabel( cName, rowWidget );
-		nameLbl->setStyleSheet( QStringLiteral( "font-size: 11px; color: #27352A; border: none; background: transparent;" ) );
+		nameLbl->setStyleSheet( QStringLiteral( "font-size: 11px; color: #18181B; border: none; background: transparent;" ) );
 
 		auto* statLbl = new QLabel( tr( "Pending" ), rowWidget );
-		statLbl->setStyleSheet( QStringLiteral( "font-size: 10px; color: #B78332; border: none; background: transparent;" ) );
+		statLbl->setStyleSheet( QStringLiteral( "font-size: 10px; color: #D97706; border: none; background: transparent;" ) );
 
 		rowLayout->addWidget( nameLbl, 1 );
 		rowLayout->addWidget( statLbl );
@@ -1177,7 +1177,7 @@ QWidget* ComputerInspectorPanel::createCountdownCard( QWidget* parent, const Cou
 	card->setStyleSheet( QStringLiteral(
 		"QFrame {"
 		"   background-color: #FFFFFF;"
-		"   border: 1px solid #DCDDD2;"
+		"   border: 1px solid #E1E3E8;"
 		"   border-radius: 8px;"
 		"   padding: 2px;"
 		"}"
@@ -1198,12 +1198,12 @@ QWidget* ComputerInspectorPanel::createCountdownCard( QWidget* parent, const Cou
 	}
 	auto* titleLbl = new QLabel( titleText, card );
 	titleLbl->setStyleSheet( QStringLiteral(
-		"font-size: 11px; font-weight: 700; color: #27352A; letter-spacing: 0.5px; border: none; background: transparent;"
+		"font-size: 11px; font-weight: 700; color: #18181B; letter-spacing: 0.5px; border: none; background: transparent;"
 	) );
 
 	auto* statusTag = new QLabel( tr( "● Pending" ), card );
 	statusTag->setStyleSheet( QStringLiteral(
-		"font-size: 9px; font-weight: 600; color: #B78332; background-color: #F8EED9; border: 1px solid #D58A45; border-radius: 4px; padding: 1px 5px;"
+		"font-size: 9px; font-weight: 600; color: #D97706; background-color: #FEF3C7; border: 1px solid #F59E0B; border-radius: 4px; padding: 1px 5px;"
 	) );
 
 	headerRow->addWidget( titleLbl, 1 );
@@ -1213,7 +1213,7 @@ QWidget* ComputerInspectorPanel::createCountdownCard( QWidget* parent, const Cou
 	// Divider
 	auto* div = new QFrame( card );
 	div->setFrameShape( QFrame::HLine );
-	div->setStyleSheet( QStringLiteral( "background-color: #F0F4EB; max-height: 1px; border: none;" ) );
+	div->setStyleSheet( QStringLiteral( "background-color: #F5F3FF; max-height: 1px; border: none;" ) );
 	layout->addWidget( div );
 
 	// Time Row
@@ -1226,12 +1226,12 @@ QWidget* ComputerInspectorPanel::createCountdownCard( QWidget* parent, const Cou
 
 	auto* timeLbl = new QLabel( timeStr, card );
 	timeLbl->setStyleSheet( QStringLiteral(
-		"font-size: 18px; font-weight: 700; color: #27352A; border: none; background: transparent; font-family: monospace;"
+		"font-size: 18px; font-weight: 700; color: #18181B; border: none; background: transparent; font-family: monospace;"
 	) );
 
 	auto* remLbl = new QLabel( tr( "remaining" ), card );
 	remLbl->setStyleSheet( QStringLiteral(
-		"font-size: 11px; color: #657064; border: none; background: transparent; padding-top: 2px;"
+		"font-size: 11px; color: #52525B; border: none; background: transparent; padding-top: 2px;"
 	) );
 
 	timeRow->addWidget( timeLbl );
@@ -1245,10 +1245,10 @@ QWidget* ComputerInspectorPanel::createCountdownCard( QWidget* parent, const Cou
 	pBar->setTextVisible( false );
 	pBar->setStyleSheet( QStringLiteral(
 		"QProgressBar {"
-		"   background-color: #F0F4EB; border: none; border-radius: 2px;"
+		"   background-color: #F5F3FF; border: none; border-radius: 2px;"
 		"}"
 		"QProgressBar::chunk {"
-		"   background-color: #B78332; border-radius: 2px;"
+		"   background-color: #D97706; border-radius: 2px;"
 		"}"
 	) );
 	pBar->setMaximum( qMax( 1, item.totalSeconds ) );
@@ -1264,10 +1264,10 @@ QWidget* ComputerInspectorPanel::createCountdownCard( QWidget* parent, const Cou
 
 	const QString btnSubStyle = QStringLiteral(
 		"QPushButton {"
-		"   background-color: #F0F4EB; color: #27352A; font-size: 11px; font-weight: 500;"
-		"   border: 1px solid #DCDDD2; border-radius: 5px; padding: 3px 6px; min-height: 24px;"
+		"   background-color: #F5F3FF; color: #18181B; font-size: 11px; font-weight: 500;"
+		"   border: 1px solid #E1E3E8; border-radius: 5px; padding: 3px 6px; min-height: 24px;"
 		"}"
-		"QPushButton:hover { background-color: #DCDDD2; border-color: #657064; color: #FFFFFF; }"
+		"QPushButton:hover { background-color: #E1E3E8; border-color: #52525B; color: #FFFFFF; }"
 	);
 	btnDec->setStyleSheet( btnSubStyle );
 	btnInc->setStyleSheet( btnSubStyle );
@@ -1283,10 +1283,10 @@ QWidget* ComputerInspectorPanel::createCountdownCard( QWidget* parent, const Cou
 	btnCancel->setCursor( Qt::PointingHandCursor );
 	btnCancel->setStyleSheet( QStringLiteral(
 		"QPushButton {"
-		"   background-color: #A64F42; color: #FFFFFF; font-weight: 600; font-size: 11px;"
+		"   background-color: #DC2626; color: #FFFFFF; font-weight: 600; font-size: 11px;"
 		"   border: none; border-radius: 5px; padding: 4px 8px; min-height: 26px;"
 		"}"
-		"QPushButton:hover { background-color: #8F4035; }"
+		"QPushButton:hover { background-color: #B91C1C; }"
 	) );
 	layout->addWidget( btnCancel );
 
@@ -1403,7 +1403,7 @@ QWidget* ComputerInspectorPanel::createMachineInfoCard( QWidget* parent, const C
 {
 	auto* card = new QFrame( parent );
 	card->setStyleSheet( QStringLiteral(
-		"QFrame { background-color: #FFFFFF; border: 1px solid #DCDDD2; border-radius: 10px; padding: 10px;"
+		"QFrame { background-color: #FFFFFF; border: 1px solid #E1E3E8; border-radius: 10px; padding: 10px;"
 		"}"
 	) );
 
@@ -1416,13 +1416,13 @@ QWidget* ComputerInspectorPanel::createMachineInfoCard( QWidget* parent, const C
 	topRow->setSpacing( 6 );
 
 	auto* nameLbl = new QLabel( controlInterface ? controlInterface->computerName() : tr( "Unknown Machine" ), card );
-	nameLbl->setStyleSheet( QStringLiteral( "font-size: 14px; font-weight: bold; color: #27352A; border: none;" ) );
+	nameLbl->setStyleSheet( QStringLiteral( "font-size: 14px; font-weight: bold; color: #18181B; border: none;" ) );
 
 	const bool isConnected = controlInterface && controlInterface->state() == ComputerControlInterface::State::Connected;
 	auto* statusBadge = new QLabel( isConnected ? tr( "● Online" ) : tr( "○ Offline" ), card );
 	statusBadge->setStyleSheet( isConnected
-		? QStringLiteral( "background: rgba(52, 211, 153, 0.15); color: #537B5B; font-size: 10px; font-weight: bold; padding: 2px 8px; border-radius: 4px; border: 1px solid #537B5B;" )
-		: QStringLiteral( "background: rgba(248, 113, 113, 0.15); color: #A64F42; font-size: 10px; font-weight: bold; padding: 2px 8px; border-radius: 4px; border: 1px solid #A64F42;" ) );
+		? QStringLiteral( "background: rgba(52, 211, 153, 0.15); color: #6D28D9; font-size: 10px; font-weight: bold; padding: 2px 8px; border-radius: 4px; border: 1px solid #6D28D9;" )
+		: QStringLiteral( "background: rgba(248, 113, 113, 0.15); color: #DC2626; font-size: 10px; font-weight: bold; padding: 2px 8px; border-radius: 4px; border: 1px solid #DC2626;" ) );
 
 	topRow->addWidget( nameLbl );
 	topRow->addStretch( 1 );
@@ -1435,14 +1435,14 @@ QWidget* ComputerInspectorPanel::createMachineInfoCard( QWidget* parent, const C
 		const auto hostAddrStr = controlInterface->computer().hostAddress().isNull()
 			? controlInterface->computer().hostName() : controlInterface->computer().hostAddress().toString();
 		auto* ipLbl = new QLabel( tr( "Host IP: %1" ).arg( hostAddrStr ), card );
-		ipLbl->setStyleSheet( QStringLiteral( "font-size: 11px; color: #657064; border: none;" ) );
+		ipLbl->setStyleSheet( QStringLiteral( "font-size: 11px; color: #52525B; border: none;" ) );
 		layout->addWidget( ipLbl );
 
 		const QString user = controlInterface->userFullName().isEmpty()
 			? controlInterface->userLoginName() : controlInterface->userFullName();
 		const QString userDisplay = user.isEmpty() ? tr( "[No logged-in user]" ) : user;
 		auto* userLbl = new QLabel( tr( "Logged User: %1" ).arg( userDisplay ), card );
-		userLbl->setStyleSheet( QStringLiteral( "font-size: 11px; color: #27352A; font-weight: 500; border: none;" ) );
+		userLbl->setStyleSheet( QStringLiteral( "font-size: 11px; color: #18181B; font-weight: 500; border: none;" ) );
 		userLbl->setWordWrap( false );
 		userLbl->setMaximumWidth( 290 );
 		userLbl->setSizePolicy( QSizePolicy::Ignored, QSizePolicy::Preferred );
@@ -1460,7 +1460,7 @@ QWidget* ComputerInspectorPanel::createActionHubCard( QWidget* parent, const QSt
 {
 	auto* card = new QFrame( parent );
 	card->setStyleSheet( QStringLiteral(
-		"QFrame { background-color: #FFFFFF; border: 1px solid #DCDDD2; border-radius: 8px; padding: 4px; }"
+		"QFrame { background-color: #FFFFFF; border: 1px solid #E1E3E8; border-radius: 8px; padding: 4px; }"
 	) );
 
 	auto* layout = new QVBoxLayout( card );
