@@ -16,10 +16,10 @@
          C6 45 9 52 16 54
          C17 61 25 61 31 57
          L32 12 Z"
-      fill="#537B5B"
+      fill="#6D28D9"
     />
     <g fill="none"
-       stroke="#F7F6F0"
+       stroke="#F9FAFB"
        stroke-width="2.3"
        stroke-linecap="round">
       <path d="M27 13 C21 11 17 16 20 21
@@ -30,10 +30,10 @@
                C28 46 26 49 23 51"/>
       <path d="M29 37 C25 35 22 37 21 40"/>
     </g>
-    <rect x="28" y="20" width="19" height="25" rx="5" fill="#426749"/>
-    <rect x="33" y="27" width="9" height="11" rx="2.5" fill="#D58A45"/>
+    <rect x="28" y="20" width="19" height="25" rx="5" fill="#5B21B6"/>
+    <rect x="33" y="27" width="9" height="11" rx="2.5" fill="#F59E0B"/>
     <g fill="none"
-       stroke="#537B5B"
+       stroke="#6D28D9"
        stroke-width="2.5"
        stroke-linecap="round"
        stroke-linejoin="round">
@@ -43,7 +43,7 @@
       <path d="M46 39 L52 45 H56"/>
       <path d="M38 45 V54"/>
     </g>
-    <g fill="#D58A45">
+    <g fill="#F59E0B">
       <circle cx="54" cy="14" r="3"/>
       <circle cx="58" cy="20" r="3"/>
       <circle cx="59" cy="32" r="3"/>
@@ -54,8 +54,8 @@
 
   <!-- WORDMARK -->
   <g font-family="Inter, Manrope, sans-serif">
-    <text x="85" y="49" font-size="35" font-weight="750" letter-spacing="1.1" fill="#27352A">SYNAPSE</text>
-    <text x="88" y="70" font-size="12" font-weight="650" letter-spacing="5" fill="#537B5B">COMMAND</text>
+    <text x="85" y="49" font-size="35" font-weight="750" letter-spacing="1.1" fill="#18181B">SYNAPSE</text>
+    <text x="88" y="70" font-size="12" font-weight="650" letter-spacing="5" fill="#6D28D9">COMMAND</text>
   </g>
 
 </svg>

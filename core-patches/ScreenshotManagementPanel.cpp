@@ -42,7 +42,7 @@ ScreenshotManagementPanel::ScreenshotManagementPanel( QWidget *parent ) :
 	ui->setupUi( this );
 
 	const QString descStyle = QStringLiteral("color: #38BDF8; font-weight: bold; font-size: 11px;");
-	const QString valStyle  = QStringLiteral("color: #27352A; font-weight: 600; font-size: 11px;");
+	const QString valStyle  = QStringLiteral("color: #18181B; font-weight: 600; font-size: 11px;");
 	ui->userDescLbl->setStyleSheet( descStyle );
 	ui->dateDescLbl->setStyleSheet( descStyle );
 	ui->timeDescLbl->setStyleSheet( descStyle );
@@ -57,12 +57,12 @@ ScreenshotManagementPanel::ScreenshotManagementPanel( QWidget *parent ) :
 
 	setStyleSheet( QStringLiteral(
 		"ScreenshotManagementPanel, QWidget#ScreenshotManagementPanel {"
-		"   background-color: #F3F2EB;"
-		"   border-right: 1px solid #E5EDE1;"
+		"   background-color: #F4F5F7;"
+		"   border-right: 1px solid #EDE9FE;"
 		"}"
 		"QListView#list {"
 		"   background-color: #0B1528;"
-		"   color: #27352A;"
+		"   color: #18181B;"
 		"   border: 1px solid #1B3666;"
 		"   border-radius: 6px;"
 		"   font-size: 11px;"
@@ -71,7 +71,7 @@ ScreenshotManagementPanel::ScreenshotManagementPanel( QWidget *parent ) :
 		"QListView#list::item {"
 		"   padding: 6px 8px;"
 		"   border-radius: 4px;"
-		"   color: #27352A;"
+		"   color: #18181B;"
 		"   margin-bottom: 2px;"
 		"}"
 		"QListView#list::item:hover {"
@@ -79,12 +79,12 @@ ScreenshotManagementPanel::ScreenshotManagementPanel( QWidget *parent ) :
 		"   color: #FFFFFF;"
 		"}"
 		"QListView#list::item:selected {"
-		"   background-color: #537B5B;"
+		"   background-color: #6D28D9;"
 		"   color: #FFFFFF;"
 		"   font-weight: bold;"
 		"}"
 		"QLabel {"
-		"   color: #657064;"
+		"   color: #52525B;"
 		"   font-size: 11px;"
 		"}"
 		"QLabel#previewLbl {"
@@ -99,16 +99,16 @@ ScreenshotManagementPanel::ScreenshotManagementPanel( QWidget *parent ) :
 		"   font-size: 11px;"
 		"}"
 		"QLabel#userLbl, QLabel#dateLbl, QLabel#timeLbl, QLabel#hostLbl {"
-		"   color: #27352A;"
+		"   color: #18181B;"
 		"   font-weight: 600;"
 		"   font-size: 11px;"
 		"}"
 		"QPushButton#showBtn {"
-		"   background-color: #537B5B;"
+		"   background-color: #6D28D9;"
 		"   color: #FFFFFF;"
 		"   font-weight: 600;"
 		"   font-size: 11px;"
-		"   border: 1px solid #426749;"
+		"   border: 1px solid #5B21B6;"
 		"   border-radius: 6px;"
 		"   padding: 6px 14px;"
 		"   min-height: 28px;"
@@ -117,8 +117,8 @@ ScreenshotManagementPanel::ScreenshotManagementPanel( QWidget *parent ) :
 		"   background-color: #1D4ED8;"
 		"}"
 		"QPushButton#deleteBtn {"
-		"   background-color: #F0F4EB;"
-		"   color: #A64F42;"
+		"   background-color: #F5F3FF;"
+		"   color: #DC2626;"
 		"   font-weight: 600;"
 		"   font-size: 11px;"
 		"   border: 1px solid #7F1D1D;"

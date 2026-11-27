@@ -76,14 +76,14 @@ ComputerMonitoringWidget::ComputerMonitoringWidget( QWidget *parent ) :
 	initializeView( this );
 
 		setStyleSheet( QStringLiteral(
-		"QListView { background-color: #F3F2EB; border: none; } "
+		"QListView { background-color: #F4F5F7; border: none; } "
 		"QListView::item { background: transparent; } "
-		"QScrollBar:vertical { background: #F3F2EB; width: 8px; margin: 0; } "
-		"QScrollBar::handle:vertical { background: #C6CABC; min-height: 20px; border-radius: 4px; } "
-		"QScrollBar::handle:vertical:hover { background: #537B5B; } "
-		"QScrollBar:horizontal { background: #F3F2EB; height: 8px; margin: 0; } "
-		"QScrollBar::handle:horizontal { background: #C6CABC; min-width: 20px; border-radius: 4px; } "
-		"QScrollBar::handle:horizontal:hover { background: #537B5B; }"
+		"QScrollBar:vertical { background: #F4F5F7; width: 8px; margin: 0; } "
+		"QScrollBar::handle:vertical { background: #D1D5DB; min-height: 20px; border-radius: 4px; } "
+		"QScrollBar::handle:vertical:hover { background: #6D28D9; } "
+		"QScrollBar:horizontal { background: #F4F5F7; height: 8px; margin: 0; } "
+		"QScrollBar::handle:horizontal { background: #D1D5DB; min-width: 20px; border-radius: 4px; } "
+		"QScrollBar::handle:horizontal:hover { background: #6D28D9; }"
 	) );
 
 	setModel( dataModel() );
@@ -206,14 +206,14 @@ void ComputerMonitoringWidget::setColors( const QColor& backgroundColor, const Q
 	Q_UNUSED(backgroundColor);
 	Q_UNUSED(textColor);
 	auto pal = palette();
-	pal.setColor(QPalette::Base, QColor(243, 242, 235)); // #131d31
-	pal.setColor(QPalette::Window, QColor(243, 242, 235));
-	pal.setColor(QPalette::Text, QColor(39, 53, 42));
+	pal.setColor(QPalette::Base, QColor(244, 245, 247)); // #131d31
+	pal.setColor(QPalette::Window, QColor(244, 245, 247));
+	pal.setColor(QPalette::Text, QColor(24, 24, 27));
 	setPalette( pal );
 	if (viewport())
 	{
 		viewport()->setPalette( pal );
-		viewport()->setStyleSheet( QStringLiteral("background-color: #F3F2EB; border: none;") );
+		viewport()->setStyleSheet( QStringLiteral("background-color: #F4F5F7; border: none;") );
 	}
 }
 
