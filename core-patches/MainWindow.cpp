@@ -132,44 +132,57 @@ MainWindow::MainWindow( VeyonMaster &masterCore, QWidget* parent ) :
 		lp.setRenderHint( QPainter::Antialiasing );
 		lp.scale( 28.0 / 64.0, 28.0 / 64.0 );
 
-		// Left human connection (#537B5B)
-		QPainterPath leftArm;
-		leftArm.moveTo( 8.0, 43.0 );
-		leftArm.cubicTo( 8.0, 34.0, 14.0, 28.0, 21.0, 28.0 );
-		leftArm.cubicTo( 26.0, 28.0, 29.0, 31.0, 32.0, 36.0 );
-		lp.setPen( QPen( QColor( 0x53, 0x7B, 0x5B ), 5.0, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin ) );
+		// Organic human brain silhouette (#537B5B)
+		QPainterPath brain;
+		brain.moveTo( 30.0, 8.0 );
+		brain.cubicTo( 25.0, 5.0, 19.0, 8.0, 18.0, 14.0 );
+		brain.cubicTo( 11.0, 13.0, 7.0, 19.0, 9.0, 25.0 );
+		brain.cubicTo( 4.0, 30.0, 7.0, 36.0, 10.0, 39.0 );
+		brain.cubicTo( 6.0, 45.0, 9.0, 52.0, 16.0, 54.0 );
+		brain.cubicTo( 17.0, 61.0, 25.0, 61.0, 31.0, 57.0 );
+		brain.lineTo( 32.0, 12.0 );
+		brain.closeSubpath();
+		lp.setPen( Qt::NoPen );
+		lp.setBrush( QColor( 0x53, 0x7B, 0x5B ) );
+		lp.drawPath( brain );
+
+		// Clean neural folds (#F7F6F0)
+		lp.setPen( QPen( QColor( 0xF7, 0xF6, 0xF0 ), 2.6, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin ) );
 		lp.setBrush( Qt::NoBrush );
-		lp.drawPath( leftArm );
+		QPainterPath fold1;
+		fold1.moveTo( 27.0, 13.0 );
+		fold1.cubicTo( 21.0, 11.0, 17.0, 16.0, 20.0, 21.0 );
+		fold1.cubicTo( 22.0, 24.0, 26.0, 23.0, 27.0, 27.0 );
+		lp.drawPath( fold1 );
 
-		// Right human connection (#537B5B)
-		QPainterPath rightArm;
-		rightArm.moveTo( 56.0, 43.0 );
-		rightArm.cubicTo( 56.0, 34.0, 50.0, 28.0, 43.0, 28.0 );
-		rightArm.cubicTo( 38.0, 28.0, 35.0, 31.0, 32.0, 36.0 );
-		lp.drawPath( rightArm );
+		QPainterPath fold2;
+		fold2.moveTo( 14.0, 44.0 );
+		fold2.cubicTo( 17.0, 39.0, 23.0, 39.0, 26.0, 43.0 );
+		fold2.cubicTo( 28.0, 46.0, 26.0, 49.0, 23.0, 51.0 );
+		lp.drawPath( fold2 );
 
-		// Central connecting body (#426749)
-		QPainterPath centerBody;
-		centerBody.moveTo( 19.0, 53.0 );
-		centerBody.cubicTo( 20.0, 43.0, 25.0, 37.0, 32.0, 37.0 );
-		centerBody.cubicTo( 39.0, 37.0, 44.0, 43.0, 45.0, 53.0 );
-		lp.setPen( QPen( QColor( 0x42, 0x67, 0x49 ), 5.0, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin ) );
-		lp.drawPath( centerBody );
+		// Rounded microchip core (#426749) + amber processor highlight (#D58A45)
+		lp.setPen( Qt::NoPen );
+		lp.setBrush( QColor( 0x42, 0x67, 0x49 ) );
+		lp.drawRoundedRect( QRectF( 28.0, 20.0, 19.0, 25.0 ), 5.0, 5.0 );
+		lp.setBrush( QColor( 0xD5, 0x8A, 0x45 ) );
+		lp.drawRoundedRect( QRectF( 33.0, 27.0, 9.0, 11.0 ), 2.5, 2.5 );
 
-		// Shared foundation arc (#D58A45)
-		QPainterPath foundation;
-		foundation.moveTo( 13.0, 55.0 );
-		foundation.cubicTo( 23.0, 62.0, 41.0, 62.0, 51.0, 55.0 );
-		lp.setPen( QPen( QColor( 0xD5, 0x8A, 0x45 ), 2.5, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin ) );
-		lp.drawPath( foundation );
+		// Radiating PCB circuit traces (#537B5B)
+		lp.setPen( QPen( QColor( 0x53, 0x7B, 0x5B ), 2.8, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin ) );
+		lp.setBrush( Qt::NoBrush );
+		QPainterPath t1; t1.moveTo( 41.0, 20.0 ); t1.lineTo( 47.0, 14.0 ); t1.lineTo( 52.0, 14.0 ); lp.drawPath( t1 );
+		QPainterPath t2; t2.moveTo( 47.0, 32.0 ); t2.lineTo( 57.0, 32.0 ); lp.drawPath( t2 );
+		QPainterPath t3; t3.moveTo( 46.0, 39.0 ); t3.lineTo( 52.0, 45.0 ); t3.lineTo( 56.0, 45.0 ); lp.drawPath( t3 );
+		QPainterPath t4; t4.moveTo( 38.0, 45.0 ); t4.lineTo( 38.0, 54.0 ); lp.drawPath( t4 );
 
-		// Central mentor node (#D58A45) & supporting human heads (#537B5B)
+		// Amber circuit endpoints (#D58A45)
 		lp.setPen( Qt::NoPen );
 		lp.setBrush( QColor( 0xD5, 0x8A, 0x45 ) );
-		lp.drawEllipse( QPointF( 32.0, 13.0 ), 6.0, 6.0 );
-		lp.setBrush( QColor( 0x53, 0x7B, 0x5B ) );
-		lp.drawEllipse( QPointF( 20.0, 24.0 ), 4.0, 4.0 );
-		lp.drawEllipse( QPointF( 44.0, 24.0 ), 4.0, 4.0 );
+		lp.drawEllipse( QPointF( 54.0, 14.0 ), 3.2, 3.2 );
+		lp.drawEllipse( QPointF( 59.0, 32.0 ), 3.2, 3.2 );
+		lp.drawEllipse( QPointF( 58.0, 45.0 ), 3.2, 3.2 );
+		lp.drawEllipse( QPointF( 38.0, 56.0 ), 3.2, 3.2 );
 	}
 	logo->setPixmap( logoPix );
 	logo->setObjectName( QStringLiteral("logoIconLabel") );
