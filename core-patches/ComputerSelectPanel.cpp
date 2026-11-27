@@ -241,17 +241,17 @@ public:
 
 			if( isSelected )
 			{
-				painter->setBrush( QColor(24, 24, 27) );
+				painter->setBrush( QColor( 0x18, 0x18, 0x1B ) );
 				painter->setPen( Qt::NoPen );
 				painter->drawRoundedRect( badgeRect, 10, 10 );
-				painter->setPen( QColor( 0x18, 0x18, 0x1B ) );
+				painter->setPen( Qt::white );
 			}
 			else
 			{
-				painter->setBrush( QColor(15, 23, 42) );
-				painter->setPen( QColor(42, 50, 61) );
+				painter->setBrush( QColor( 0xE8, 0xE9, 0xEC ) );
+				painter->setPen( QColor( 0xE1, 0xE3, 0xE8 ) );
 				painter->drawRoundedRect( badgeRect, 10, 10 );
-				painter->setPen( QColor(24, 24, 27) );
+				painter->setPen( QColor( 0x18, 0x18, 0x1B ) );
 			}
 
 			painter->setFont( badgeFont );
