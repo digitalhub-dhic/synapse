@@ -334,10 +334,10 @@ bool ScreenLockFeaturePlugin::startFeature( VeyonMasterInterface& master, const 
 		dialog.setStyleSheet( QStringLiteral(
 			"QDialog { background-color: #FFFFFF; color: #18181B; }"
 			"QLabel { color: #18181B; font-size: 13px; }"
-			"QComboBox, QSpinBox { background-color: #F5F3FF; color: #18181B; border: 1px solid #E1E3E8; border-radius: 4px; padding: 6px 10px; font-size: 13px; }"
-			"QPushButton { background-color: #6D28D9; color: #FFFFFF; border: 1px solid #5B21B6; border-radius: 4px; padding: 7px 16px; font-weight: 600; font-size: 13px; }"
+			"QComboBox, QSpinBox { background-color: #F0F0F2; color: #18181B; border: 1px solid #E1E3E8; border-radius: 4px; padding: 6px 10px; font-size: 13px; }"
+			"QPushButton { background-color: #18181B; color: #FFFFFF; border: 1px solid #27272A; border-radius: 4px; padding: 7px 16px; font-weight: 600; font-size: 13px; }"
 			"QPushButton:hover { background-color: #1D4ED8; }"
-			"QPushButton#btnCancel { background-color: #F5F3FF; color: #52525B; border: 1px solid #E1E3E8; }"
+			"QPushButton#btnCancel { background-color: #F0F0F2; color: #52525B; border: 1px solid #E1E3E8; }"
 			"QPushButton#btnCancel:hover { background-color: #E1E3E8; color: #FFFFFF; }"
 		) );
 

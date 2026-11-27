@@ -124,13 +124,13 @@ public:
 		// 1. Draw rounded background pill
 		if( isSelected )
 		{
-			painter->setBrush( QColor(237, 233, 254) ); // #EDE9FE WCAG AA selection
-			painter->setPen( QPen( QColor(109, 40, 217), 1 ) );
+			painter->setBrush( QColor(232, 233, 236) ); // #E8E9EC WCAG AA selection
+			painter->setPen( QPen( QColor(24, 24, 27), 1 ) );
 			painter->drawRoundedRect( rowRect, 6, 6 );
 		}
 		else if( isHovered )
 		{
-			painter->setBrush( QColor(249, 250, 251) ); // #F9FAFB elevated hover
+			painter->setBrush( QColor(250, 250, 250) ); // #FAFAFA elevated hover
 			painter->setPen( Qt::NoPen );
 			painter->drawRoundedRect( rowRect, 6, 6 );
 		}
@@ -153,7 +153,7 @@ public:
 		if( hasChildren )
 		{
 			const bool isExpanded = m_treeView ? m_treeView->isExpanded( index ) : false;
-			painter->setPen( isSelected ? QColor(109, 40, 217) : QColor(82, 82, 91) );
+			painter->setPen( isSelected ? QColor(24, 24, 27) : QColor(82, 82, 91) );
 			painter->setFont( QFont( QStringLiteral("Segoe UI"), 7, QFont::Bold ) );
 			QRect chevronRect( indent, option.rect.top() + (option.rect.height() - 16) / 2, 12, 16 );
 			painter->drawText( chevronRect, Qt::AlignCenter, isExpanded ? QStringLiteral("▼") : QStringLiteral("▶") );
@@ -169,8 +169,8 @@ public:
 		painter->setRenderHint( QPainter::Antialiasing, true );
 		if( checkState == Qt::Checked )
 		{
-			painter->setBrush( QColor( 0x6D, 0x28, 0xD9 ) );
-			painter->setPen( QColor( 0x5B, 0x21, 0xB6 ) );
+			painter->setBrush( QColor( 0x18, 0x18, 0x1B ) );
+			painter->setPen( QColor( 0x27, 0x27, 0x2A ) );
 			painter->drawRoundedRect( cbRect, 3, 3 );
 
 			painter->setPen( QPen( Qt::white, 1.8, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin ) );
@@ -203,7 +203,7 @@ public:
 		painter->setRenderHint( QPainter::Antialiasing );
 		if( isLocation )
 		{
-			QPen fPen( isSelected ? QColor( 0x18, 0x18, 0x1B ) : QColor( 0x5B, 0x21, 0xB6 ), 1.5, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin );
+			QPen fPen( isSelected ? QColor( 0x18, 0x18, 0x1B ) : QColor( 0x27, 0x27, 0x2A ), 1.5, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin );
 			painter->setPen( fPen );
 			painter->setBrush( Qt::NoBrush );
 			QPainterPath fp;
@@ -241,7 +241,7 @@ public:
 
 			if( isSelected )
 			{
-				painter->setBrush( QColor(109, 40, 217) );
+				painter->setBrush( QColor(24, 24, 27) );
 				painter->setPen( Qt::NoPen );
 				painter->drawRoundedRect( badgeRect, 10, 10 );
 				painter->setPen( QColor( 0x18, 0x18, 0x1B ) );
@@ -251,7 +251,7 @@ public:
 				painter->setBrush( QColor(15, 23, 42) );
 				painter->setPen( QColor(42, 50, 61) );
 				painter->drawRoundedRect( badgeRect, 10, 10 );
-				painter->setPen( QColor(109, 40, 217) );
+				painter->setPen( QColor(24, 24, 27) );
 			}
 
 			painter->setFont( badgeFont );
@@ -296,7 +296,7 @@ ComputerSelectPanel::ComputerSelectPanel( ComputerManager& computerManager, QWid
 
 	auto* selectHeader = new QFrame( this );
 	selectHeader->setFixedHeight( 32 );
-	selectHeader->setStyleSheet( QStringLiteral( "QFrame { background-color: #F4F5F7; border-bottom: 1px solid #EDE9FE; }" ) );
+	selectHeader->setStyleSheet( QStringLiteral( "QFrame { background-color: #F4F5F6; border-bottom: 1px solid #E8E9EC; }" ) );
 	auto* headerLayout = new QHBoxLayout( selectHeader );
 	headerLayout->setContentsMargins( 12, 0, 8, 0 );
 	headerLayout->setSpacing( 6 );
@@ -315,7 +315,7 @@ ComputerSelectPanel::ComputerSelectPanel( ComputerManager& computerManager, QWid
 		"   background: transparent; border: none; border-radius: 4px;"
 		"   color: #52525B; font-size: 11px; font-weight: bold; padding: 0px;"
 		"}"
-		"QPushButton:hover { background: #DC2626; color: #ffffff; }"
+		"QPushButton:hover { background: #B42332; color: #ffffff; }"
 	) );
 	connect( closeButton, &QPushButton::clicked, this, [this]() {
 		this->hide();
@@ -336,11 +336,11 @@ ComputerSelectPanel::ComputerSelectPanel( ComputerManager& computerManager, QWid
 
 		setStyleSheet( QStringLiteral(
 		"ComputerSelectPanel, QWidget#ComputerSelectPanel {"
-		"   background-color: #F4F5F7;"
+		"   background-color: #F4F5F6;"
 		"   border-right: 1px solid #E1E3E8;"
 		"}"
 		"QTreeView {"
-		"   background-color: #F4F5F7;"
+		"   background-color: #F4F5F6;"
 		"   color: #18181B;"
 		"   border: none;"
 		"   outline: none;"
@@ -358,8 +358,8 @@ ComputerSelectPanel::ComputerSelectPanel( ComputerManager& computerManager, QWid
 		"   font-size: 11px;"
 		"}"
 		"QLineEdit:focus {"
-		"   border: 1px solid #6D28D9;"
-		"   background-color: #F4F5F7;"
+		"   border: 1px solid #18181B;"
+		"   background-color: #F4F5F6;"
 		"}"
 		"QPushButton {"
 		"   background-color: #FFFFFF;"
@@ -372,12 +372,12 @@ ComputerSelectPanel::ComputerSelectPanel( ComputerManager& computerManager, QWid
 		"   padding: 4px 10px;"
 		"}"
 		"QPushButton:hover {"
-		"   background-color: #EDE9FE;"
-		"   border-color: #6D28D9;"
-		"   color: #6D28D9;"
+		"   background-color: #E8E9EC;"
+		"   border-color: #18181B;"
+		"   color: #18181B;"
 		"}"
 	) );
-	ui->treeView->viewport()->setStyleSheet( QStringLiteral( "background-color: #F4F5F7;" ) );
+	ui->treeView->viewport()->setStyleSheet( QStringLiteral( "background-color: #F4F5F6;" ) );
 
 	// Hide table header and style tree view
 	ui->treeView->setHeaderHidden( true );
