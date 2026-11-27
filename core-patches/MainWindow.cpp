@@ -185,6 +185,18 @@ MainWindow::MainWindow( VeyonMaster &masterCore, QWidget* parent ) :
 		lp.drawEllipse( QPointF( 38.0, 56.0 ), 3.2, 3.2 );
 	}
 	logo->setPixmap( logoPix );
+	{
+		QIcon appWinIcon;
+		appWinIcon.addPixmap( logoPix );
+		appWinIcon.addPixmap( logoPix.scaled( 16, 16, Qt::KeepAspectRatio, Qt::SmoothTransformation ) );
+		appWinIcon.addPixmap( logoPix.scaled( 32, 32, Qt::KeepAspectRatio, Qt::SmoothTransformation ) );
+		appWinIcon.addPixmap( logoPix.scaled( 64, 64, Qt::KeepAspectRatio, Qt::SmoothTransformation ) );
+		setWindowIcon( appWinIcon );
+		if( qApp )
+		{
+			qApp->setWindowIcon( appWinIcon );
+		}
+	}
 	logo->setObjectName( QStringLiteral("logoIconLabel") );
 	logo->setStyleSheet( QStringLiteral(
 		"background-color: #E5EDE1; border-radius: 8px; border: 1px solid #C6D6C1;"
