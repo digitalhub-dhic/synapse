@@ -17,13 +17,25 @@ if (-not (Test-Path "\\fileserver\public\Synapse\4-Auto-Updater\client_version.j
     $serverHost = "192.168.1.50"
 }
 $versionFile = "\\$serverHost\public\Synapse\4-Auto-Updater\client_version.json"
-if (-not (Test-Path $versionFile)) { exit 0 }
+$useGitHub = $false
+$ghBase = "https://raw.githubusercontent.com/digitalhub-dhic/synapse/main/deploy/4-Auto-Updater"
 
-try {
-    $config = Get-Content $versionFile -Raw | ConvertFrom-Json
-    $latestVersion = $config.latest_version
-} catch {
-    exit 0
+if (Test-Path $versionFile) {
+    try {
+        $config = Get-Content $versionFile -Raw | ConvertFrom-Json
+        $latestVersion = $config.latest_version
+    } catch {
+        exit 0
+    }
+} else {
+    try {
+        [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+        $config = Invoke-RestMethod -Uri "$ghBase/client_version.json" -TimeoutSec 10
+        $latestVersion = $config.latest_version
+        $useGitHub = $true
+    } catch {
+        exit 0
+    }
 }
 
 $localVerFile = "C:\ProgramData\DigiAgent\installed_version.txt"
@@ -51,7 +63,11 @@ if (-not (Test-Path $srcPlugins)) { $srcPlugins = "\\$serverHost\public\Synapse\
 
 # Stage Core DLL
 $stagedCore = "$stageDir\DigiAgentCore.dll"
-if (Test-Path $srcCore) {
+if ($useGitHub) {
+    try {
+        Invoke-WebRequest -Uri "$ghBase/Payload/DigiAgentCore.dll" -OutFile $stagedCore -TimeoutSec 30 -UseBasicParsing
+    } catch {}
+} elseif (Test-Path $srcCore) {
     Copy-Item -Path $srcCore -Destination $stagedCore -Force -ErrorAction SilentlyContinue
 }
 

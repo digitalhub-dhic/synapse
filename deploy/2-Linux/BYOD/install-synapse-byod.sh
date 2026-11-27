@@ -169,6 +169,55 @@ for target in ['255.255.255.255', '192.168.1.50', '192.168.1.255']:
 s.close()
 " 2>/dev/null || ping -c 1 192.168.1.50 >/dev/null 2>&1 || true
 
+# Install Git-based Linux Auto-Updater (checks GitHub every 30m & at boot)
+mkdir -p /var/lib/synapse
+cat <<'EOF' > /usr/local/bin/synapse-autoupdate.sh
+#!/usr/bin/env bash
+set -e
+GH_RAW="https://raw.githubusercontent.com/digitalhub-dhic/synapse/main"
+VER_FILE="/var/lib/synapse/installed_version.txt"
+REMOTE_VER=$(curl -fsSL "$GH_RAW/deploy/4-Auto-Updater/client_version.json" 2>/dev/null | python3 -c "import sys,json; print(json.load(sys.stdin).get('latest_version',''))" 2>/dev/null || true)
+[ -z "$REMOTE_VER" ] && exit 0
+LOCAL_VER=$(cat "$VER_FILE" 2>/dev/null || echo "")
+if [ "$REMOTE_VER" != "$LOCAL_VER" ]; then
+    TMP_SH=$(mktemp /tmp/synapse-byod-XXXXXX.sh)
+    if curl -fsSL "$GH_RAW/deploy/2-Linux/BYOD/install-synapse-byod.sh" -o "$TMP_SH"; then
+        chmod +x "$TMP_SH"
+        SYNAPSE_AUTOUPDATE_RUN=1 bash "$TMP_SH" >/var/log/synapse-autoupdate.log 2>&1 || true
+        echo "$REMOTE_VER" > "$VER_FILE"
+    fi
+    rm -f "$TMP_SH"
+fi
+EOF
+chmod +x /usr/local/bin/synapse-autoupdate.sh
+
+if [ -z "${SYNAPSE_AUTOUPDATE_RUN:-}" ] && command -v systemctl >/dev/null 2>&1; then
+    cat <<'EOF' > /etc/systemd/system/synapse-autoupdate.service
+[Unit]
+Description=Synapse Linux BYOD Auto-Updater (GitHub)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/synapse-autoupdate.sh
+EOF
+    cat <<'EOF' > /etc/systemd/system/synapse-autoupdate.timer
+[Unit]
+Description=Check GitHub for newer Synapse Linux BYOD releases
+
+[Timer]
+OnBootSec=2min
+OnUnitActiveSec=30min
+Persistent=true
+
+[Install]
+WantedBy=timers.target
+EOF
+    systemctl daemon-reload >/dev/null 2>&1 || true
+    systemctl enable --now synapse-autoupdate.timer >/dev/null 2>&1 || true
+fi
+
 echo ""
 echo "=========================================================="
 echo " [SUCCESS] Synapse BYOD Client is Installed & Active!     "
