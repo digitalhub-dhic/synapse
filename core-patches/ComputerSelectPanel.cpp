@@ -169,7 +169,7 @@ public:
 		painter->setRenderHint( QPainter::Antialiasing, true );
 		if( checkState == Qt::Checked )
 		{
-			painter->setBrush( QColor( 0xFA, 0xFA, 0xFA ) );
+			painter->setBrush( QColor( 0xF4, 0xF4, 0xF5 ) );
 			painter->setPen( QColor( 0x27, 0x27, 0x2A ) );
 			painter->drawRoundedRect( cbRect, 3, 3 );
 
@@ -203,7 +203,7 @@ public:
 		painter->setRenderHint( QPainter::Antialiasing );
 		if( isLocation )
 		{
-			QPen fPen( isSelected ? QColor( 0xFA, 0xFA, 0xFA ) : QColor( 0x27, 0x27, 0x2A ), 1.5, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin );
+			QPen fPen( isSelected ? QColor( 0xF4, 0xF4, 0xF5 ) : QColor( 0x27, 0x27, 0x2A ), 1.5, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin );
 			painter->setPen( fPen );
 			painter->setBrush( Qt::NoBrush );
 			QPainterPath fp;
@@ -218,7 +218,7 @@ public:
 		}
 		else
 		{
-			QPen mPen( isSelected ? QColor( 0xFA, 0xFA, 0xFA ) : QColor( 0x29, 0x29, 0x2E ), 1.4, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin );
+			QPen mPen( isSelected ? QColor( 0xF4, 0xF4, 0xF5 ) : QColor( 0x29, 0x29, 0x2E ), 1.4, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin );
 			painter->setPen( mPen );
 			painter->setBrush( Qt::NoBrush );
 			painter->drawRoundedRect( QRectF( iconRect.left() + 1.0, iconRect.top() + 2.0, 14.0, 9.0 ), 1.5, 1.5 );
@@ -241,7 +241,7 @@ public:
 
 			if( isSelected )
 			{
-				painter->setBrush( QColor( 0xFA, 0xFA, 0xFA ) );
+				painter->setBrush( QColor( 0xF4, 0xF4, 0xF5 ) );
 				painter->setPen( Qt::NoPen );
 				painter->drawRoundedRect( badgeRect, 10, 10 );
 				painter->setPen( Qt::white );
@@ -251,7 +251,7 @@ public:
 				painter->setBrush( QColor( 0x29, 0x29, 0x2E ) );
 				painter->setPen( QColor( 0x29, 0x29, 0x2E ) );
 				painter->drawRoundedRect( badgeRect, 10, 10 );
-				painter->setPen( QColor( 0xFA, 0xFA, 0xFA ) );
+				painter->setPen( QColor( 0xF4, 0xF4, 0xF5 ) );
 			}
 
 			painter->setFont( badgeFont );
@@ -313,7 +313,7 @@ ComputerSelectPanel::ComputerSelectPanel( ComputerManager& computerManager, QWid
 	closeButton->setStyleSheet( QStringLiteral(
 		"QPushButton {"
 		"   background: transparent; border: none; border-radius: 4px;"
-		"   color: #29292E; font-size: 11px; font-weight: bold; padding: 0px;"
+		"   color: #D4D4D8; font-size: 11px; font-weight: bold; padding: 0px;"
 		"}"
 		"QPushButton:hover { background: #F87171; color: #18181B; }"
 	) );
@@ -358,7 +358,7 @@ ComputerSelectPanel::ComputerSelectPanel( ComputerManager& computerManager, QWid
 		"   font-size: 11px;"
 		"}"
 		"QLineEdit:focus {"
-		"   border: 1px solid #FAFAFA;"
+		"   border: 1px solid #697B3C;"
 		"   background-color: #111113;"
 		"}"
 		"QPushButton {"
@@ -372,8 +372,8 @@ ComputerSelectPanel::ComputerSelectPanel( ComputerManager& computerManager, QWid
 		"   padding: 4px 10px;"
 		"}"
 		"QPushButton:hover {"
-		"   background-color: #29292E;"
-		"   border-color: #FAFAFA;"
+		"   background-color: #D4D4D8;"
+		"   border-color: #48484F;"
 		"   color: #FAFAFA;"
 		"}"
 	) );

@@ -57,8 +57,8 @@ ScreenshotManagementPanel::ScreenshotManagementPanel( QWidget *parent ) :
 
 	setStyleSheet( QStringLiteral(
 		"ScreenshotManagementPanel, QWidget#ScreenshotManagementPanel {"
-		"   background-color: #121214;"
-		"   border-right: 1px solid #303036;"
+		"   background-color: #111113;"
+		"   border-right: 1px solid #29292E;"
 		"}"
 		"QListView#list {"
 		"   background-color: #0B1528;"
@@ -108,7 +108,7 @@ ScreenshotManagementPanel::ScreenshotManagementPanel( QWidget *parent ) :
 		"   color: #18181B;"
 		"   font-weight: 600;"
 		"   font-size: 11px;"
-		"   border: 1px solid #E4E4E7;"
+		"   border: 1px solid #27272A;"
 		"   border-radius: 6px;"
 		"   padding: 6px 14px;"
 		"   min-height: 28px;"

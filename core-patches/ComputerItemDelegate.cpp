@@ -67,13 +67,13 @@ void ComputerItemDelegate::paint(QPainter* painter, const QStyleOptionViewItem& 
 	if (isSelected)
 	{
 		painter->fillPath(cardPath, QColor(39, 39, 42)); // #29292E WCAG AA selection
-		painter->setPen(QPen(QColor(250, 250, 250), 1.5)); // #27272A focus border
+		painter->setPen(QPen(QColor(23, 25, 26), 1.5)); // #27272A focus border
 		painter->drawPath(cardPath);
 	}
 	else if (isHovered)
 	{
 		painter->fillPath(cardPath, QColor(39, 39, 42)); // #18181B elevated hover
-		painter->setPen(QPen(QColor(250, 250, 250), 1.0));
+		painter->setPen(QPen(QColor(23, 25, 26), 1.0));
 		painter->drawPath(cardPath);
 	}
 	else
@@ -136,7 +136,7 @@ void ComputerItemDelegate::paint(QPainter* painter, const QStyleOptionViewItem& 
 
 		if (!fb.isNull())
 		{
-			painter->fillRect(previewRect, QColor(250, 250, 250));
+			painter->fillRect(previewRect, QColor(23, 25, 26));
 
 			QPixmap cachedPixmap;
 			const QString cacheKey = QStringLiteral("prev_%1_%2x%3")
@@ -184,8 +184,8 @@ void ComputerItemDelegate::paint(QPainter* painter, const QStyleOptionViewItem& 
 		}
 		else
 		{
-			painter->fillRect(previewRect, QColor(250, 250, 250));
-			painter->setPen(QColor(250, 250, 250));
+			painter->fillRect(previewRect, QColor(23, 25, 26));
+			painter->setPen(QColor(23, 25, 26));
 			QFont loadingFont(QStringLiteral("Segoe UI"), 8);
 			painter->setFont(loadingFont);
 			painter->drawText(previewRect, Qt::AlignCenter, tr("Connecting Stream..."));
@@ -194,14 +194,14 @@ void ComputerItemDelegate::paint(QPainter* painter, const QStyleOptionViewItem& 
 	else if (isConnecting)
 	{
 		// Quiet Connecting State - Subtle border & compact status without radar noise
-		painter->fillRect(previewRect, QColor(250, 250, 250));
+		painter->fillRect(previewRect, QColor(23, 25, 26));
 		painter->setPen(QPen(QColor(41, 41, 46), 1));
 		painter->drawRect(previewRect.adjusted(0, 0, -1, -1));
 
 		const int cx = previewRect.center().x();
 		const int cy = previewRect.center().y() - 6;
 
-		painter->setBrush(QColor(251, 191, 36));
+		painter->setBrush(QColor(198, 230, 106));
 		painter->setPen(Qt::NoPen);
 		painter->drawEllipse(QPoint(cx, cy - 8), 4, 4);
 
@@ -213,7 +213,7 @@ void ComputerItemDelegate::paint(QPainter* painter, const QStyleOptionViewItem& 
 	else
 	{
 		// Offline Empty State - Dark Sleek Container (NO giant monitor icon)
-		painter->fillRect(previewRect, QColor(250, 250, 250));
+		painter->fillRect(previewRect, QColor(23, 25, 26));
 
 		// Subtle grid accent line inside preview
 		painter->setPen(QPen(QColor(41, 41, 46), 1));
@@ -251,7 +251,7 @@ void ComputerItemDelegate::paint(QPainter* painter, const QStyleOptionViewItem& 
 		painter->drawRoundedRect(hoverBar, 4, 4);
 
 		painter->setFont(QFont(QStringLiteral("Segoe UI"), 7, QFont::DemiBold));
-		painter->setPen(QColor(250, 250, 250));
+		painter->setPen(QColor(23, 25, 26));
 		if (isOnline)
 		{
 			const int third = hoverBar.width() / 3;
@@ -299,7 +299,7 @@ void ComputerItemDelegate::paint(QPainter* painter, const QStyleOptionViewItem& 
 		painter->setPen(QPen(QColor(251, 191, 36, 180), 1)); // Amber border
 		painter->drawRoundedRect(badgeRect, 8, 8);
 
-		painter->setBrush(QColor(251, 191, 36));
+		painter->setBrush(QColor(198, 230, 106));
 		painter->setPen(Qt::NoPen);
 		painter->drawEllipse(QPoint(badgeRect.left() + 7, badgeRect.center().y()), 3, 3);
 
@@ -330,7 +330,7 @@ void ComputerItemDelegate::paint(QPainter* painter, const QStyleOptionViewItem& 
 
 	// Computer Name
 	painter->setFont(QFont(QStringLiteral("Segoe UI"), 9, QFont::Bold));
-	painter->setPen(isSelected ? QColor(250, 250, 250) : QColor(250, 250, 250));
+	painter->setPen(isSelected ? QColor(23, 25, 26) : QColor(23, 25, 26));
 	QFontMetrics fmName(painter->font());
 	const QString elidedName = fmName.elidedText(compName, Qt::ElideRight, infoRect.width());
 	painter->drawText(QRect(infoRect.left(), infoRect.top(), infoRect.width(), 16), Qt::AlignLeft | Qt::AlignVCenter, elidedName);
@@ -548,7 +548,7 @@ void ComputerItemDelegate::drawFeatureIcons(QPainter* painter, const QPoint& pos
 		painter->save();
 		painter->setRenderHint(QPainter::Antialiasing);
 		painter->setBrush(QColor(27, 27, 31, 240));
-		painter->setPen(QPen(QColor(250, 250, 250), 1));
+		painter->setPen(QPen(QColor(23, 25, 26), 1));
 		painter->drawRoundedRect(QRect(x, y, count * (OverlayIconSize + OverlayIconSpacing) + 4, OverlayIconSize + 4),
 								 OverlayIconsRadius, OverlayIconsRadius);
 

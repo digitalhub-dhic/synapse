@@ -337,7 +337,7 @@ bool ScreenLockFeaturePlugin::startFeature( VeyonMasterInterface& master, const 
 			"QComboBox, QSpinBox { background-color: #27272A; color: #FAFAFA; border: 1px solid #E1E3E8; border-radius: 4px; padding: 6px 10px; font-size: 13px; }"
 			"QPushButton { background-color: #FAFAFA; color: #18181B; border: 1px solid #27272A; border-radius: 4px; padding: 7px 16px; font-weight: 600; font-size: 13px; }"
 			"QPushButton:hover { background-color: #1D4ED8; }"
-			"QPushButton#btnCancel { background-color: #27272A; color: #29292E; border: 1px solid #E1E3E8; }"
+			"QPushButton#btnCancel { background-color: #27272A; color: #D4D4D8; border: 1px solid #E1E3E8; }"
 			"QPushButton#btnCancel:hover { background-color: #E1E3E8; color: #18181B; }"
 		) );
 
@@ -350,7 +350,7 @@ bool ScreenLockFeaturePlugin::startFeature( VeyonMasterInterface& master, const 
 		layout->addWidget( headerLabel );
 
 		auto* subLabel = new QLabel( tr( "The student screen displays the live countdown ONLY when this Timed Lock is used. Workstations automatically unlock when the timer reaches 00:00." ), &dialog );
-		subLabel->setStyleSheet( QStringLiteral("color: #29292E; font-size: 12px; line-height: 1.4;") );
+		subLabel->setStyleSheet( QStringLiteral("color: #D4D4D8; font-size: 12px; line-height: 1.4;") );
 		subLabel->setWordWrap( true );
 		layout->addWidget( subLabel );
 

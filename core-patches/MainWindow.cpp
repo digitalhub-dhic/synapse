@@ -216,7 +216,7 @@ MainWindow::MainWindow( VeyonMaster &masterCore, QWidget* parent ) :
 	topSearch->setFixedHeight( 28 );
 		topSearch->setStyleSheet( QStringLiteral(
 		"QLineEdit { background-color: #18181B; border: 1px solid #E1E3E8; border-radius: 14px; padding: 4px 12px; color: #FAFAFA; font-size: 11px; } "
-		"QLineEdit:focus { border-color: #FAFAFA; background-color: #111113; }"
+		"QLineEdit:focus { border-color: #48484F; background-color: #111113; }"
 	) );
 	connect( topSearch, &QLineEdit::textChanged, this, [this]( const QString& t ) {
 		ui->computerMonitoringWidget->setSearchFilter( t );
@@ -258,7 +258,7 @@ MainWindow::MainWindow( VeyonMaster &masterCore, QWidget* parent ) :
 	bellBtn->setIconSize( QSize( 16, 16 ) );
 		bellBtn->setStyleSheet( QStringLiteral(
 		"QToolButton#bellButton { background-color: #18181B; border: 1px solid #E1E3E8; border-radius: 14px; color: #FAFAFA; font-size: 12px; min-width: 28px; max-width: 28px; min-height: 28px; max-height: 28px; padding: 0px; } "
-		"QToolButton#bellButton:hover { border-color: #FAFAFA; background-color: #29292E; color: #FAFAFA; }"
+		"QToolButton#bellButton:hover { border-color: #48484F; background-color: #D4D4D8; color: #FAFAFA; }"
 	) );
 	auto* bellDot = new QLabel( bellBtn );
 	bellDot->setObjectName( QStringLiteral("bellDot") );
@@ -273,7 +273,7 @@ MainWindow::MainWindow( VeyonMaster &masterCore, QWidget* parent ) :
 		menu->setStyleSheet( QStringLiteral(
 			"QMenu { background-color: #18181B; border: 1px solid #27272A; border-radius: 8px; padding: 6px; color: #FAFAFA; }"
 			"QMenu::item { padding: 6px 12px; border-radius: 4px; font-size: 11px; }"
-			"QMenu::item:selected { background-color: #29292E; }"
+			"QMenu::item:selected { background-color: #D4D4D8; }"
 		) );
 
 		// 1. Load live AI Sentinel alerts (if any) for 1-click teacher review & freeze
@@ -378,7 +378,7 @@ MainWindow::MainWindow( VeyonMaster &masterCore, QWidget* parent ) :
 	settingsBtn->setIconSize( QSize( 16, 16 ) );
 		settingsBtn->setStyleSheet( QStringLiteral(
 		"QToolButton#settingsButton { background-color: #18181B; border: 1px solid #E1E3E8; border-radius: 14px; color: #FAFAFA; font-size: 13px; min-width: 28px; max-width: 28px; min-height: 28px; max-height: 28px; padding: 0px; } "
-		"QToolButton#settingsButton:hover { border-color: #FAFAFA; background-color: #29292E; color: #FAFAFA; }"
+		"QToolButton#settingsButton:hover { border-color: #48484F; background-color: #D4D4D8; color: #FAFAFA; }"
 	) );
 	connect( settingsBtn, &QToolButton::clicked, this, &MainWindow::showAboutDialog );
 	m_headerToolBar->addWidget( settingsBtn );
@@ -414,13 +414,13 @@ MainWindow::MainWindow( VeyonMaster &masterCore, QWidget* parent ) :
 		"   font-weight: 600;"
 		"}"
 		"QDialog QPushButton:hover {"
-		"   background-color: #29292E;"
-		"   border-color: #FAFAFA;"
+		"   background-color: #D4D4D8;"
+		"   border-color: #48484F;"
 		"   color: #18181B;"
 		"}"
 		"QDialog QPushButton:default {"
 		"   background-color: #FAFAFA;"
-		"   border: 1px solid #FAFAFA;"
+		"   border: 1px solid #697B3C;"
 		"   color: #18181B;"
 		"}"
 		"QMainWindow, QWidget#centralWidget {"
@@ -467,25 +467,25 @@ MainWindow::MainWindow( VeyonMaster &masterCore, QWidget* parent ) :
 		"   max-height: 58px;"
 		"}"
 		"QToolBar#mainToolBar QToolButton:hover, QToolBar#toolBar QToolButton:hover {"
-		"   background-color: #29292E;"
-		"   border-color: #FAFAFA;"
+		"   background-color: #D4D4D8;"
+		"   border-color: #48484F;"
 		"   color: #FAFAFA;"
 		"}"
 		"QToolBar#mainToolBar QToolButton:pressed, QToolBar#toolBar QToolButton:pressed {"
-		"   background-color: #FAFAFA;"
-		"   border-color: #FAFAFA;"
-		"   color: #18181B;"
+		"   background-color: #303226;"
+		"   border-color: #697B3C;"
+		"   color: #D4F184;"
 		"}"
 		"QToolBar#mainToolBar QToolButton:checked, QToolBar#toolBar QToolButton:checked {"
-		"   background-color: #FAFAFA;"
-		"   border: 1px solid #FAFAFA;"
-		"   color: #18181B;"
+		"   background-color: #22251C;"
+		"   border: 1px solid #697B3C;"
+		"   color: #C6E66A;"
 		"   font-weight: 600;"
 		"}"
 		"QToolBar#mainToolBar QToolButton:disabled, QToolBar#toolBar QToolButton:disabled {"
 		"   background-color: #111113;"
 		"   border-color: #E1E3E8;"
-		"   color: #29292E;"
+		"   color: #D4D4D8;"
 		"}"
 				"QToolBar::separator {"
 		"   width: 1px;"
@@ -540,7 +540,7 @@ MainWindow::MainWindow( VeyonMaster &masterCore, QWidget* parent ) :
 		"QStatusBar, QWidget#panelButtons {"
 		"   background-color: #111113;"
 		"   border-top: 1px solid #E1E3E8;"
-		"   color: #29292E;"
+		"   color: #D4D4D8;"
 		"   min-height: 38px;"
 		"   padding: 2px 8px;"
 		"}"
@@ -554,18 +554,18 @@ MainWindow::MainWindow( VeyonMaster &masterCore, QWidget* parent ) :
 		"   font-weight: 600;"
 		"}"
 		"QStatusBar QToolButton:hover, QWidget#panelButtons QToolButton:hover {"
-		"   background-color: #29292E;"
-		"   border-color: #FAFAFA;"
+		"   background-color: #D4D4D8;"
+		"   border-color: #48484F;"
 		"   color: #18181B;"
 		"}"
 		"QStatusBar QToolButton:checked, QWidget#panelButtons QToolButton:checked {"
 		"   background-color: #FAFAFA;"
-		"   border: 1px solid #FAFAFA;"
+		"   border: 1px solid #697B3C;"
 		"   color: #18181B;"
 		"   font-weight: 600;"
 		"}"
 		"QStatusBar QLabel {"
-		"   color: #29292E;"
+		"   color: #D4D4D8;"
 		"   font-size: 11px;"
 		"}"
 		"QMainWindow QLineEdit, QStatusBar QLineEdit, QLineEdit#filterLineEdit, QLineEdit#globalSearchEdit {"
@@ -577,7 +577,7 @@ MainWindow::MainWindow( VeyonMaster &masterCore, QWidget* parent ) :
 		"   font-size: 11px;"
 		"}"
 		"QStatusBar QLineEdit:focus, QLineEdit#filterLineEdit:focus, QLineEdit:focus {"
-		"   border-color: #FAFAFA;"
+		"   border-color: #48484F;"
 		"   background-color: #111113;"
 		"}"
 		"QStatusBar QSlider::groove:horizontal, QSlider::groove:horizontal {"
@@ -592,7 +592,7 @@ MainWindow::MainWindow( VeyonMaster &masterCore, QWidget* parent ) :
 		"}"
 		"QStatusBar QSlider::handle:horizontal, QSlider::handle:horizontal {"
 		"   background: #FAFAFA;"
-		"   border: 1px solid #FAFAFA;"
+		"   border: 1px solid #697B3C;"
 		"   width: 14px;"
 		"   margin-top: -5px;"
 		"   margin-bottom: -5px;"
@@ -600,7 +600,7 @@ MainWindow::MainWindow( VeyonMaster &masterCore, QWidget* parent ) :
 		"}"
 		"QStatusBar QSlider::handle:horizontal:hover, QSlider::handle:horizontal:hover {"
 		"   background: #1B1B1F;"
-		"   border-color: #FAFAFA;"
+		"   border-color: #48484F;"
 		"}"
 				"QSplitter::handle {"
 		"   background-color: transparent;"
@@ -623,7 +623,7 @@ MainWindow::MainWindow( VeyonMaster &masterCore, QWidget* parent ) :
 		"   font-size: 11px;"
 		"}"
 		"QTreeView::item:hover, QListView::item:hover {"
-		"   background-color: #29292E;"
+		"   background-color: #D4D4D8;"
 		"   color: #18181B;"
 		"}"
 		"QTreeView::item:selected, QListView::item:selected {"
@@ -633,7 +633,7 @@ MainWindow::MainWindow( VeyonMaster &masterCore, QWidget* parent ) :
 		"}"
 		"QHeaderView::section {"
 		"   background-color: #18181B;"
-		"   color: #29292E;"
+		"   color: #D4D4D8;"
 		"   border: 1px solid #E1E3E8;"
 		"   padding: 4px;"
 		"}"
@@ -647,11 +647,11 @@ MainWindow::MainWindow( VeyonMaster &masterCore, QWidget* parent ) :
 		"   font-weight: 500;"
 		"}"
 		"QPushButton:hover {"
-		"   background-color: #29292E;"
-		"   border-color: #FAFAFA;"
+		"   background-color: #D4D4D8;"
+		"   border-color: #48484F;"
 		"   color: #18181B;"
 		"}"
-		"QPushButton:checked { background: #FAFAFA; color: #18181B; font-weight: bold; border-color: #FAFAFA; }"
+		"QPushButton:checked { background: #FAFAFA; color: #18181B; font-weight: bold; border-color: #48484F; }"
 		"QScrollBar:vertical {"
 		"   background: #111113;"
 		"   width: 8px;"
@@ -751,7 +751,7 @@ MainWindow::MainWindow( VeyonMaster &masterCore, QWidget* parent ) :
 	const QString footerBtnStyle = QStringLiteral(
 		"QToolButton {"
 		"   background: #18181B; border: 1px solid #E1E3E8; border-radius: 4px;"
-		"   color: #29292E; font-size: 11px; font-weight: 600; padding: 2px 8px; margin: 1px 2px;"
+		"   color: #D4D4D8; font-size: 11px; font-weight: 600; padding: 2px 8px; margin: 1px 2px;"
 		"}"
 		"QToolButton:hover { background: #27272A; border-color: #27272A; color: #FAFAFA; }"
 		"QToolButton:checked { background: #29292E; border-color: #27272A; color: #18181B; font-weight: bold; }"
@@ -766,7 +766,7 @@ MainWindow::MainWindow( VeyonMaster &masterCore, QWidget* parent ) :
 	// Restore footer Zoom Slider & Auto Button in bottom status bar
 	ui->autoAdjustComputerIconSizeButton->show();
 	ui->autoAdjustComputerIconSizeButton->setStyleSheet( QStringLiteral(
-		"QToolButton { background: #18181B; border: 1px solid #E1E3E8; border-radius: 4px; color: #29292E; font-size: 10px; font-weight: 600; padding: 2px 6px; }"
+		"QToolButton { background: #18181B; border: 1px solid #E1E3E8; border-radius: 4px; color: #D4D4D8; font-size: 10px; font-weight: 600; padding: 2px 6px; }"
 		"QToolButton:hover { border-color: #27272A; color: #18181B; }"
 		"QToolButton:checked { background: #FAFAFA; color: #18181B; border-color: #27272A; }"
 	) );
@@ -787,7 +787,7 @@ MainWindow::MainWindow( VeyonMaster &masterCore, QWidget* parent ) :
 
 
 	auto* timeLabel = new QLabel( ui->statusBar );
-	timeLabel->setStyleSheet( QStringLiteral("color: #29292E; font-size: 11px; font-family: monospace; padding-right: 12px;") );
+	timeLabel->setStyleSheet( QStringLiteral("color: #D4D4D8; font-size: 11px; font-family: monospace; padding-right: 12px;") );
 	auto updateTime = [timeLabel]() {
 		timeLabel->setText( QDateTime::currentDateTime().toString( QStringLiteral("MMM dd, yyyy  hh:mm") ) );
 	};
@@ -838,12 +838,12 @@ MainWindow::MainWindow( VeyonMaster &masterCore, QWidget* parent ) :
 	auto* locationTitle = new QLabel( tr( "DIGIHUB / Lab" ), subHeader );
 	locationTitle->setStyleSheet( QStringLiteral("font-weight: 700; font-size: 11px; color: #FAFAFA;") );
 	auto* countBadge = new QLabel( subHeader );
-	countBadge->setStyleSheet( QStringLiteral("font-weight: 400; font-size: 11px; color: #29292E;") );
+	countBadge->setStyleSheet( QStringLiteral("font-weight: 400; font-size: 11px; color: #D4D4D8;") );
 
 	// Quick filter pills: [All] [Online] [Offline]
 	const QString pillBase = QStringLiteral(
 		"QPushButton { background: #18181B; border: 1px solid #27272A; border-radius: 10px;"
-		" color: #29292E; font-size: 10px; font-weight: 600; padding: 2px 10px; min-height: 20px; }"
+		" color: #D4D4D8; font-size: 10px; font-weight: 600; padding: 2px 10px; min-height: 20px; }"
 		"QPushButton:checked { background: #FAFAFA; color: #18181B; font-weight: 700; border-color: #27272A; }"
 		"QPushButton:hover { border-color: #27272A; color: #FAFAFA; }");
 	auto* pillAll     = new QPushButton( tr("All"),     subHeader );
@@ -932,7 +932,7 @@ MainWindow::MainWindow( VeyonMaster &masterCore, QWidget* parent ) :
 	auto* btnLive = new QPushButton( tr("Live"), densityWidget );
 
 	const QString densityBtnStyle = QStringLiteral(
-		"QPushButton { background: #18181B; border: 1px solid #27272A; border-radius: 6px; padding: 2px 8px; color: #29292E; font-size: 10px; font-weight: 600; }"
+		"QPushButton { background: #18181B; border: 1px solid #27272A; border-radius: 6px; padding: 2px 8px; color: #D4D4D8; font-size: 10px; font-weight: 600; }"
 		"QPushButton:hover { background: #18181B; color: #FAFAFA; border-color: #27272A; }"
 		"QPushButton:checked { background: #FAFAFA; color: #18181B; font-weight: 700; border-color: #27272A; }"
 	);
@@ -1108,7 +1108,7 @@ MainWindow::MainWindow( VeyonMaster &masterCore, QWidget* parent ) :
 		};
 		QIcon ic;
 		ic.addPixmap( drawPx( QColor( 0xFA, 0xFA, 0xFA ) ), QIcon::Normal, QIcon::Off );
-		ic.addPixmap( drawPx( Qt::white ), QIcon::Normal, QIcon::On );
+		ic.addPixmap( drawPx( QColor( 0xC6, 0xE6, 0x6A ) ), QIcon::Normal, QIcon::On );
 		return ic;
 	};
 	ui->computerSelectPanelButton->setIcon( makeFooterIcon( QStringLiteral("locations") ) );
@@ -1119,7 +1119,7 @@ MainWindow::MainWindow( VeyonMaster &masterCore, QWidget* parent ) :
 	inspectorPanelButton->setStyleSheet( QStringLiteral(
 		"QToolButton {"
 		"   background: #18181B; border: 1px solid #E1E3E8; border-radius: 4px;"
-		"   color: #29292E; font-size: 11px; font-weight: 600; padding: 2px 8px; margin: 1px 2px;"
+		"   color: #D4D4D8; font-size: 11px; font-weight: 600; padding: 2px 8px; margin: 1px 2px;"
 		"}"
 		"QToolButton:hover { background: #27272A; border-color: #27272A; color: #FAFAFA; }"
 		"QToolButton:checked { background: #29292E; border-color: #27272A; color: #18181B; font-weight: bold; }"
@@ -1918,7 +1918,7 @@ void MainWindow::addFeaturesToToolBar()
 
 		QIcon richIcon;
 		richIcon.addPixmap( drawFeatureGlyph( k, accentFg, accentBg ), QIcon::Normal, QIcon::Off );
-		richIcon.addPixmap( drawFeatureGlyph( k, Qt::white, QColor( 0x27, 0x27, 0x2A ) ), QIcon::Normal, QIcon::On );
+		richIcon.addPixmap( drawFeatureGlyph( k, QColor( 0xC6, 0xE6, 0x6A ), QColor( 0x22, 0x25, 0x1C ) ), QIcon::Normal, QIcon::On );
 
 		QString text = feature.displayName();
 		if( k.contains( QStringLiteral("monitor") ) )

@@ -76,12 +76,12 @@ ComputerMonitoringWidget::ComputerMonitoringWidget( QWidget *parent ) :
 	initializeView( this );
 
 		setStyleSheet( QStringLiteral(
-		"QListView { background-color: #121214; border: none; } "
+		"QListView { background-color: #111113; border: none; } "
 		"QListView::item { background: transparent; } "
-		"QScrollBar:vertical { background: #121214; width: 8px; margin: 0; } "
+		"QScrollBar:vertical { background: #111113; width: 8px; margin: 0; } "
 		"QScrollBar::handle:vertical { background: #D1D5DB; min-height: 20px; border-radius: 4px; } "
 		"QScrollBar::handle:vertical:hover { background: #FAFAFA; } "
-		"QScrollBar:horizontal { background: #121214; height: 8px; margin: 0; } "
+		"QScrollBar:horizontal { background: #111113; height: 8px; margin: 0; } "
 		"QScrollBar::handle:horizontal { background: #D1D5DB; min-width: 20px; border-radius: 4px; } "
 		"QScrollBar::handle:horizontal:hover { background: #FAFAFA; }"
 	) );
@@ -206,14 +206,14 @@ void ComputerMonitoringWidget::setColors( const QColor& backgroundColor, const Q
 	Q_UNUSED(backgroundColor);
 	Q_UNUSED(textColor);
 	auto pal = palette();
-	pal.setColor(QPalette::Base, QColor(18, 18, 20)); // #131d31
-	pal.setColor(QPalette::Window, QColor(18, 18, 20));
+	pal.setColor(QPalette::Base, QColor(17, 17, 19)); // #131d31
+	pal.setColor(QPalette::Window, QColor(17, 17, 19));
 	pal.setColor(QPalette::Text, QColor(250, 250, 250));
 	setPalette( pal );
 	if (viewport())
 	{
 		viewport()->setPalette( pal );
-		viewport()->setStyleSheet( QStringLiteral("background-color: #121214; border: none;") );
+		viewport()->setStyleSheet( QStringLiteral("background-color: #111113; border: none;") );
 	}
 }
 
