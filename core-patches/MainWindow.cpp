@@ -1036,11 +1036,11 @@ MainWindow::MainWindow( VeyonMaster &masterCore, QWidget* parent ) :
 	}
 
 	// Dynamic Fleet Auto-Refresh Timer:
-	// Automatically checks for newly enrolled network objects from Sentinel discovery every 20 seconds
+	// Incrementally syncs newly enrolled network objects every 20s without dropping live VNC connections
 	auto* directoryRefreshTimer = new QTimer( this );
 	connect( directoryRefreshTimer, &QTimer::timeout, this, [this]() {
 		VeyonCore::networkObjectDirectoryManager().configuredDirectory()->update();
-		m_master.computerControlListModel().reload();
+		m_master.computerControlListModel().update();
 	} );
 	directoryRefreshTimer->start( 20000 );
 
