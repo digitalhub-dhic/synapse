@@ -130,36 +130,29 @@ MainWindow::MainWindow( VeyonMaster &masterCore, QWidget* parent ) :
 	{
 		QPainter lp( &logoPix );
 		lp.setRenderHint( QPainter::Antialiasing );
-		lp.scale( 28.0 / 100.0, 28.0 / 100.0 );
+		lp.scale( 28.0 / 64.0, 28.0 / 64.0 );
 
-		// Left folded hexagonal bracket (<)
-		QPolygonF leftBracket;
-		leftBracket << QPointF( 43.0, 30.0 ) << QPointF( 27.0, 30.0 )
-					<< QPointF( 13.0, 50.0 ) << QPointF( 27.0, 70.0 )
-					<< QPointF( 43.0, 70.0 ) << QPointF( 30.0, 50.0 );
-		lp.setPen( Qt::NoPen );
-		lp.setBrush( Qt::white );
-		lp.drawPolygon( leftBracket );
-		lp.setPen( QPen( QColor( 0xD1, 0xD5, 0xDB ), 1.8, Qt::SolidLine, Qt::RoundCap ) );
-		lp.drawLine( QPointF( 20.0, 40.0 ), QPointF( 35.0, 30.0 ) );
+		// Primary Charcoal Connected-S stroke (#18181B)
+		QPainterPath sCharcoal;
+		sCharcoal.moveTo( 47.0, 14.0 );
+		sCharcoal.cubicTo( 42.0, 8.0, 34.0, 8.0, 27.0, 13.0 );
+		sCharcoal.lineTo( 16.0, 21.0 );
+		sCharcoal.cubicTo( 10.0, 25.0, 12.0, 34.0, 20.0, 35.0 );
+		sCharcoal.lineTo( 39.0, 38.0 );
+		sCharcoal.cubicTo( 48.0, 40.0, 51.0, 48.0, 44.0, 54.0 );
+		sCharcoal.cubicTo( 37.0, 60.0, 25.0, 57.0, 18.0, 51.0 );
+		lp.setPen( QPen( QColor( 0x18, 0x18, 0x1B ), 8.0, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin ) );
+		lp.setBrush( Qt::NoBrush );
+		lp.drawPath( sCharcoal );
 
-		// Right folded hexagonal bracket (>)
-		QPolygonF rightBracket;
-		rightBracket << QPointF( 57.0, 30.0 ) << QPointF( 73.0, 30.0 )
-					 << QPointF( 87.0, 50.0 ) << QPointF( 73.0, 70.0 )
-					 << QPointF( 57.0, 70.0 ) << QPointF( 70.0, 50.0 );
-		lp.setPen( Qt::NoPen );
-		lp.setBrush( Qt::white );
-		lp.drawPolygon( rightBracket );
-		lp.setPen( QPen( QColor( 0xD1, 0xD5, 0xDB ), 1.8, Qt::SolidLine, Qt::RoundCap ) );
-		lp.drawLine( QPointF( 80.0, 60.0 ), QPointF( 65.0, 70.0 ) );
-
-		// Central pupil with upper-left crescent notch
-		lp.setPen( Qt::NoPen );
-		lp.setBrush( Qt::white );
-		lp.drawEllipse( QPointF( 50.0, 50.0 ), 10.5, 10.5 );
-		lp.setBrush( QColor( 0x18, 0x18, 0x1B ) );
-		lp.drawEllipse( QPointF( 45.2, 45.2 ), 4.6, 4.6 );
+		// Secondary Deep Violet signal stroke (#6D28D9)
+		QPainterPath sViolet;
+		sViolet.moveTo( 47.0, 14.0 );
+		sViolet.cubicTo( 53.0, 20.0, 52.0, 27.0, 45.0, 32.0 );
+		sViolet.lineTo( 28.0, 44.0 );
+		sViolet.cubicTo( 21.0, 49.0, 15.0, 49.0, 11.0, 45.0 );
+		lp.setPen( QPen( QColor( 0x6D, 0x28, 0xD9 ), 8.0, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin ) );
+		lp.drawPath( sViolet );
 	}
 	logo->setPixmap( logoPix );
 	{
@@ -167,8 +160,8 @@ MainWindow::MainWindow( VeyonMaster &masterCore, QWidget* parent ) :
 		winPix.fill( Qt::transparent );
 		QPainter wp( &winPix );
 		wp.setRenderHint( QPainter::Antialiasing );
-		wp.setPen( Qt::NoPen );
-		wp.setBrush( QColor( 0x18, 0x18, 0x1B ) );
+		wp.setPen( QPen( QColor( 0xE1, 0xE3, 0xE8 ), 2.0 ) );
+		wp.setBrush( Qt::white );
 		wp.drawRoundedRect( QRectF( 2.0, 2.0, 60.0, 60.0 ), 14.0, 14.0 );
 		wp.drawPixmap( QRect( 4, 4, 56, 56 ), logoPix.scaled( 56, 56, Qt::KeepAspectRatio, Qt::SmoothTransformation ) );
 
@@ -184,7 +177,7 @@ MainWindow::MainWindow( VeyonMaster &masterCore, QWidget* parent ) :
 	}
 	logo->setObjectName( QStringLiteral("logoIconLabel") );
 	logo->setStyleSheet( QStringLiteral(
-		"background-color: #18181B; border-radius: 8px; border: 1px solid #3F3F46;"
+		"background-color: #FFFFFF; border-radius: 8px; border: 1px solid #E1E3E8;"
 	) );
 
 	auto* titleWidget = new QWidget( m_headerToolBar );
