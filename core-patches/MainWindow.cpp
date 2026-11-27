@@ -130,67 +130,52 @@ MainWindow::MainWindow( VeyonMaster &masterCore, QWidget* parent ) :
 	{
 		QPainter lp( &logoPix );
 		lp.setRenderHint( QPainter::Antialiasing );
-		lp.scale( 28.0 / 64.0, 28.0 / 64.0 );
+		lp.scale( 28.0 / 100.0, 28.0 / 100.0 );
 
-		// Organic human brain silhouette (#6D28D9)
-		QPainterPath brain;
-		brain.moveTo( 30.0, 8.0 );
-		brain.cubicTo( 25.0, 5.0, 19.0, 8.0, 18.0, 14.0 );
-		brain.cubicTo( 11.0, 13.0, 7.0, 19.0, 9.0, 25.0 );
-		brain.cubicTo( 4.0, 30.0, 7.0, 36.0, 10.0, 39.0 );
-		brain.cubicTo( 6.0, 45.0, 9.0, 52.0, 16.0, 54.0 );
-		brain.cubicTo( 17.0, 61.0, 25.0, 61.0, 31.0, 57.0 );
-		brain.lineTo( 32.0, 12.0 );
-		brain.closeSubpath();
+		// Left folded hexagonal bracket (<)
+		QPolygonF leftBracket;
+		leftBracket << QPointF( 43.0, 30.0 ) << QPointF( 27.0, 30.0 )
+					<< QPointF( 13.0, 50.0 ) << QPointF( 27.0, 70.0 )
+					<< QPointF( 43.0, 70.0 ) << QPointF( 30.0, 50.0 );
 		lp.setPen( Qt::NoPen );
-		lp.setBrush( QColor( 0x6D, 0x28, 0xD9 ) );
-		lp.drawPath( brain );
+		lp.setBrush( Qt::white );
+		lp.drawPolygon( leftBracket );
+		lp.setPen( QPen( QColor( 0xD1, 0xD5, 0xDB ), 1.8, Qt::SolidLine, Qt::RoundCap ) );
+		lp.drawLine( QPointF( 20.0, 40.0 ), QPointF( 35.0, 30.0 ) );
 
-		// Clean neural folds (#F9FAFB)
-		lp.setPen( QPen( QColor( 0xF9, 0xFA, 0xFB ), 2.6, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin ) );
-		lp.setBrush( Qt::NoBrush );
-		QPainterPath fold1;
-		fold1.moveTo( 27.0, 13.0 );
-		fold1.cubicTo( 21.0, 11.0, 17.0, 16.0, 20.0, 21.0 );
-		fold1.cubicTo( 22.0, 24.0, 26.0, 23.0, 27.0, 27.0 );
-		lp.drawPath( fold1 );
-
-		QPainterPath fold2;
-		fold2.moveTo( 14.0, 44.0 );
-		fold2.cubicTo( 17.0, 39.0, 23.0, 39.0, 26.0, 43.0 );
-		fold2.cubicTo( 28.0, 46.0, 26.0, 49.0, 23.0, 51.0 );
-		lp.drawPath( fold2 );
-
-		// Rounded microchip core (#5B21B6) + amber processor highlight (#F59E0B)
+		// Right folded hexagonal bracket (>)
+		QPolygonF rightBracket;
+		rightBracket << QPointF( 57.0, 30.0 ) << QPointF( 73.0, 30.0 )
+					 << QPointF( 87.0, 50.0 ) << QPointF( 73.0, 70.0 )
+					 << QPointF( 57.0, 70.0 ) << QPointF( 70.0, 50.0 );
 		lp.setPen( Qt::NoPen );
-		lp.setBrush( QColor( 0x5B, 0x21, 0xB6 ) );
-		lp.drawRoundedRect( QRectF( 28.0, 20.0, 19.0, 25.0 ), 5.0, 5.0 );
-		lp.setBrush( QColor( 0xF5, 0x9E, 0x0B ) );
-		lp.drawRoundedRect( QRectF( 33.0, 27.0, 9.0, 11.0 ), 2.5, 2.5 );
+		lp.setBrush( Qt::white );
+		lp.drawPolygon( rightBracket );
+		lp.setPen( QPen( QColor( 0xD1, 0xD5, 0xDB ), 1.8, Qt::SolidLine, Qt::RoundCap ) );
+		lp.drawLine( QPointF( 80.0, 60.0 ), QPointF( 65.0, 70.0 ) );
 
-		// Radiating PCB circuit traces (#6D28D9)
-		lp.setPen( QPen( QColor( 0x6D, 0x28, 0xD9 ), 2.8, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin ) );
-		lp.setBrush( Qt::NoBrush );
-		QPainterPath t1; t1.moveTo( 41.0, 20.0 ); t1.lineTo( 47.0, 14.0 ); t1.lineTo( 52.0, 14.0 ); lp.drawPath( t1 );
-		QPainterPath t2; t2.moveTo( 47.0, 32.0 ); t2.lineTo( 57.0, 32.0 ); lp.drawPath( t2 );
-		QPainterPath t3; t3.moveTo( 46.0, 39.0 ); t3.lineTo( 52.0, 45.0 ); t3.lineTo( 56.0, 45.0 ); lp.drawPath( t3 );
-		QPainterPath t4; t4.moveTo( 38.0, 45.0 ); t4.lineTo( 38.0, 54.0 ); lp.drawPath( t4 );
-
-		// Amber circuit endpoints (#F59E0B)
+		// Central pupil with upper-left crescent notch
 		lp.setPen( Qt::NoPen );
-		lp.setBrush( QColor( 0xF5, 0x9E, 0x0B ) );
-		lp.drawEllipse( QPointF( 54.0, 14.0 ), 3.2, 3.2 );
-		lp.drawEllipse( QPointF( 59.0, 32.0 ), 3.2, 3.2 );
-		lp.drawEllipse( QPointF( 58.0, 45.0 ), 3.2, 3.2 );
-		lp.drawEllipse( QPointF( 38.0, 56.0 ), 3.2, 3.2 );
+		lp.setBrush( Qt::white );
+		lp.drawEllipse( QPointF( 50.0, 50.0 ), 10.5, 10.5 );
+		lp.setBrush( QColor( 0x18, 0x18, 0x1B ) );
+		lp.drawEllipse( QPointF( 45.2, 45.2 ), 4.6, 4.6 );
 	}
 	logo->setPixmap( logoPix );
 	{
+		QPixmap winPix( 64, 64 );
+		winPix.fill( Qt::transparent );
+		QPainter wp( &winPix );
+		wp.setRenderHint( QPainter::Antialiasing );
+		wp.setPen( Qt::NoPen );
+		wp.setBrush( QColor( 0x18, 0x18, 0x1B ) );
+		wp.drawRoundedRect( QRectF( 2.0, 2.0, 60.0, 60.0 ), 14.0, 14.0 );
+		wp.drawPixmap( QRect( 4, 4, 56, 56 ), logoPix.scaled( 56, 56, Qt::KeepAspectRatio, Qt::SmoothTransformation ) );
+
 		QIcon appWinIcon;
-		appWinIcon.addPixmap( logoPix );
-		appWinIcon.addPixmap( logoPix.scaled( 16, 16, Qt::KeepAspectRatio, Qt::SmoothTransformation ) );
-		appWinIcon.addPixmap( logoPix.scaled( 32, 32, Qt::KeepAspectRatio, Qt::SmoothTransformation ) );
-		appWinIcon.addPixmap( logoPix.scaled( 64, 64, Qt::KeepAspectRatio, Qt::SmoothTransformation ) );
+		appWinIcon.addPixmap( winPix );
+		appWinIcon.addPixmap( winPix.scaled( 16, 16, Qt::KeepAspectRatio, Qt::SmoothTransformation ) );
+		appWinIcon.addPixmap( winPix.scaled( 32, 32, Qt::KeepAspectRatio, Qt::SmoothTransformation ) );
 		setWindowIcon( appWinIcon );
 		if( qApp )
 		{
@@ -199,7 +184,7 @@ MainWindow::MainWindow( VeyonMaster &masterCore, QWidget* parent ) :
 	}
 	logo->setObjectName( QStringLiteral("logoIconLabel") );
 	logo->setStyleSheet( QStringLiteral(
-		"background-color: #EDE9FE; border-radius: 8px; border: 1px solid #DDD6FE;"
+		"background-color: #18181B; border-radius: 8px; border: 1px solid #3F3F46;"
 	) );
 
 	auto* titleWidget = new QWidget( m_headerToolBar );
