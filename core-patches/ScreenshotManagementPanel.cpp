@@ -42,7 +42,7 @@ ScreenshotManagementPanel::ScreenshotManagementPanel( QWidget *parent ) :
 	ui->setupUi( this );
 
 	const QString descStyle = QStringLiteral("color: #38BDF8; font-weight: bold; font-size: 11px;");
-	const QString valStyle  = QStringLiteral("color: #18181B; font-weight: 600; font-size: 11px;");
+	const QString valStyle  = QStringLiteral("color: #FAFAFA; font-weight: 600; font-size: 11px;");
 	ui->userDescLbl->setStyleSheet( descStyle );
 	ui->dateDescLbl->setStyleSheet( descStyle );
 	ui->timeDescLbl->setStyleSheet( descStyle );
@@ -57,12 +57,12 @@ ScreenshotManagementPanel::ScreenshotManagementPanel( QWidget *parent ) :
 
 	setStyleSheet( QStringLiteral(
 		"ScreenshotManagementPanel, QWidget#ScreenshotManagementPanel {"
-		"   background-color: #F4F5F6;"
-		"   border-right: 1px solid #E8E9EC;"
+		"   background-color: #121214;"
+		"   border-right: 1px solid #303036;"
 		"}"
 		"QListView#list {"
 		"   background-color: #0B1528;"
-		"   color: #18181B;"
+		"   color: #FAFAFA;"
 		"   border: 1px solid #1B3666;"
 		"   border-radius: 6px;"
 		"   font-size: 11px;"
@@ -71,20 +71,20 @@ ScreenshotManagementPanel::ScreenshotManagementPanel( QWidget *parent ) :
 		"QListView#list::item {"
 		"   padding: 6px 8px;"
 		"   border-radius: 4px;"
-		"   color: #18181B;"
+		"   color: #FAFAFA;"
 		"   margin-bottom: 2px;"
 		"}"
 		"QListView#list::item:hover {"
 		"   background-color: #152B54;"
-		"   color: #FFFFFF;"
+		"   color: #18181B;"
 		"}"
 		"QListView#list::item:selected {"
-		"   background-color: #18181B;"
-		"   color: #FFFFFF;"
+		"   background-color: #FAFAFA;"
+		"   color: #18181B;"
 		"   font-weight: bold;"
 		"}"
 		"QLabel {"
-		"   color: #52525B;"
+		"   color: #D4D4D8;"
 		"   font-size: 11px;"
 		"}"
 		"QLabel#previewLbl {"
@@ -99,16 +99,16 @@ ScreenshotManagementPanel::ScreenshotManagementPanel( QWidget *parent ) :
 		"   font-size: 11px;"
 		"}"
 		"QLabel#userLbl, QLabel#dateLbl, QLabel#timeLbl, QLabel#hostLbl {"
-		"   color: #18181B;"
+		"   color: #FAFAFA;"
 		"   font-weight: 600;"
 		"   font-size: 11px;"
 		"}"
 		"QPushButton#showBtn {"
-		"   background-color: #18181B;"
-		"   color: #FFFFFF;"
+		"   background-color: #FAFAFA;"
+		"   color: #18181B;"
 		"   font-weight: 600;"
 		"   font-size: 11px;"
-		"   border: 1px solid #27272A;"
+		"   border: 1px solid #E4E4E7;"
 		"   border-radius: 6px;"
 		"   padding: 6px 14px;"
 		"   min-height: 28px;"
@@ -117,8 +117,8 @@ ScreenshotManagementPanel::ScreenshotManagementPanel( QWidget *parent ) :
 		"   background-color: #1D4ED8;"
 		"}"
 		"QPushButton#deleteBtn {"
-		"   background-color: #F0F0F2;"
-		"   color: #B42332;"
+		"   background-color: #27272A;"
+		"   color: #F87171;"
 		"   font-weight: 600;"
 		"   font-size: 11px;"
 		"   border: 1px solid #7F1D1D;"
@@ -128,7 +128,7 @@ ScreenshotManagementPanel::ScreenshotManagementPanel( QWidget *parent ) :
 		"}"
 		"QPushButton#deleteBtn:hover {"
 		"   background-color: #7F1D1D;"
-		"   color: #FFFFFF;"
+		"   color: #18181B;"
 		"}"
 	) );
 
