@@ -932,6 +932,7 @@ MainWindow::MainWindow( VeyonMaster &masterCore, QWidget* parent ) :
 
 	// View density modes: Compact (180px), Balanced (240px), Live (320px)
 	auto* densityWidget = new QFrame( subHeader );
+	densityWidget->setFixedHeight( 26 );
 	densityWidget->setStyleSheet( QStringLiteral("QFrame { background: #191B20; border: 1px solid #252830; border-radius: 6px; }") );
 	auto* densityLayout = new QHBoxLayout( densityWidget );
 	densityLayout->setContentsMargins( 2, 2, 2, 2 );
@@ -1960,12 +1961,11 @@ void MainWindow::addFeaturesToToolBar()
 								   feature.displayNameActive(),
 								   feature.description(),
 								   feature.shortcut() );
-		btn->setIconSize( QSize( 22, 22 ) );
-		btn->setToolButtonStyle( Qt::ToolButtonTextUnderIcon );
-		btn->setIconSize( QSize( 18, 18 ) );
-		btn->setMinimumSize( 66, 72 );
-		btn->setMaximumWidth( 76 );
-		btn->setFixedHeight( 72 );
+		btn->setToolButtonStyle( Qt::ToolButtonTextBesideIcon );
+		btn->setIconSize( QSize( 15, 15 ) );
+		btn->setMinimumSize( 0, 32 );
+		btn->setMaximumWidth( 160 );
+		btn->setFixedHeight( 32 );
 		connect(btn, &QToolButton::clicked, this, [=, this] () {
 			if( feature.name().compare( QStringLiteral("PowerDown"), Qt::CaseInsensitive ) == 0 )
 			{

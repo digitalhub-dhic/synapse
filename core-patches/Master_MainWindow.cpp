@@ -198,7 +198,7 @@ MainWindow::MainWindow( VeyonMaster &masterCore, QWidget* parent ) :
 	appTitle->setStyleSheet( QStringLiteral("font-size: 13px; font-weight: 700; color: #FAFAFA; letter-spacing: 0.2px; background: transparent;") );
 	auto* appSub = new QLabel( QStringLiteral("One network  •  Every classroom"), titleWidget );
 	appSub->setFixedHeight( 14 );
-	appSub->setStyleSheet( QStringLiteral("font-size: 10px; font-weight: 500; color: #FAFAFA; letter-spacing: 0.2px; background: transparent;") );
+	appSub->setStyleSheet( QStringLiteral("font-size: 10px; font-weight: 500; color: #A1A1AA; letter-spacing: 0.2px; background: transparent;") );
 	titleLayout->addWidget( appTitle );
 	titleLayout->addWidget( appSub );
 
@@ -444,8 +444,8 @@ MainWindow::MainWindow( VeyonMaster &masterCore, QWidget* parent ) :
 		"QToolBar {"
 		"   background-color: #14161B;"
 		"   border-bottom: 1px solid #252830;"
-		"   padding: 8px 14px;"
-		"   spacing: 8px;"
+		"   padding: 7px 14px;"
+		"   spacing: 6px;"
 		"}"
 		"QToolBar QToolButton#qt_toolbar_ext_button {"
 		"   qproperty-visible: false;"
@@ -457,15 +457,15 @@ MainWindow::MainWindow( VeyonMaster &masterCore, QWidget* parent ) :
 		"   background-color: #191B20;"
 		"   border: 1px solid #282C36;"
 		"   border-top-color: #323744;"
-		"   border-radius: 8px;"
+		"   border-radius: 7px;"
 		"   color: #E4E4E7;"
 		"   font-weight: 500;"
-		"   font-size: 10px;"
-		"   padding: 6px 6px;"
-		"   min-width: 68px;"
-		"   max-width: 78px;"
-		"   min-height: 54px;"
-		"   max-height: 56px;"
+		"   font-size: 11px;"
+		"   padding: 0px 10px;"
+		"   min-width: 0px;"
+		"   max-width: 160px;"
+		"   min-height: 32px;"
+		"   max-height: 32px;"
 		"}"
 		"QToolBar#mainToolBar QToolButton:hover, QToolBar#toolBar QToolButton:hover {"
 		"   background-color: #222630;"
@@ -478,7 +478,7 @@ MainWindow::MainWindow( VeyonMaster &masterCore, QWidget* parent ) :
 		"   color: #FFFFFF;"
 		"}"
 		"QToolBar#mainToolBar QToolButton:checked, QToolBar#toolBar QToolButton:checked {"
-		"   background-color: rgba(183, 227, 75, 0.12);"
+		"   background-color: rgba(183, 227, 75, 0.14);"
 		"   border: 1px solid rgba(183, 227, 75, 0.35);"
 		"   color: #B7E34B;"
 		"   font-weight: 600;"
@@ -490,17 +490,17 @@ MainWindow::MainWindow( VeyonMaster &masterCore, QWidget* parent ) :
 		"}"
 				"QToolBar::separator {"
 		"   width: 1px;"
-		"   height: 32px;"
+		"   height: 20px;"
 		"   background-color: #2D313B;"
 		"   border: none;"
-		"   margin: 10px 8px;"
+		"   margin: 6px 6px;"
 		"}"
 		"QToolBar::separator:horizontal {"
 		"   width: 1px;"
-		"   height: 32px;"
+		"   height: 20px;"
 		"   background-color: #2D313B;"
 		"   border: none;"
-		"   margin: 10px 8px;"
+		"   margin: 6px 6px;"
 		"}"
 		"QToolBar::separator:vertical {"
 		"   height: 1px;"
@@ -828,10 +828,11 @@ MainWindow::MainWindow( VeyonMaster &masterCore, QWidget* parent ) :
 	monitoringLayout->setSpacing( 0 );
 
 	auto* subHeader = new QFrame( ui->centralWidget );
-	subHeader->setFixedHeight( 38 );
-	subHeader->setStyleSheet( QStringLiteral("QFrame { background-color: #101114; border-bottom: 1px solid #252830; }") );
+	subHeader->setObjectName( QStringLiteral("monitoringSubHeader") );
+	subHeader->setFixedHeight( 42 );
+	subHeader->setStyleSheet( QStringLiteral("QFrame#monitoringSubHeader { background-color: #101114; border-bottom: 1px solid #252830; }") );
 	auto* subHeaderLayout = new QHBoxLayout( subHeader );
-	subHeaderLayout->setContentsMargins( 12, 0, 12, 0 );
+	subHeaderLayout->setContentsMargins( 14, 4, 14, 4 );
 	subHeaderLayout->setSpacing( 8 );
 
 	auto* dotOnline = new QLabel( QStringLiteral("●"), subHeader );
@@ -843,6 +844,7 @@ MainWindow::MainWindow( VeyonMaster &masterCore, QWidget* parent ) :
 
 	// Quick filter pills: segmented [All | ● Online | Offline]
 	auto* filterSegment = new QFrame( subHeader );
+	filterSegment->setFixedHeight( 26 );
 	filterSegment->setStyleSheet( QStringLiteral("QFrame { background: #191B20; border: 1px solid #252830; border-radius: 6px; }") );
 	auto* filterLayout = new QHBoxLayout( filterSegment );
 	filterLayout->setContentsMargins( 2, 2, 2, 2 );
@@ -903,6 +905,7 @@ MainWindow::MainWindow( VeyonMaster &masterCore, QWidget* parent ) :
 	// Sort selector: Online First | Logged In First | Hostname | IP
 	auto* sortCombo = new QComboBox( subHeader );
 	sortCombo->setObjectName( QStringLiteral("sortCombo") );
+	sortCombo->setFixedHeight( 26 );
 	sortCombo->setStyleSheet( QStringLiteral(
 		"QComboBox { background: #191B20; border: 1px solid #252830; border-radius: 6px; color: #FAFAFA; padding: 2px 8px; font-size: 10px; font-weight: 600; min-height: 20px; }"
 		"QComboBox:hover { border-color: #343944; color: #FAFAFA; }"
@@ -929,6 +932,7 @@ MainWindow::MainWindow( VeyonMaster &masterCore, QWidget* parent ) :
 
 	// View density modes: Compact (180px), Balanced (240px), Live (320px)
 	auto* densityWidget = new QFrame( subHeader );
+	densityWidget->setFixedHeight( 26 );
 	densityWidget->setStyleSheet( QStringLiteral("QFrame { background: #191B20; border: 1px solid #252830; border-radius: 6px; }") );
 	auto* densityLayout = new QHBoxLayout( densityWidget );
 	densityLayout->setContentsMargins( 2, 2, 2, 2 );
@@ -1957,12 +1961,11 @@ void MainWindow::addFeaturesToToolBar()
 								   feature.displayNameActive(),
 								   feature.description(),
 								   feature.shortcut() );
-		btn->setIconSize( QSize( 22, 22 ) );
-		btn->setToolButtonStyle( Qt::ToolButtonTextUnderIcon );
-		btn->setIconSize( QSize( 18, 18 ) );
-		btn->setMinimumSize( 66, 72 );
-		btn->setMaximumWidth( 76 );
-		btn->setFixedHeight( 72 );
+		btn->setToolButtonStyle( Qt::ToolButtonTextBesideIcon );
+		btn->setIconSize( QSize( 15, 15 ) );
+		btn->setMinimumSize( 0, 32 );
+		btn->setMaximumWidth( 160 );
+		btn->setFixedHeight( 32 );
 		connect(btn, &QToolButton::clicked, this, [=, this] () {
 			if( feature.name().compare( QStringLiteral("PowerDown"), Qt::CaseInsensitive ) == 0 )
 			{
