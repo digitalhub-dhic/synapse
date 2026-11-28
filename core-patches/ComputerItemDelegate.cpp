@@ -213,7 +213,7 @@ void ComputerItemDelegate::paint(QPainter* painter, const QStyleOptionViewItem& 
 	else
 	{
 		// Offline Empty State - Dark Sleek Container (NO giant monitor icon)
-		painter->fillRect(previewRect, QColor(23, 25, 26));
+		painter->fillRect(previewRect, QColor(20, 22, 26));
 
 		// Subtle grid accent line inside preview
 		painter->setPen(QPen(QColor(37, 40, 48), 1));
@@ -222,23 +222,23 @@ void ComputerItemDelegate::paint(QPainter* painter, const QStyleOptionViewItem& 
 		const int cx = previewRect.center().x();
 		const int cy = previewRect.center().y() - 14;
 
-		// Modern sleek monitor glyph
-		painter->setPen(QPen(QColor(113, 113, 122), 1.4));
-		painter->setBrush(QColor(25, 27, 32));
+		// Modern sleek monitor glyph with clean contrast
+		painter->setPen(QPen(QColor(161, 161, 170), 1.5));
+		painter->setBrush(QColor(28, 30, 36));
 		painter->drawRoundedRect(QRect(cx - 16, cy - 10, 32, 20), 2, 2);
 		// Stand & Base
 		painter->drawLine(cx, cy + 10, cx, cy + 14);
 		painter->drawLine(cx - 8, cy + 14, cx + 8, cy + 14);
 
-		// Status text - High contrast and readable
-		painter->setFont(QFont(QStringLiteral("Segoe UI"), 8, QFont::DemiBold));
-		painter->setPen(QColor(212, 212, 216));
+		// Status text - High contrast and crystal clear readability
+		painter->setFont(QFont(QStringLiteral("Segoe UI"), 9, QFont::DemiBold));
+		painter->setPen(QColor(241, 245, 249));
 		painter->drawText(QRect(previewRect.left(), cy + 18, previewRect.width(), 16),
 						  Qt::AlignCenter, tr("Computer Offline"));
 
-		painter->setFont(QFont(QStringLiteral("Segoe UI"), 7));
-		painter->setPen(QColor(140, 144, 153));
-		painter->drawText(QRect(previewRect.left(), cy + 34, previewRect.width(), 14),
+		painter->setFont(QFont(QStringLiteral("Segoe UI"), 8));
+		painter->setPen(QColor(161, 161, 170));
+		painter->drawText(QRect(previewRect.left(), cy + 35, previewRect.width(), 14),
 						  Qt::AlignCenter, tr("Standby • Ready for WOL"));
 	}
 
