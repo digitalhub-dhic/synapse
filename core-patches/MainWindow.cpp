@@ -922,9 +922,10 @@ MainWindow::MainWindow( VeyonMaster &masterCore, QWidget* parent ) :
 	subHeaderLayout->addSpacing( 8 );
 
 	// View density modes: Compact (180px), Balanced (240px), Live (320px)
-	auto* densityWidget = new QWidget( subHeader );
+	auto* densityWidget = new QFrame( subHeader );
+	densityWidget->setStyleSheet( QStringLiteral("QFrame { background: #191B20; border: 1px solid #252830; border-radius: 6px; }") );
 	auto* densityLayout = new QHBoxLayout( densityWidget );
-	densityLayout->setContentsMargins( 0, 0, 0, 0 );
+	densityLayout->setContentsMargins( 2, 2, 2, 2 );
 	densityLayout->setSpacing( 2 );
 
 	auto* btnCompact = new QPushButton( tr("Compact"), densityWidget );
@@ -932,9 +933,9 @@ MainWindow::MainWindow( VeyonMaster &masterCore, QWidget* parent ) :
 	auto* btnLive = new QPushButton( tr("Live"), densityWidget );
 
 	const QString densityBtnStyle = QStringLiteral(
-		"QPushButton { background: #191B20; border: 1px solid #20232B; border-radius: 6px; padding: 2px 8px; color: #D4D4D8; font-size: 10px; font-weight: 600; }"
-		"QPushButton:hover { background: #191B20; color: #FAFAFA; border-color: #20232B; }"
-		"QPushButton:checked { background: #FAFAFA; color: #191B20; font-weight: 700; border-color: #20232B; }"
+		"QPushButton { background: transparent; border: none; border-radius: 4px; padding: 2px 9px; color: #A1A1AA; font-size: 10px; font-weight: 600; }"
+		"QPushButton:hover { background: #252830; color: #F4F4F5; }"
+		"QPushButton:checked { background: rgba(183, 227, 75, 0.14); color: #B7E34B; font-weight: 600; }"
 	);
 	for (auto* b : { btnCompact, btnBalanced, btnLive })
 	{
