@@ -844,6 +844,7 @@ MainWindow::MainWindow( VeyonMaster &masterCore, QWidget* parent ) :
 
 	// Quick filter pills: segmented [All | ● Online | Offline]
 	auto* filterSegment = new QFrame( subHeader );
+	filterSegment->setFixedHeight( 26 );
 	filterSegment->setStyleSheet( QStringLiteral("QFrame { background: #191B20; border: 1px solid #252830; border-radius: 6px; }") );
 	auto* filterLayout = new QHBoxLayout( filterSegment );
 	filterLayout->setContentsMargins( 2, 2, 2, 2 );
@@ -904,6 +905,7 @@ MainWindow::MainWindow( VeyonMaster &masterCore, QWidget* parent ) :
 	// Sort selector: Online First | Logged In First | Hostname | IP
 	auto* sortCombo = new QComboBox( subHeader );
 	sortCombo->setObjectName( QStringLiteral("sortCombo") );
+	sortCombo->setFixedHeight( 26 );
 	sortCombo->setStyleSheet( QStringLiteral(
 		"QComboBox { background: #191B20; border: 1px solid #252830; border-radius: 6px; color: #FAFAFA; padding: 2px 8px; font-size: 10px; font-weight: 600; min-height: 20px; }"
 		"QComboBox:hover { border-color: #343944; color: #FAFAFA; }"
