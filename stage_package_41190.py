@@ -9,9 +9,14 @@ base_build = os.path.join(codex_dir, r"work\DigiAgent-build-output")
 src_pkg = os.path.join(base_build, "digiagent-win64-4.11.4.9")
 dst_pkg = os.path.join(base_build, "digiagent-win64-4.11.9.0")
 
+def handle_remove_readonly(func, path, exc):
+    import stat
+    os.chmod(path, stat.S_IWRITE)
+    func(path)
+
 print("[1] Staging directory:", dst_pkg)
 if os.path.exists(dst_pkg):
-    shutil.rmtree(dst_pkg)
+    shutil.rmtree(dst_pkg, onexc=handle_remove_readonly)
 
 # Copy base package
 shutil.copytree(src_pkg, dst_pkg)

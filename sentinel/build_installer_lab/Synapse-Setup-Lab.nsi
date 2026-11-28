@@ -5,6 +5,7 @@ SetCompressor /SOLID lzma
 
 Name "Synapse Lab Setup (Domain Computers)"
 OutFile "dist\Synapse-Setup-Lab.exe"
+Icon "synapse-command.ico"
 InstallDir "$PROGRAMFILES64\DigiAgent"
 ShowInstDetails show
 
@@ -39,6 +40,8 @@ Section "MainSection" SEC01
     WriteRegDWORD HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" "HideFastUserSwitching" 0
     WriteRegDWORD HKLM "SOFTWARE\Policies\Microsoft\Windows\System" "HideFastUserSwitching" 0
 
+    IfSilent skip_msgbox
     MessageBox MB_OK|MB_ICONINFORMATION "Synapse Lab Client Installed Successfully!$\r$\n$\r$\n• Configured for Domain Authentication ('Other user' active)$\r$\n• Classroom Authentication Keys Deployed$\r$\n• Core Monitoring Service Active$\r$\n• Zero BYOD Restrictions"
+skip_msgbox:
 
 SectionEnd

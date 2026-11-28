@@ -72,4 +72,42 @@ if not os.path.exists(lab_setup):
     sys.exit(1)
 print(f"[OK] Generated {lab_setup} ({os.path.getsize(lab_setup):,} bytes)")
 
-print("\n🎉 ALL THREE INSTALLERS PACKED AND VERIFIED SUCCESSFULLY!")
+print("\n=== [4/4] Staging Installers & Payloads to Network Shares ===")
+share_base = r"\\192.168.1.50\public\Synapse"
+if os.path.exists(share_base):
+    win_dir = os.path.join(share_base, "1-Windows")
+    byod_target = os.path.join(win_dir, "BYOD")
+    lab_target = os.path.join(win_dir, "Lab")
+    os.makedirs(byod_target, exist_ok=True)
+    os.makedirs(lab_target, exist_ok=True)
+
+    # Core setup
+    shutil.copy2(core_setup, os.path.join(win_dir, "Synapse-4.11.9.0-win64-setup.exe"))
+    shutil.copy2(core_setup, os.path.join(win_dir, "Synapse-Setup.exe"))
+    print("[OK] Deployed Core setup to 1-Windows")
+
+    # BYOD
+    shutil.copy2(byod_setup, os.path.join(byod_target, "Synapse-Setup-BYOD.exe"))
+    shutil.copy2(byod_setup, os.path.join(byod_target, "Synapse-Setup-BYOD-v4.11.9.0.exe"))
+    print("[OK] Deployed BYOD setup to 1-Windows/BYOD")
+
+    # Lab
+    shutil.copy2(lab_setup, os.path.join(lab_target, "Synapse-Setup-Lab.exe"))
+    shutil.copy2(lab_setup, os.path.join(lab_target, "Synapse-Setup-Lab-v4.11.9.0.exe"))
+    print("[OK] Deployed Lab setup to 1-Windows/Lab")
+
+    # 4-Auto-Updater payload
+    updater_payload = os.path.join(share_base, r"4-Auto-Updater\Payload")
+    if os.path.exists(updater_payload):
+        shutil.copy2(fresh_core, os.path.join(updater_payload, "DigiAgentCore.dll"))
+        up_plugins = os.path.join(updater_payload, "plugins")
+        os.makedirs(up_plugins, exist_ok=True)
+        for p in ["screenlock.dll", "remoteaccess.dll", "windows-platform.dll"]:
+            src_p = os.path.join(STAGE_DIR, "plugins", p)
+            if os.path.exists(src_p):
+                shutil.copy2(src_p, os.path.join(up_plugins, p))
+        print("[OK] Deployed DigiAgentCore & plugins to 4-Auto-Updater/Payload")
+else:
+    print(f"[WARN] Share path {share_base} not found; skipping network share copy.")
+
+print("\n🎉 ALL THREE INSTALLERS PACKED AND DEPLOYED SUCCESSFULLY!")
