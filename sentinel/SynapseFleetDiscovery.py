@@ -260,7 +260,11 @@ def run_subnet_sweep():
         if hostname:
             sync_device(hostname, ip, mac)
         else:
-            fallback_name = f"BYOD-{ip.split('.')[-1]}"
+            # Use subnet-aware prefix: BYOD- for Student Wi-Fi, LAB- for LAN
+            if ip.startswith("192.168.30.") or ip.startswith("100."):
+                fallback_name = f"BYOD-{ip.split('.')[-1]}"
+            else:
+                fallback_name = f"LAB-{ip.split('.')[-1]}"
             sync_device(fallback_name, ip, mac)
 
 
