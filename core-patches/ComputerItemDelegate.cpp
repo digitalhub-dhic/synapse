@@ -288,10 +288,10 @@ void ComputerItemDelegate::paint(QPainter* painter, const QStyleOptionViewItem& 
 	// 4. Badges on top of preview
 	if (isOnline)
 	{
-		// Pill badge in top right: "● LIVE" (strictly semantic green #35C982)
+		// Pill badge in top right: "● LIVE" (#35C982 on #153528)
 		const QRect badgeRect(previewRect.right() - 48, previewRect.top() + 5, 44, 16);
-		painter->setBrush(QColor(22, 51, 35, 240));
-		painter->setPen(QPen(QColor(53, 201, 130, 180), 1));
+		painter->setBrush(QColor(21, 53, 40, 240));
+		painter->setPen(QPen(QColor(53, 201, 130, 140), 1));
 		painter->drawRoundedRect(badgeRect, 8, 8);
 
 		painter->setBrush(QColor(53, 201, 130));
@@ -299,37 +299,37 @@ void ComputerItemDelegate::paint(QPainter* painter, const QStyleOptionViewItem& 
 		painter->drawEllipse(QPoint(badgeRect.left() + 7, badgeRect.center().y()), 3, 3);
 
 		painter->setPen(QColor(53, 201, 130));
-		painter->setFont(QFont(QStringLiteral("Segoe UI"), 6, QFont::Bold));
+		painter->setFont(QFont(QStringLiteral("Segoe UI"), 6, QFont::DemiBold));
 		painter->drawText(QRect(badgeRect.left() + 11, badgeRect.top(), badgeRect.width() - 12, badgeRect.height()),
 						  Qt::AlignCenter, QStringLiteral("LIVE"));
 	}
 	else if (isConnecting)
 	{
-		// Pill badge in top right: "SYNCING"
+		// Pill badge in top right: "SYNCING" (#B7E34B on #343A22)
 		const QRect badgeRect(previewRect.right() - 72, previewRect.top() + 5, 68, 16);
-		painter->setBrush(QColor(56, 43, 19, 240)); // Dark amber bg
-		painter->setPen(QPen(QColor(224, 163, 74, 180), 1)); // Amber border
+		painter->setBrush(QColor(52, 58, 34, 240));
+		painter->setPen(QPen(QColor(183, 227, 75, 130), 1));
 		painter->drawRoundedRect(badgeRect, 8, 8);
 
 		painter->setBrush(QColor(183, 227, 75));
 		painter->setPen(Qt::NoPen);
 		painter->drawEllipse(QPoint(badgeRect.left() + 7, badgeRect.center().y()), 3, 3);
 
-		painter->setPen(QColor(224, 163, 74));
-		painter->setFont(QFont(QStringLiteral("Segoe UI"), 6, QFont::Bold));
+		painter->setPen(QColor(183, 227, 75));
+		painter->setFont(QFont(QStringLiteral("Segoe UI"), 6, QFont::DemiBold));
 		painter->drawText(QRect(badgeRect.left() + 11, badgeRect.top(), badgeRect.width() - 12, badgeRect.height()),
 						  Qt::AlignCenter, QStringLiteral("SYNCING"));
 	}
 	else
 	{
-		// Pill badge in top right: "OFFLINE"
+		// Pill badge in top right: "OFFLINE" (#A1A1AA on #292B31)
 		const QRect badgeRect(previewRect.right() - 58, previewRect.top() + 5, 54, 16);
-		painter->setBrush(QColor(37, 40, 48, 245)); // #252830
-		painter->setPen(QPen(QColor(63, 67, 78), 1));
-		painter->drawRoundedRect(badgeRect, 4, 4);
+		painter->setBrush(QColor(41, 43, 49, 240));
+		painter->setPen(QPen(QColor(58, 62, 72), 1));
+		painter->drawRoundedRect(badgeRect, 8, 8);
 
-		painter->setPen(QColor(226, 232, 240)); // #E2E8F0 high-contrast readable
-		painter->setFont(QFont(QStringLiteral("Segoe UI"), 7, QFont::Bold));
+		painter->setPen(QColor(161, 161, 170));
+		painter->setFont(QFont(QStringLiteral("Segoe UI"), 6, QFont::DemiBold));
 		painter->drawText(badgeRect, Qt::AlignCenter, QStringLiteral("OFFLINE"));
 	}
 
@@ -340,9 +340,9 @@ void ComputerItemDelegate::paint(QPainter* painter, const QStyleOptionViewItem& 
 	const int infoTop = previewRect.bottom() + 4;
 	const QRect infoRect(rect.left() + 8, infoTop, rect.width() - 16, rect.bottom() - infoTop);
 
-	// Computer Name
-	painter->setFont(QFont(QStringLiteral("Segoe UI"), 9, QFont::Bold));
-	painter->setPen(QColor(250, 250, 250));
+	// Computer Name (DemiBold for cleaner enterprise hierarchy)
+	painter->setFont(QFont(QStringLiteral("Segoe UI"), 9, QFont::DemiBold));
+	painter->setPen(isOnline ? QColor(250, 250, 250) : QColor(212, 212, 216));
 	QFontMetrics fmName(painter->font());
 	const QString elidedName = fmName.elidedText(compName, Qt::ElideRight, infoRect.width());
 	painter->drawText(QRect(infoRect.left(), infoRect.top(), infoRect.width(), 16), Qt::AlignLeft | Qt::AlignVCenter, elidedName);
