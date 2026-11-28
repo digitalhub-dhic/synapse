@@ -435,6 +435,41 @@ QWidget* ComputerInspectorPanel::createGlobalTabWidget()
 	addActionRow( QStringLiteral( "⚡" ), tr( "Power On Fleet (WOL)" ), QStringLiteral( "poweron" ) );
 
 	layout->addWidget( actionsCard );
+
+	// D. "Network & Fleet Health" Card (eliminates empty space in Global Inspector)
+	auto* healthCard = new QFrame( container );
+	healthCard->setStyleSheet( QStringLiteral(
+		"QFrame {"
+		"   background-color: #191B20; border: 1px solid #252830; border-radius: 6px; padding: 6px;"
+		"}"
+	) );
+	auto* healthLayout = new QVBoxLayout( healthCard );
+	healthLayout->setContentsMargins( 10, 8, 10, 8 );
+	healthLayout->setSpacing( 6 );
+
+	auto* healthTitle = new QLabel( tr( "NETWORK & FLEET HEALTH" ), healthCard );
+	healthTitle->setStyleSheet( QStringLiteral( "font-size: 10px; font-weight: 700; color: #B4B8C2; border: none; letter-spacing: 0.5px;" ) );
+	healthLayout->addWidget( healthTitle );
+
+	auto addHealthRow = [&]( const QString& k, const QString& v, const QString& color ) {
+		auto* r = new QHBoxLayout();
+		r->setContentsMargins( 0, 1, 0, 1 );
+		auto* kl = new QLabel( k, healthCard );
+		kl->setStyleSheet( QStringLiteral( "font-size: 11px; color: #B4B8C2; border: none;" ) );
+		auto* vl = new QLabel( v, healthCard );
+		vl->setStyleSheet( QStringLiteral( "font-size: 11px; font-weight: 600; color: %1; border: none;" ).arg( color ) );
+		r->addWidget( kl );
+		r->addStretch( 1 );
+		r->addWidget( vl );
+		healthLayout->addLayout( r );
+	};
+
+	addHealthRow( tr( "Discovery" ), tr( "LAN + Tailscale" ), QStringLiteral( "#35C982" ) );
+	addHealthRow( tr( "Transport" ), QStringLiteral( "VNC :11100" ), QStringLiteral( "#F4F4F5" ) );
+	addHealthRow( tr( "Auth Mode" ), tr( "Key File (Method 1)" ), QStringLiteral( "#B7E34B" ) );
+	addHealthRow( tr( "Auto-Sync" ), tr( "Git + SMB Active" ), QStringLiteral( "#E0A34A" ) );
+
+	layout->addWidget( healthCard );
 	layout->addStretch( 1 );
 
 	scrollArea->setWidget( container );
