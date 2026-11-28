@@ -842,12 +842,12 @@ MainWindow::MainWindow( VeyonMaster &masterCore, QWidget* parent ) :
 
 	// Quick filter pills: [All] [Online] [Offline]
 	const QString pillBase = QStringLiteral(
-		"QPushButton { background: #191B20; border: 1px solid #20232B; border-radius: 6px;"
-		" color: #D4D4D8; font-size: 10px; font-weight: 600; padding: 2px 10px; min-height: 20px; }"
-		"QPushButton:checked { background: #FAFAFA; color: #191B20; font-weight: 700; border-color: #20232B; }"
-		"QPushButton:hover { border-color: #20232B; color: #FAFAFA; }");
+		"QPushButton { background: transparent; border: 1px solid transparent; border-radius: 6px;"
+		" color: #A1A1AA; font-size: 10px; font-weight: 600; padding: 2px 10px; min-height: 20px; }"
+		"QPushButton:hover { background: #1F2229; border-color: #252830; color: #F4F4F5; }"
+		"QPushButton:checked { background: rgba(183, 227, 75, 0.14); color: #B7E34B; font-weight: 600; border: 1px solid rgba(183, 227, 75, 0.30); }");
 	auto* pillAll     = new QPushButton( tr("All"),     subHeader );
-	auto* pillOnline  = new QPushButton( tr("Online"),  subHeader );
+	auto* pillOnline  = new QPushButton( tr("● Online"),  subHeader );
 	auto* pillOffline = new QPushButton( tr("Offline"), subHeader );
 	for( auto* p : { pillAll, pillOnline, pillOffline } )
 	{
