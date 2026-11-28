@@ -198,7 +198,7 @@ MainWindow::MainWindow( VeyonMaster &masterCore, QWidget* parent ) :
 	appTitle->setStyleSheet( QStringLiteral("font-size: 13px; font-weight: 700; color: #FAFAFA; letter-spacing: 0.2px; background: transparent;") );
 	auto* appSub = new QLabel( QStringLiteral("One network  •  Every classroom"), titleWidget );
 	appSub->setFixedHeight( 14 );
-	appSub->setStyleSheet( QStringLiteral("font-size: 10px; font-weight: 500; color: #FAFAFA; letter-spacing: 0.2px; background: transparent;") );
+	appSub->setStyleSheet( QStringLiteral("font-size: 10px; font-weight: 500; color: #A1A1AA; letter-spacing: 0.2px; background: transparent;") );
 	titleLayout->addWidget( appTitle );
 	titleLayout->addWidget( appSub );
 
