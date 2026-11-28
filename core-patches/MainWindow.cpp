@@ -416,7 +416,7 @@ MainWindow::MainWindow( VeyonMaster &masterCore, QWidget* parent ) :
 		"QDialog QPushButton:hover {"
 		"   background-color: #20232B;"
 		"   border-color: #343844;"
-		"   color: #191B20;"
+		"   color: #FAFAFA;"
 		"}"
 		"QDialog QPushButton:default {"
 		"   background-color: #FAFAFA;"
