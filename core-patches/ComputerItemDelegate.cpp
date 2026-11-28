@@ -60,20 +60,37 @@ void ComputerItemDelegate::paint(QPainter* painter, const QStyleOptionViewItem& 
 	const bool isSelected = (option.state & QStyle::State_Selected) != 0;
 	const bool isHovered = (option.state & QStyle::State_MouseOver) != 0;
 
-	// 1. Draw Card Surface & Border
+	// 2. Data Retrieval (needed before card surface so offline/connecting states get distinct hierarchy)
+	const auto controlInterface = index.model()->data(index, ComputerControlListModel::ControlInterfaceRole).value<ComputerControlInterface::Pointer>();
+	const bool isOnline = controlInterface && (controlInterface->state() == ComputerControlInterface::State::Connected);
+	const bool isConnecting = controlInterface && (controlInterface->state() == ComputerControlInterface::State::Connecting);
+
+	// 1. Draw Card Surface & Border (surface hierarchy over harsh outlines)
 	QPainterPath cardPath;
-	cardPath.addRoundedRect(rect, 6, 6);
+	cardPath.addRoundedRect(rect, 8, 8);
 
 	if (isSelected)
 	{
-		painter->fillPath(cardPath, QColor(25, 27, 32)); // #191B20 surface
-		painter->setPen(QPen(QColor(183, 227, 75), 1.5)); // #B7E34B active focus border
+		painter->fillPath(cardPath, QColor(34, 39, 27)); // #22271B subtle lime-tinted surface
+		painter->setPen(QPen(QColor(101, 123, 53), 1.2)); // #657B35 restrained accent border
 		painter->drawPath(cardPath);
 	}
 	else if (isHovered)
 	{
-		painter->fillPath(cardPath, QColor(32, 35, 42)); // elevated hover
-		painter->setPen(QPen(QColor(55, 58, 68), 1.0));
+		painter->fillPath(cardPath, QColor(31, 34, 41)); // #1F2229 elevated hover
+		painter->setPen(QPen(QColor(52, 57, 68), 1.0)); // #343944
+		painter->drawPath(cardPath);
+	}
+	else if (isConnecting)
+	{
+		painter->fillPath(cardPath, QColor(25, 27, 32)); // #191B20
+		painter->setPen(QPen(QColor(52, 52, 42), 1.0)); // #34342A
+		painter->drawPath(cardPath);
+	}
+	else if (!isOnline)
+	{
+		painter->fillPath(cardPath, QColor(23, 25, 29)); // #17191D quieter offline surface
+		painter->setPen(QPen(QColor(37, 40, 48), 1.0)); // #252830
 		painter->drawPath(cardPath);
 	}
 	else
@@ -82,11 +99,6 @@ void ComputerItemDelegate::paint(QPainter* painter, const QStyleOptionViewItem& 
 		painter->setPen(QPen(QColor(37, 40, 48), 1.0)); // #252830 subtle border
 		painter->drawPath(cardPath);
 	}
-
-	// 2. Data Retrieval
-	const auto controlInterface = index.model()->data(index, ComputerControlListModel::ControlInterfaceRole).value<ComputerControlInterface::Pointer>();
-	const bool isOnline = controlInterface && (controlInterface->state() == ComputerControlInterface::State::Connected);
-	const bool isConnecting = controlInterface && (controlInterface->state() == ComputerControlInterface::State::Connecting);
 
 	QString compName = index.data(Qt::DisplayRole).toString();
 	if (compName.isEmpty() && controlInterface)
