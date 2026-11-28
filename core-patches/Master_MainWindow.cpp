@@ -444,8 +444,8 @@ MainWindow::MainWindow( VeyonMaster &masterCore, QWidget* parent ) :
 		"QToolBar {"
 		"   background-color: #14161B;"
 		"   border-bottom: 1px solid #252830;"
-		"   padding: 6px 10px;"
-		"   spacing: 6px;"
+		"   padding: 8px 14px;"
+		"   spacing: 8px;"
 		"}"
 		"QToolBar QToolButton#qt_toolbar_ext_button {"
 		"   qproperty-visible: false;"
@@ -455,51 +455,52 @@ MainWindow::MainWindow( VeyonMaster &masterCore, QWidget* parent ) :
 		"}"
 		"QToolBar#mainToolBar QToolButton, QToolBar#toolBar QToolButton {"
 		"   background-color: #191B20;"
-		"   border: 1px solid #252830;"
-		"   border-radius: 6px;"
-		"   color: #D4D4D8;"
+		"   border: 1px solid #282C36;"
+		"   border-top-color: #323744;"
+		"   border-radius: 8px;"
+		"   color: #E4E4E7;"
 		"   font-weight: 500;"
 		"   font-size: 10px;"
-		"   padding: 4px 4px 4px 4px;"
-		"   min-width: 64px;"
-		"   max-width: 74px;"
+		"   padding: 6px 6px;"
+		"   min-width: 68px;"
+		"   max-width: 78px;"
 		"   min-height: 54px;"
-		"   max-height: 58px;"
+		"   max-height: 56px;"
 		"}"
 		"QToolBar#mainToolBar QToolButton:hover, QToolBar#toolBar QToolButton:hover {"
-		"   background-color: #232730;"
-		"   border: 1px solid #343944;"
-		"   color: #FAFAFA;"
+		"   background-color: #222630;"
+		"   border: 1px solid #3B4150;"
+		"   color: #FFFFFF;"
 		"}"
 		"QToolBar#mainToolBar QToolButton:pressed, QToolBar#toolBar QToolButton:pressed {"
 		"   background-color: #252830;"
-		"   border: 1px solid #343844;"
+		"   border: 1px solid #4A5B28;"
 		"   color: #FFFFFF;"
 		"}"
 		"QToolBar#mainToolBar QToolButton:checked, QToolBar#toolBar QToolButton:checked {"
-		"   background-color: #1E2417;"
-		"   border: 1px solid #4A5B28;"
+		"   background-color: rgba(183, 227, 75, 0.12);"
+		"   border: 1px solid rgba(183, 227, 75, 0.35);"
 		"   color: #B7E34B;"
 		"   font-weight: 600;"
 		"}"
 		"QToolBar#mainToolBar QToolButton:disabled, QToolBar#toolBar QToolButton:disabled {"
-		"   background-color: #101114;"
-		"   border-color: #252830;"
-		"   color: #D4D4D8;"
+		"   background-color: #14161B;"
+		"   border-color: #20232B;"
+		"   color: #71717A;"
 		"}"
 				"QToolBar::separator {"
 		"   width: 1px;"
-		"   height: 28px;"
-		"   background-color: #252830;"
+		"   height: 32px;"
+		"   background-color: #2D313B;"
 		"   border: none;"
-		"   margin: 6px 4px;"
+		"   margin: 10px 8px;"
 		"}"
 		"QToolBar::separator:horizontal {"
 		"   width: 1px;"
-		"   height: 28px;"
-		"   background-color: #252830;"
+		"   height: 32px;"
+		"   background-color: #2D313B;"
 		"   border: none;"
-		"   margin: 6px 4px;"
+		"   margin: 10px 8px;"
 		"}"
 		"QToolBar::separator:vertical {"
 		"   height: 1px;"
@@ -840,21 +841,28 @@ MainWindow::MainWindow( VeyonMaster &masterCore, QWidget* parent ) :
 	auto* countBadge = new QLabel( subHeader );
 	countBadge->setStyleSheet( QStringLiteral("font-weight: 400; font-size: 11px; color: #D4D4D8;") );
 
-	// Quick filter pills: [All] [Online] [Offline]
+	// Quick filter pills: segmented [All | ● Online | Offline]
+	auto* filterSegment = new QFrame( subHeader );
+	filterSegment->setStyleSheet( QStringLiteral("QFrame { background: #191B20; border: 1px solid #252830; border-radius: 6px; }") );
+	auto* filterLayout = new QHBoxLayout( filterSegment );
+	filterLayout->setContentsMargins( 2, 2, 2, 2 );
+	filterLayout->setSpacing( 2 );
+
 	const QString pillBase = QStringLiteral(
-		"QPushButton { background: transparent; border: 1px solid transparent; border-radius: 6px;"
+		"QPushButton { background: transparent; border: none; border-radius: 4px;"
 		" color: #A1A1AA; font-size: 10px; font-weight: 600; padding: 2px 10px; min-height: 20px; }"
-		"QPushButton:hover { background: #1F2229; border-color: #252830; color: #F4F4F5; }"
-		"QPushButton:checked { background: rgba(183, 227, 75, 0.14); color: #B7E34B; font-weight: 600; border: 1px solid rgba(183, 227, 75, 0.30); }");
-	auto* pillAll     = new QPushButton( tr("All"),     subHeader );
-	auto* pillOnline  = new QPushButton( tr("● Online"),  subHeader );
-	auto* pillOffline = new QPushButton( tr("Offline"), subHeader );
+		"QPushButton:hover { background: #252830; color: #F4F4F5; }"
+		"QPushButton:checked { background: rgba(183, 227, 75, 0.14); color: #B7E34B; font-weight: 600; }");
+	auto* pillAll     = new QPushButton( tr("All"),       filterSegment );
+	auto* pillOnline  = new QPushButton( tr("● Online"),  filterSegment );
+	auto* pillOffline = new QPushButton( tr("Offline"),   filterSegment );
 	for( auto* p : { pillAll, pillOnline, pillOffline } )
 	{
 		p->setCheckable( true );
 		p->setStyleSheet( pillBase );
 		p->setCursor( Qt::PointingHandCursor );
 		p->setFixedHeight( 22 );
+		filterLayout->addWidget( p );
 	}
 	pillAll->setChecked( true );
 	// Wire filter pills to monitoring widget filter
@@ -889,9 +897,7 @@ MainWindow::MainWindow( VeyonMaster &masterCore, QWidget* parent ) :
 	subHeaderLayout->addWidget( locationTitle );
 	subHeaderLayout->addWidget( countBadge );
 	subHeaderLayout->addStretch();
-	subHeaderLayout->addWidget( pillAll );
-	subHeaderLayout->addWidget( pillOnline );
-	subHeaderLayout->addWidget( pillOffline );
+	subHeaderLayout->addWidget( filterSegment );
 	subHeaderLayout->addSpacing( 6 );
 
 	// Sort selector: Online First | Logged In First | Hostname | IP
