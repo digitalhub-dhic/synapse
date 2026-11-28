@@ -264,7 +264,7 @@ void LockWidget::paintEvent( QPaintEvent* event )
 		}
 		else
 		{
-			p.fillRect( rect(), QColor( 5, 7, 10 ) );
+			p.fillRect( rect(), QColor( 0x10, 0x11, 0x14 ) );
 		}
 
 		{
@@ -273,22 +273,22 @@ void LockWidget::paintEvent( QPaintEvent* event )
 			QRect cardRect( (width() - cardW) / 2, (height() - cardH) / 2, cardW, cardH );
 
 			p.setRenderHint( QPainter::Antialiasing, true );
-			p.setBrush( QColor( 13, 17, 23, 235 ) );
-			p.setPen( QPen( QColor( 46, 160, 67, 190 ), 2 ) );
-			p.drawRoundedRect( cardRect, 20, 20 );
+			p.setBrush( QColor( 0x19, 0x1B, 0x20, 245 ) );
+			p.setPen( QPen( QColor( 0x25, 0x28, 0x30 ), 1.5 ) );
+			p.drawRoundedRect( cardRect, 7, 7 );
 
 			// Title badge
 			QRect badgeRect( cardRect.x() + (cardW - 220) / 2, cardRect.y() + 24, 220, 32 );
-			p.setBrush( QColor( 35, 134, 54, 70 ) );
-			p.setPen( QPen( QColor( 46, 160, 67, 140 ), 1 ) );
-			p.drawRoundedRect( badgeRect, 16, 16 );
-			p.setPen( QColor( 46, 160, 67 ) );
+			p.setBrush( QColor( 0x1E, 0x24, 0x17 ) );
+			p.setPen( QPen( QColor( 0x4A, 0x5B, 0x28 ), 1 ) );
+			p.drawRoundedRect( badgeRect, 6, 6 );
+			p.setPen( QColor( 0xB7, 0xE3, 0x4B ) );
 			p.setFont( QFont( p.font().family(), 11, QFont::Bold ) );
 			p.drawText( badgeRect, Qt::AlignCenter, m_labTitle.toUpper() );
 
 			// Message
 			QRect msgRect( cardRect.x() + 30, cardRect.y() + 68, cardW - 60, m_hasTimer ? 120 : 160 );
-			p.setPen( Qt::white );
+			p.setPen( QColor( 0xF4, 0xF4, 0xF5 ) );
 			p.setFont( QFont( p.font().family(), 24, QFont::DemiBold ) );
 			p.drawText( msgRect, Qt::AlignCenter | Qt::TextWordWrap, m_message );
 
@@ -302,18 +302,18 @@ void LockWidget::paintEvent( QPaintEvent* event )
 					.arg( secs, 2, 10, QLatin1Char('0') );
 
 				QRect timerBox( cardRect.x() + (cardW - 320) / 2, cardRect.y() + 200, 320, 50 );
-				p.setBrush( QColor( 22, 27, 34, 240 ) );
-				p.setPen( QPen( QColor( 59, 130, 246, 200 ), 1.5 ) );
-				p.drawRoundedRect( timerBox, 14, 14 );
+				p.setBrush( QColor( 0x1E, 0x24, 0x17, 240 ) );
+				p.setPen( QPen( QColor( 0x4A, 0x5B, 0x28 ), 1.5 ) );
+				p.drawRoundedRect( timerBox, 6, 6 );
 
-				p.setPen( QColor( 96, 165, 250 ) );
+				p.setPen( QColor( 0xB7, 0xE3, 0x4B ) );
 				p.setFont( QFont( p.font().family(), 15, QFont::Bold ) );
 				p.drawText( timerBox, Qt::AlignCenter, timerStr );
 			}
 
 			// Subtitle footer
 			QRect subRect( cardRect.x() + 30, cardRect.bottom() - 42, cardW - 60, 24 );
-			p.setPen( QColor( 139, 148, 158 ) );
+			p.setPen( QColor( 0xA1, 0xA1, 0xAA ) );
 			p.setFont( QFont( p.font().family(), 11, QFont::Normal ) );
 			p.drawText( subRect, Qt::AlignCenter, m_hasTimer ?
 				tr("⏱️ Timed Focus Session in progress • Screen will auto-unlock at 00:00") :
