@@ -1,6 +1,6 @@
 {
     "latest_version": "4.11.9.0",
-    "release_date": "2026-11-26",
+    "release_date": "2026-11-28",
     "changelog": "Enterprise Refinement: Compact Global Power Down operation card (no horizontal scrollbar / zero repetition), refined modal confirmation with dynamic computer count, separated standard lock from timed focus session with countdown display, enhanced toolbar semantic grouping, and hardened zero-duplicate fleet discovery",
     "windows": {
         "byod_installer": "\\\\fileserver\\public\\Synapse\\1-Windows\\BYOD\\Synapse-Setup-BYOD.exe",
