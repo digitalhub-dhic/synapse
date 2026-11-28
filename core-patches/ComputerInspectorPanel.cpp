@@ -44,28 +44,28 @@ protected:
 		const int cx = width() / 2;
 		const int cy = height() / 2;
 
-		// Subtle network connection lines and nodes
-		QPen linePen( QColor( 0x3b, 0x82, 0xf6, 120 ), 1.5, Qt::DashLine );
+		// Subtle network connection lines and nodes in theme accent
+		QPen linePen( QColor( 0x37, 0x40, 0x4e ), 1.0, Qt::DashLine );
 		p.setPen( linePen );
 		p.drawLine( cx - 75, cy, cx - 40, cy );
 		p.drawLine( cx + 40, cy, cx + 75, cy );
 
 		// Floating network nodes
-		p.setBrush( QColor( 0x3b, 0x82, 0xf6, 200 ) );
+		p.setBrush( QColor( 0xb7, 0xe3, 0x4b, 180 ) ); // #B7E34B accent dots
 		p.setPen( Qt::NoPen );
-		p.drawEllipse( cx - 75, cy - 3, 6, 6 );
-		p.drawEllipse( cx - 60, cy - 12, 4, 4 );
-		p.drawEllipse( cx + 75, cy - 3, 6, 6 );
-		p.drawEllipse( cx + 60, cy + 12, 4, 4 );
+		p.drawEllipse( cx - 75, cy - 3, 5, 5 );
+		p.drawEllipse( cx - 60, cy - 12, 3, 3 );
+		p.drawEllipse( cx + 75, cy - 3, 5, 5 );
+		p.drawEllipse( cx + 60, cy + 12, 3, 3 );
 
 		// Laptop base
 		const int baseW = 76;
-		const int baseH = 8;
+		const int baseH = 7;
 		const int baseY = cy + 16;
 		QPainterPath basePath;
-		basePath.addRoundedRect( cx - baseW / 2, baseY, baseW, baseH, 4, 4 );
-		p.setBrush( QColor( 0xFA, 0xFA, 0xFA ) );
-		p.setPen( QPen( QColor( 0x3b, 0x82, 0xf6 ), 1.2 ) );
+		basePath.addRoundedRect( cx - baseW / 2, baseY, baseW, baseH, 3, 3 );
+		p.setBrush( QColor( 0x19, 0x1B, 0x20 ) );
+		p.setPen( QPen( QColor( 0x25, 0x28, 0x30 ), 1.0 ) );
 		p.drawPath( basePath );
 
 		// Laptop screen bezel
@@ -73,15 +73,15 @@ protected:
 		const int screenH = 40;
 		const int screenY = cy - 22;
 		QPainterPath screenPath;
-		screenPath.addRoundedRect( cx - screenW / 2, screenY, screenW, screenH, 5, 5 );
+		screenPath.addRoundedRect( cx - screenW / 2, screenY, screenW, screenH, 4, 4 );
 		p.setBrush( QColor( 0x19, 0x1B, 0x20 ) );
-		p.setPen( QPen( QColor( 0x25, 0x28, 0x30 ), 1.5 ) );
+		p.setPen( QPen( QColor( 0x25, 0x28, 0x30 ), 1.0 ) );
 		p.drawPath( screenPath );
 
-		// Screen inner display
-		p.setBrush( QColor( 0xFA, 0xFA, 0xFA ) );
+		// Screen inner display - Dark control room display
+		p.setBrush( QColor( 0x10, 0x11, 0x14 ) );
 		p.setPen( Qt::NoPen );
-		p.drawRoundedRect( cx - screenW / 2 + 4, screenY + 4, screenW - 8, screenH - 8, 3, 3 );
+		p.drawRoundedRect( cx - screenW / 2 + 4, screenY + 4, screenW - 8, screenH - 8, 2, 2 );
 
 		// Glowing green checkmark badge in center
 		const int badgeRadius = 11;
