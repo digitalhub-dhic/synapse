@@ -332,13 +332,13 @@ bool ScreenLockFeaturePlugin::startFeature( VeyonMasterInterface& master, const 
 		dialog.setWindowTitle( tr( "Timed Lock / Focus Session" ) );
 		dialog.setMinimumWidth( 400 );
 		dialog.setStyleSheet( QStringLiteral(
-			"QDialog { background-color: #18181B; color: #FAFAFA; }"
+			"QDialog { background-color: #191B20; color: #FAFAFA; }"
 			"QLabel { color: #FAFAFA; font-size: 13px; }"
-			"QComboBox, QSpinBox { background-color: #27272A; color: #FAFAFA; border: 1px solid #29292E; border-radius: 4px; padding: 6px 10px; font-size: 13px; }"
-			"QPushButton { background-color: #FAFAFA; color: #18181B; border: 1px solid #27272A; border-radius: 4px; padding: 7px 16px; font-weight: 600; font-size: 13px; }"
+			"QComboBox, QSpinBox { background-color: #20232B; color: #FAFAFA; border: 1px solid #252830; border-radius: 4px; padding: 6px 10px; font-size: 13px; }"
+			"QPushButton { background-color: #FAFAFA; color: #191B20; border: 1px solid #20232B; border-radius: 4px; padding: 7px 16px; font-weight: 600; font-size: 13px; }"
 			"QPushButton:hover { background-color: #1D4ED8; }"
-			"QPushButton#btnCancel { background-color: #27272A; color: #D4D4D8; border: 1px solid #29292E; }"
-			"QPushButton#btnCancel:hover { background-color: #29292E; color: #18181B; }"
+			"QPushButton#btnCancel { background-color: #20232B; color: #D4D4D8; border: 1px solid #252830; }"
+			"QPushButton#btnCancel:hover { background-color: #252830; color: #191B20; }"
 		) );
 
 		auto* layout = new QVBoxLayout( &dialog );

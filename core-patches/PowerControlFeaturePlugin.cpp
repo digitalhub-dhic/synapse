@@ -815,8 +815,8 @@ void PowerControlFeaturePlugin::displayShutdownTimeout( int shutdownTimeout )
 	m_clientShutdownDialog->setFixedSize( 480, 180 );
 	m_clientShutdownDialog->setStyleSheet( QStringLiteral(
 		"QDialog { background-color: #0B1324; border: 2px solid #FAFAFA; border-radius: 12px; }"
-		"QLabel { color: #18181B; font-size: 13px; font-weight: 500; font-family: 'Segoe UI', Arial, sans-serif; }"
-		"QProgressBar { background-color: #27272A; border: 1px solid #29292E; border-radius: 4px; }"
+		"QLabel { color: #191B20; font-size: 13px; font-weight: 500; font-family: 'Segoe UI', Arial, sans-serif; }"
+		"QProgressBar { background-color: #20232B; border: 1px solid #252830; border-radius: 4px; }"
 		"QProgressBar::chunk { background-color: #F87171; border-radius: 3px; }"
 	) );
 

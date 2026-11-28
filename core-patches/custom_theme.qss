@@ -46,7 +46,7 @@ QToolBar QToolButton#qt_toolbar_ext_button {
 QToolBar#mainToolBar QToolButton, QToolBar#toolBar QToolButton {
     background-color: #0F172A;
     border: 1px solid #2A323D;
-    border-radius: 8px;
+    border-radius: 6px;
     color: #E6EDF3;
     font-weight: 500;
     font-size: 9.5px;
@@ -156,7 +156,7 @@ QWidget#remoteAccessToolBar QToolButton#exitButton:hover {
 QMenu {
     background-color: #0F172A;
     border: 1px solid #2A323D;
-    border-radius: 8px;
+    border-radius: 6px;
     padding: 6px;
 }
 QMenu::item {

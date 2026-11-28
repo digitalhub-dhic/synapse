@@ -124,13 +124,13 @@ public:
 		// 1. Draw rounded background pill
 		if( isSelected )
 		{
-			painter->setBrush( QColor(41, 41, 46) ); // #29292E WCAG AA selection
+			painter->setBrush( QColor(37, 40, 48) ); // #252830 WCAG AA selection
 			painter->setPen( QPen( QColor(250, 250, 250), 1 ) );
 			painter->drawRoundedRect( rowRect, 6, 6 );
 		}
 		else if( isHovered )
 		{
-			painter->setBrush( QColor(250, 250, 250) ); // #18181B elevated hover
+			painter->setBrush( QColor(250, 250, 250) ); // #191B20 elevated hover
 			painter->setPen( Qt::NoPen );
 			painter->drawRoundedRect( rowRect, 6, 6 );
 		}
@@ -218,7 +218,7 @@ public:
 		}
 		else
 		{
-			QPen mPen( isSelected ? QColor( 0xF4, 0xF4, 0xF5 ) : QColor( 0x29, 0x29, 0x2E ), 1.4, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin );
+			QPen mPen( isSelected ? QColor( 0xF4, 0xF4, 0xF5 ) : QColor( 0x25, 0x28, 0x30 ), 1.4, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin );
 			painter->setPen( mPen );
 			painter->setBrush( Qt::NoBrush );
 			painter->drawRoundedRect( QRectF( iconRect.left() + 1.0, iconRect.top() + 2.0, 14.0, 9.0 ), 1.5, 1.5 );
@@ -248,8 +248,8 @@ public:
 			}
 			else
 			{
-				painter->setBrush( QColor( 0x29, 0x29, 0x2E ) );
-				painter->setPen( QColor( 0x29, 0x29, 0x2E ) );
+				painter->setBrush( QColor( 0x25, 0x28, 0x30 ) );
+				painter->setPen( QColor( 0x25, 0x28, 0x30 ) );
 				painter->drawRoundedRect( badgeRect, 10, 10 );
 				painter->setPen( QColor( 0xF4, 0xF4, 0xF5 ) );
 			}
@@ -296,7 +296,7 @@ ComputerSelectPanel::ComputerSelectPanel( ComputerManager& computerManager, QWid
 
 	auto* selectHeader = new QFrame( this );
 	selectHeader->setFixedHeight( 32 );
-	selectHeader->setStyleSheet( QStringLiteral( "QFrame { background-color: #111113; border-bottom: 1px solid #29292E; }" ) );
+	selectHeader->setStyleSheet( QStringLiteral( "QFrame { background-color: #101114; border-bottom: 1px solid #252830; }" ) );
 	auto* headerLayout = new QHBoxLayout( selectHeader );
 	headerLayout->setContentsMargins( 12, 0, 8, 0 );
 	headerLayout->setSpacing( 6 );
@@ -315,7 +315,7 @@ ComputerSelectPanel::ComputerSelectPanel( ComputerManager& computerManager, QWid
 		"   background: transparent; border: none; border-radius: 4px;"
 		"   color: #D4D4D8; font-size: 11px; font-weight: bold; padding: 0px;"
 		"}"
-		"QPushButton:hover { background: #F87171; color: #18181B; }"
+		"QPushButton:hover { background: #F87171; color: #191B20; }"
 	) );
 	connect( closeButton, &QPushButton::clicked, this, [this]() {
 		this->hide();
@@ -336,11 +336,11 @@ ComputerSelectPanel::ComputerSelectPanel( ComputerManager& computerManager, QWid
 
 		setStyleSheet( QStringLiteral(
 		"ComputerSelectPanel, QWidget#ComputerSelectPanel {"
-		"   background-color: #111113;"
-		"   border-right: 1px solid #29292E;"
+		"   background-color: #101114;"
+		"   border-right: 1px solid #252830;"
 		"}"
 		"QTreeView {"
-		"   background-color: #111113;"
+		"   background-color: #101114;"
 		"   color: #FAFAFA;"
 		"   border: none;"
 		"   outline: none;"
@@ -349,8 +349,8 @@ ComputerSelectPanel::ComputerSelectPanel( ComputerManager& computerManager, QWid
 		"   background: transparent;"
 		"}"
 		"QLineEdit {"
-		"   background-color: #18181B;"
-		"   border: 1px solid #29292E;"
+		"   background-color: #191B20;"
+		"   border: 1px solid #252830;"
 		"   border-radius: 6px;"
 		"   padding: 4px 10px;"
 		"   margin: 0px 8px;"
@@ -358,12 +358,12 @@ ComputerSelectPanel::ComputerSelectPanel( ComputerManager& computerManager, QWid
 		"   font-size: 11px;"
 		"}"
 		"QLineEdit:focus {"
-		"   border: 1px solid #697B3C;"
-		"   background-color: #111113;"
+		"   border: 1px solid #4A5B28;"
+		"   background-color: #101114;"
 		"}"
 		"QPushButton {"
-		"   background-color: #18181B;"
-		"   border: 1px solid #29292E;"
+		"   background-color: #191B20;"
+		"   border: 1px solid #252830;"
 		"   border-radius: 6px;"
 		"   margin: 0px 8px;"
 		"   color: #FAFAFA;"
@@ -372,12 +372,12 @@ ComputerSelectPanel::ComputerSelectPanel( ComputerManager& computerManager, QWid
 		"   padding: 4px 10px;"
 		"}"
 		"QPushButton:hover {"
-		"   background-color: #27272A;"
-		"   border-color: #48484F;"
+		"   background-color: #20232B;"
+		"   border-color: #343844;"
 		"   color: #FAFAFA;"
 		"}"
 	) );
-	ui->treeView->viewport()->setStyleSheet( QStringLiteral( "background-color: #111113;" ) );
+	ui->treeView->viewport()->setStyleSheet( QStringLiteral( "background-color: #101114;" ) );
 
 	// Hide table header and style tree view
 	ui->treeView->setHeaderHidden( true );

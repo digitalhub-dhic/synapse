@@ -285,13 +285,13 @@ def show_status_window() -> None:
     root = tk.Tk()
     root.title("Synapse BYOD Status")
     root.geometry("420x250")
-    root.configure(bg="#111113")
+    root.configure(bg="#101114")
     root.resizable(False, False)
 
-    lbl_mode = tk.Label(root, text="Checking mode...", font=("Segoe UI", 14, "bold"), bg="#111113", fg="#C6E66A")
+    lbl_mode = tk.Label(root, text="Checking mode...", font=("Segoe UI", 14, "bold"), bg="#101114", fg="#B7E34B")
     lbl_mode.pack(pady=(20, 6))
 
-    lbl_detail = tk.Label(root, text="", font=("Segoe UI", 10), bg="#111113", fg="#29292E", wraplength=380)
+    lbl_detail = tk.Label(root, text="", font=("Segoe UI", 10), bg="#101114", fg="#252830", wraplength=380)
     lbl_detail.pack(pady=(0, 14))
 
     def refresh_view():
@@ -300,7 +300,7 @@ def show_status_window() -> None:
                 with open(STATE_FILE, "r", encoding="utf-8") as f:
                     st = json.load(f)
                 m = st.get("mode", "personal").upper()
-                color = "#4ADE80" if m == "CAMPUS" else "#C6E66A"
+                color = "#35C982" if m == "CAMPUS" else "#B7E34B"
                 lbl_mode.config(text=f"Mode: {m}", fg=color)
                 lbl_detail.config(
                     text=(
@@ -330,7 +330,7 @@ def show_status_window() -> None:
 
     tk.Button(
         root, text="Admin Pause / Resume Override", command=admin_override,
-        bg="#C6E66A", fg="#18181B", font=("Segoe UI", 10, "bold"), relief=tk.FLAT, padx=14, pady=6, cursor="hand2"
+        bg="#B7E34B", fg="#191B20", font=("Segoe UI", 10, "bold"), relief=tk.FLAT, padx=14, pady=6, cursor="hand2"
     ).pack(pady=8)
 
     refresh_view()
