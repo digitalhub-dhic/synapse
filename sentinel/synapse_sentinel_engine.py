@@ -71,6 +71,7 @@ DEFAULT_CONFIG = {
     "ai_api_model": "qwen3.5:0.8b",
     "ai_api_timeout_seconds": 4.0,
     "ai_api_min_interval_seconds": 10.0,
+    "ai_api_candidate_expiry_seconds": 35.0,
     "ai_api_key_env": "SYNAPSE_VISION_API_KEY",
     "detection_targets": {
         "sports_streams": True,
@@ -489,9 +490,8 @@ class SynapseAISentinel:
             return {}
         try:
             host = parsed.hostname.strip("[]").lower()
-            is_loopback = host == "localhost" or ipaddress.ip_address(host).is_loopback
-            is_private = ipaddress.ip_address(host).is_private
-            if not (is_loopback or is_private):
+            address = ipaddress.ip_address("127.0.0.1" if host == "localhost" else host)
+            if address.is_unspecified or address.is_multicast or not (address.is_loopback or address.is_private):
                 logging.warning("Local vision API skipped: endpoint host is not loopback or a private IP.")
                 return {}
         except ValueError:
@@ -510,10 +510,10 @@ class SynapseAISentinel:
             "Do not infer intent from motion alone. Keep rationale under 20 words."
         )
         try:
-            image = frame_rgb.copy()
-            image.thumbnail((448, 448), Image.Resampling.LANCZOS)
             buffer = io.BytesIO()
-            image.save(buffer, format="JPEG", quality=65, optimize=True)
+            with frame_rgb.copy() as image:
+                image.thumbnail((448, 448), Image.Resampling.LANCZOS)
+                image.save(buffer, format="JPEG", quality=65, optimize=True)
             data_url = "data:image/jpeg;base64," + __import__("base64").b64encode(buffer.getvalue()).decode("ascii")
             endpoint = base_url + "/chat/completions"
             payload = {
@@ -549,13 +549,23 @@ class SynapseAISentinel:
             return {
                 "ai_api_model": str(result.get("model", self.config.get("ai_api_model", ""))),
                 "ai_api_category": category,
-                "ai_api_misuse": bool(parsed_result.get("misuse", False)) and category in categories,
+                "ai_api_misuse": parsed_result.get("misuse") is True and category in categories,
                 "ai_api_rationale": rationale,
                 "ai_api_latency_ms": round((time.monotonic() - started) * 1000),
             }
         except Exception as e:
             logging.debug(f"Private vision API inference failed: {e}")
             return {"ai_api_error": type(e).__name__}
+
+    def preserve_throttled_api_candidate(self, ip, metrics):
+        """Do not erase a confirmed API candidate merely because its next call is rate-limited."""
+        candidate = self.violation_candidates.get(ip)
+        if not candidate or not candidate.get("reason", "").startswith("AI API review candidate:"):
+            return False
+        if "ai_api_misuse" in metrics:
+            return False
+        expiry = max(1.0, float(self.config.get("ai_api_candidate_expiry_seconds", 35.0)))
+        return time.monotonic() - candidate.get("last_eval", 0.0) <= expiry
 
     def save_evidence_image(self, comp_name, ip, reason, screen_crop, full_master_img=None):
         """Generates a professional evidence image with watermark header."""
@@ -670,6 +680,7 @@ class SynapseAISentinel:
                 cand = self.violation_candidates.get(ip, {"count": 0, "reason": reason})
                 cand["count"] += 1
                 cand["reason"] = reason
+                cand["last_eval"] = time.monotonic()
                 self.violation_candidates[ip] = cand
 
                 required_cycles = self.config.get("confirmation_cycles", 2)
@@ -680,7 +691,7 @@ class SynapseAISentinel:
                     if capture_error:
                         logging.error(f"Built-in Screenshot failed for {comp_name} ({ip}): {capture_error}")
                     conf = metrics.get("confidence", 0.78)
-                    if self.config.get("auto_freeze", False):
+                    if self.config.get("auto_freeze", False) and not reason.startswith("AI API review candidate:"):
                         self.lock_computer(comp_name, ip, reason, evidence_path)
                         self.publish_live_alert(comp_name, ip, reason, evidence_path, conf, "LOCKED", capture_error)
                     else:
@@ -688,6 +699,8 @@ class SynapseAISentinel:
                         self.publish_live_alert(comp_name, ip, reason, evidence_path, conf, "ALERT", capture_error)
                     del self.violation_candidates[ip]
             else:
+                if self.preserve_throttled_api_candidate(ip, metrics):
+                    continue
                 if ip in self.violation_candidates:
                     del self.violation_candidates[ip]
 
@@ -731,6 +744,7 @@ class SynapseAISentinel:
                 cand = self.violation_candidates.get(ip, {"count": 0, "reason": reason})
                 cand["count"] += 1
                 cand["reason"] = reason
+                cand["last_eval"] = time.monotonic()
                 self.violation_candidates[ip] = cand
 
                 required_cycles = self.config.get("confirmation_cycles", 2)
@@ -742,7 +756,7 @@ class SynapseAISentinel:
                     evidence_path, capture_error = self.capture_existing_screenshot(ip, comp_name, reason)
                     if capture_error:
                         logging.error(f"Built-in Screenshot failed for {comp_name} ({ip}): {capture_error}")
-                    if self.config.get("auto_freeze", False):
+                    if self.config.get("auto_freeze", False) and not reason.startswith("AI API review candidate:"):
                         self.lock_computer(comp_name, ip, reason, evidence_path)
                         self.publish_live_alert(comp_name, ip, reason, evidence_path, 0.78, "LOCKED", capture_error)
                     else:
@@ -750,6 +764,8 @@ class SynapseAISentinel:
                     del self.violation_candidates[ip]
             else:
                 # Reset candidate count on clean frame
+                if self.preserve_throttled_api_candidate(ip, metrics):
+                    continue
                 if ip in self.violation_candidates:
                     del self.violation_candidates[ip]
 
