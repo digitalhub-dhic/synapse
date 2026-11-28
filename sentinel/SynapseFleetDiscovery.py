@@ -18,6 +18,7 @@ from concurrent.futures import ThreadPoolExecutor
 CLI_PATH = r"C:\Program Files\DigiAgent\digiagent-cli.exe"
 BEACON_UDP_PORT = 11105
 SUBNET_PREFIX = "192.168.1."
+SUBNET_PREFIXES = ["192.168.1.", "192.168.30."]
 SELF_IP = "192.168.1.150"
 TARGET_LOCATION = "BYOD"
 TELEMETRY_PATHS = [
@@ -217,11 +218,16 @@ def resolve_hostname(ip):
     return None
 
 def run_subnet_sweep():
-    """Performs a concurrent sweep of the subnet on port 11100."""
-    ips = [f"{SUBNET_PREFIX}{i}" for i in range(1, 255) if f"{SUBNET_PREFIX}{i}" != SELF_IP]
+    """Performs a concurrent sweep of all configured subnets (LAN + BYOD Wi-Fi) on port 11100."""
+    ips = [
+        f"{prefix}{i}"
+        for prefix in SUBNET_PREFIXES
+        for i in range(1, 255)
+        if f"{prefix}{i}" != SELF_IP
+    ]
     active_ips = []
     
-    with ThreadPoolExecutor(max_workers=50) as executor:
+    with ThreadPoolExecutor(max_workers=80) as executor:
         for ip, is_open in executor.map(probe_agent_port, ips):
             if is_open:
                 active_ips.append(ip)
