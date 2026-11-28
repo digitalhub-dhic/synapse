@@ -92,6 +92,11 @@ Section "MainSection" SEC01
     ExecWait 'sc failure DigiAgentService reset= 0 actions= restart/1000/restart/1000/restart/1000'
     ExecWait 'sc start DigiAgentService'
 
+    DetailPrint "Tagging Client Type (BYOD Hardware)..."
+    WriteRegDWORD HKLM "SOFTWARE\DigiAgent" "IsBYOD" 1
+    WriteRegStr HKLM "SOFTWARE\DigiAgent" "ClientType" "BYOD"
+    WriteRegStr HKLM "SOFTWARE\Policies\Synapse" "DeviceRole" "BYOD"
+
     DetailPrint "Configuring BYOD Logon Policy (Disabling Other User and Switch User)..."
     WriteRegDWORD HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" "DontDisplayLastUserName" 0
     WriteRegDWORD HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" "HideFastUserSwitching" 1

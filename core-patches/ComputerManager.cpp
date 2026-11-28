@@ -594,23 +594,6 @@ void ComputerManager::initAutoDiscovery()
 	connect( m_discoveryProbeTimer, &QTimer::timeout, this, &ComputerManager::sendDiscoveryProbe );
 	m_discoveryProbeTimer->start( 15000 ); // probe every 15 seconds
 
-	// Auto-register local admin machine in directory and monitoring
-	const QString localName = QHostInfo::localHostName();
-	QString localIp;
-	for( const auto& addr : std::as_const( m_localHostAddresses ) )
-	{
-		if( addr.protocol() == QAbstractSocket::IPv4Protocol && !addr.isLoopback() && !addr.toString().startsWith( QStringLiteral("169.254.") ) )
-		{
-			localIp = addr.toString();
-			break;
-		}
-	}
-	if( localIp.isEmpty() )
-	{
-		localIp = QStringLiteral("127.0.0.1");
-	}
-	registerDiscoveredComputer( localName, localIp, QString{} );
-
 	QTimer::singleShot( 1000, this, &ComputerManager::sendDiscoveryProbe );
 }
 
@@ -684,68 +667,60 @@ void ComputerManager::scanSubnetForNewClients()
 		}
 	}
 
-	QString baseSubnet = QStringLiteral( "192.168.1." );
-	for( const auto& addr : std::as_const( m_localHostAddresses ) )
-	{
-		if( addr.protocol() == QAbstractSocket::IPv4Protocol && !addr.isLoopback() )
-		{
-			const QString s = addr.toString();
-			const int lastDot = s.lastIndexOf( QLatin1Char( '.' ) );
-			if( lastDot > 0 )
-			{
-				baseSubnet = s.left( lastDot + 1 );
-				break;
-			}
-		}
-	}
-
+	const QStringList scanSubnets = { QStringLiteral( "192.168.1." ), QStringLiteral( "192.168.30." ) };
 	const int startHost = 2;
 	const int endHost = 254;
-	const int numTasks = 4;
-	const int chunkSize = ( endHost - startHost + 1 ) / numTasks;
+	const int totalTasks = scanSubnets.size() * 4;
+	auto* activeTasksCount = new QAtomicInt( totalTasks );
 
-	auto* activeTasksCount = new QAtomicInt( numTasks );
-
-	for( int t = 0; t < numTasks; ++t )
+	for( const auto& subnet : scanSubnets )
 	{
-		const int chunkStart = startHost + t * chunkSize;
-		const int chunkEnd = ( t == numTasks - 1 ) ? endHost : ( chunkStart + chunkSize - 1 );
+		const bool isByodSubnet = subnet.startsWith( QStringLiteral( "192.168.30." ) );
+		const int numTasks = 4;
+		const int chunkSize = ( endHost - startHost + 1 ) / numTasks;
 
-		QThreadPool::globalInstance()->start( [this, knownIps, baseSubnet, chunkStart, chunkEnd, activeTasksCount]() {
-			for( int h = chunkStart; h <= chunkEnd; ++h )
-			{
-				const QString targetIp = baseSubnet + QString::number( h );
-				if( knownIps.contains( targetIp ) )
+		for( int t = 0; t < numTasks; ++t )
+		{
+			const int chunkStart = startHost + t * chunkSize;
+			const int chunkEnd = ( t == numTasks - 1 ) ? endHost : ( chunkStart + chunkSize - 1 );
+
+			QThreadPool::globalInstance()->start( [this, knownIps, subnet, isByodSubnet, chunkStart, chunkEnd, activeTasksCount]() {
+				for( int h = chunkStart; h <= chunkEnd; ++h )
 				{
-					continue;
-				}
-
-				QTcpSocket sock;
-				sock.connectToHost( targetIp, 11100 );
-				if( sock.waitForConnected( 60 ) )
-				{
-					sock.disconnectFromHost();
-
-					QString hostName = QHostInfo::fromName( targetIp ).hostName();
-					if( hostName.isEmpty() || hostName == targetIp )
+					const QString targetIp = subnet + QString::number( h );
+					if( targetIp == QStringLiteral( "192.168.1.150" ) )
 					{
-						hostName = QStringLiteral( "BYOD-%1" ).arg( h );
+						continue;
 					}
 
-					QMetaObject::invokeMethod( this, [this, hostName, targetIp]() {
-						registerDiscoveredComputer( hostName, targetIp, QString{} );
+					QTcpSocket sock;
+					sock.connectToHost( targetIp, 11100 );
+					if( sock.waitForConnected( 50 ) )
+					{
+						sock.disconnectFromHost();
+
+						QString hostName = QHostInfo::fromName( targetIp ).hostName();
+						if( hostName.isEmpty() || hostName == targetIp )
+						{
+							hostName = isByodSubnet ? QStringLiteral( "BYOD-%1" ).arg( h )
+													: QStringLiteral( "LAB-%1" ).arg( h );
+						}
+
+						QMetaObject::invokeMethod( this, [this, hostName, targetIp]() {
+							registerDiscoveredComputer( hostName, targetIp, QString{} );
+						}, Qt::QueuedConnection );
+					}
+				}
+
+				if( activeTasksCount->deref() == 0 )
+				{
+					delete activeTasksCount;
+					QMetaObject::invokeMethod( this, [this]() {
+						m_isScanningSubnet = false;
 					}, Qt::QueuedConnection );
 				}
-			}
-
-			if( activeTasksCount->deref() == 0 )
-			{
-				delete activeTasksCount;
-				QMetaObject::invokeMethod( this, [this]() {
-					m_isScanningSubnet = false;
-				}, Qt::QueuedConnection );
-			}
-		} );
+			} );
+		}
 	}
 }
 
@@ -809,25 +784,32 @@ void ComputerManager::registerDiscoveredComputer( const QString& hostName, const
 		return;
 	}
 
+	// Never register local teacher machine or invalid loopback/APIPA addresses
+	if( ipAddress == QStringLiteral( "192.168.1.150" ) ||
+		ipAddress == QStringLiteral( "100.99.161.43" ) ||
+		hostName.compare( QStringLiteral( "computer-50" ), Qt::CaseInsensitive ) == 0 ||
+		ipAddress.startsWith( QStringLiteral( "169.254." ) ) ||
+		ipAddress.startsWith( QStringLiteral( "127." ) ) )
+	{
+		return;
+	}
+
 	const auto rawObjects = VeyonCore::config().value( QStringLiteral( "NetworkObjects" ), QStringLiteral( "BuiltinDirectory" ), QJsonArray() ).toJsonArray();
 	ObjectManager<NetworkObject> mgr( rawObjects );
 
-	bool isLabIp = false;
-	const QStringList ipParts = ipAddress.split( QLatin1Char( '.' ) );
-	if( ipParts.size() == 4 )
-	{
-		const int octet = ipParts.at( 3 ).toInt();
-		if( octet >= 101 && octet <= 140 )
-		{
-			isLabIp = true;
-		}
-	}
+	// Strict BYOD Separation:
+	// A device is ONLY in BYOD if:
+	// - On Student Wi-Fi (192.168.30.x)
+	// - On Tailscale mesh (100.x.x.x)
+	// - Or explicit BYOD hostname
+	// ALL other local network/domain computers go to DIGIHUB (Lab)
+	const bool isByod = ipAddress.startsWith( QStringLiteral( "192.168.30." ) ) ||
+						ipAddress.startsWith( QStringLiteral( "100." ) ) ||
+						hostName.startsWith( QStringLiteral( "BYOD-" ), Qt::CaseInsensitive );
 
-	const QString targetLocationName = isLabIp ? QStringLiteral( "DIGIHUB" ) : QStringLiteral( "BYOD" );
+	const QString targetLocationName = isByod ? QStringLiteral( "BYOD" ) : QStringLiteral( "DIGIHUB" );
 	NetworkObject::Uid targetLocationUid;
 	NetworkObject::Uid fallbackLocationUid;
-	NetworkObject::Uid existingHostUid;
-	bool alreadyRegistered = false;
 
 	for( const auto& val : mgr.objects() )
 	{
@@ -845,41 +827,38 @@ void ComputerManager::registerDiscoveredComputer( const QString& hostName, const
 		}
 		else if( obj.type() == NetworkObject::Type::Host )
 		{
-			if( obj.hostAddress().trimmed().compare( ipAddress.trimmed(), Qt::CaseInsensitive ) == 0 ||
-				( !hostName.isEmpty() && obj.name().trimmed().compare( hostName.trimmed(), Qt::CaseInsensitive ) == 0 ) )
+			// Dynamic IP Update: If hostName already exists in directory, update its IP address dynamically
+			if( !hostName.isEmpty() && obj.name().trimmed().compare( hostName.trimmed(), Qt::CaseInsensitive ) == 0 )
 			{
-				alreadyRegistered = true;
-				existingHostUid = obj.uid();
-				break;
+				if( obj.hostAddress().trimmed().compare( ipAddress.trimmed(), Qt::CaseInsensitive ) != 0 )
+				{
+					const NetworkObject updated( obj.type(),
+												 obj.name(),
+												 ipAddress,
+												 macAddress.isEmpty() ? obj.macAddress() : macAddress,
+												 obj.directoryAddress(),
+												 obj.uid(),
+												 obj.parentUid() );
+					mgr.update( updated );
+					VeyonCore::config().setValue( QStringLiteral( "NetworkObjects" ), mgr.objects(), QStringLiteral( "BuiltinDirectory" ) );
+					VeyonCore::config().flushStore();
+					m_networkObjectDirectory->update();
+					Q_EMIT computerSelectionChanged();
+				}
+				return;
+			}
+
+			// If exact IP address is already registered under another object, skip to prevent duplicates
+			if( obj.hostAddress().trimmed().compare( ipAddress.trimmed(), Qt::CaseInsensitive ) == 0 )
+			{
+				return;
 			}
 		}
 	}
 
-	if( alreadyRegistered )
-	{
-		// Already registered: never call loadStates() here, as it resets the tree model
-		// and forces ComputerControlListModel::reload() on all active VNC connections.
-		return;
-	}
-
 	if( targetLocationUid.isNull() )
 	{
-		if( !fallbackLocationUid.isNull() && !isLabIp )
-		{
-			const NetworkObject newLoc( NetworkObject::Type::Location, targetLocationName, {}, {}, {}, QUuid::createUuid(), QUuid() );
-			targetLocationUid = newLoc.uid();
-			mgr.add( newLoc );
-		}
-		else if( !fallbackLocationUid.isNull() )
-		{
-			targetLocationUid = fallbackLocationUid;
-		}
-		else
-		{
-			const NetworkObject newLoc( NetworkObject::Type::Location, targetLocationName, {}, {}, {}, QUuid::createUuid(), QUuid() );
-			targetLocationUid = newLoc.uid();
-			mgr.add( newLoc );
-		}
+		targetLocationUid = fallbackLocationUid;
 	}
 
 	const NetworkObject newHost( NetworkObject::Type::Host,

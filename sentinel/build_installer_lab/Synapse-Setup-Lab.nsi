@@ -40,6 +40,11 @@ Section "MainSection" SEC01
     WriteRegDWORD HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" "HideFastUserSwitching" 0
     WriteRegDWORD HKLM "SOFTWARE\Policies\Microsoft\Windows\System" "HideFastUserSwitching" 0
 
+    DetailPrint "Tagging Client Type (Lab Domain Computer)..."
+    WriteRegDWORD HKLM "SOFTWARE\DigiAgent" "IsBYOD" 0
+    WriteRegStr HKLM "SOFTWARE\DigiAgent" "ClientType" "LAB"
+    WriteRegStr HKLM "SOFTWARE\Policies\Synapse" "DeviceRole" "LAB"
+
     IfSilent skip_msgbox
     MessageBox MB_OK|MB_ICONINFORMATION "Synapse Lab Client Installed Successfully!$\r$\n$\r$\n• Configured for Domain Authentication ('Other user' active)$\r$\n• Classroom Authentication Keys Deployed$\r$\n• Core Monitoring Service Active$\r$\n• Zero BYOD Restrictions"
 skip_msgbox:

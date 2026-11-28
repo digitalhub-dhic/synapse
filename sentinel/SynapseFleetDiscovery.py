@@ -112,6 +112,25 @@ def remove_object(identifier):
     except Exception as e:
         print(f"[ERR] Remove object {identifier} failed: {e}")
 
+def update_computer_ip(obj_uuid, new_ip):
+    """Updates the HostAddress of an existing object without recreating or duplicating it."""
+    try:
+        res = subprocess.run([CLI_PATH, "config", "get", "BuiltinDirectory/NetworkObjects"], capture_output=True, text=True)
+        data = json.loads(res.stdout)
+        clean_uuid = obj_uuid.strip("{}")
+        changed = False
+        for item in data:
+            if item.get("Uid", "").strip("{}") == clean_uuid:
+                item["HostAddress"] = new_ip
+                changed = True
+                break
+        if changed:
+            new_json = json.dumps(data, separators=(',', ':'))
+            subprocess.run([CLI_PATH, "config", "set", "BuiltinDirectory/NetworkObjects", new_json], capture_output=True)
+            print(f"[OK] Dynamically updated object {obj_uuid} host to {new_ip}")
+    except Exception as e:
+        print(f"[ERR] Failed to update computer IP: {e}")
+
 def enroll_computer(name, host, mac="", location=TARGET_LOCATION):
     """Enrolls a computer into a specific location in DigiAgent networkobjects."""
     if not os.path.exists(CLI_PATH) or not name or not host:
@@ -121,22 +140,20 @@ def enroll_computer(name, host, mac="", location=TARGET_LOCATION):
     host_clean = host.strip()
     mac_clean = mac.strip().upper()
 
+    # Never enroll teacher master PC
+    if host_clean in ("192.168.1.150", "100.99.161.43", "127.0.0.1") or name_clean.lower() in ("computer-50", "computer-50.digihub.net") or host_clean.startswith("169.254."):
+        return False
+
     # Pre-check: Ensure this host address does not already exist in any location
     reg = get_registered_network_objects()
     for existing in reg.get("objects", []):
         if existing.get("host", "").strip().lower() == host_clean.lower():
-            print(f"[SKIP-DUPLICATE] Host {host_clean} already registered as '{existing.get('name')}' in location {existing.get('parent_uuid')}. Skipping add.")
+            print(f"[SKIP-DUPLICATE] Host {host_clean} already registered as '{existing.get('name')}'. Skipping add.")
             return False
 
-    # Never add lab IPs (192.168.1.101 - 192.168.1.140) into BYOD
+    # Never add LAN IPs (192.168.1.x) into BYOD
     if location == "BYOD" and host_clean.startswith("192.168.1."):
-        try:
-            last_octet = int(host_clean.split(".")[-1])
-            if 101 <= last_octet <= 140 or last_octet in (145, 146, 148, 150):
-                print(f"[SKIP-LAB-IP] Host {host_clean} is a DIGIHUB lab workstation IP. Refusing to add into BYOD.")
-                return False
-        except ValueError:
-            pass
+        location = "DIGIHUB"
 
     cmd = [CLI_PATH, "networkobjects", "add", "computer", name_clean, host_clean, mac_clean, location]
     try:
@@ -158,40 +175,45 @@ def sync_device(name, current_ip, mac=""):
 def _sync_device_impl(name, current_ip, mac=""):
     """
     Intelligently registers or updates computers without creating duplicates.
-    1. If IP is already registered in ANY location, do nothing!
-    2. If MAC matches an existing entry, do nothing unless IP changed.
-    3. If genuinely new device and NOT a lab computer IP, enroll into BYOD.
+    1. Ignores teacher master PC.
+    2. If device name or MAC matches existing record, updates IP if changed (DHCP support).
+    3. Guarantees BYOD location ONLY gets devices on 192.168.30.x or Tailscale (100.x.x.x).
+    4. Never creates duplicate entries.
     """
+    if current_ip in ("192.168.1.150", "100.99.161.43", "127.0.0.1") or name.lower() in ("computer-50", "computer-50.digihub.net") or current_ip.startswith("169.254."):
+        return False
+
     mac_clean = mac.strip().upper()
     registered = get_registered_network_objects()
     by_name = registered["by_name"]
     by_ip = registered["by_ip"]
     by_mac = registered["by_mac"]
 
-    # 1. Check if IP is ALREADY registered anywhere in the fleet
+    # 1. Check if IP is ALREADY registered with the same name
     if current_ip in by_ip:
-        # IP already exists in directory - never duplicate!
         return False
 
-    # 2. Check if MAC is already registered
+    # 2. Check if MAC or Name matches an existing registered computer (Dynamic DHCP IP update)
+    matched_entry = None
     if mac_clean and mac_clean in by_mac:
-        # Hardware already registered - never create a duplicate entry
+        matched_entry = by_mac[mac_clean][0]
+    elif name.lower() in by_name:
+        matched_entry = by_name[name.lower()][0]
+
+    if matched_entry:
+        old_ip = matched_entry.get("host", "")
+        if old_ip != current_ip:
+            print(f"[DHCP-UPDATE] Computer '{matched_entry.get('name')}' IP changed from {old_ip} -> {current_ip}. Updating in-place...")
+            update_computer_ip(matched_entry.get("uuid"), current_ip)
+            return True
         return False
 
-    # 3. Check by Name
-    key = name.lower()
-    if key in by_name:
-        return False
-
-    # 4. Genuinely new unknown device
-    assigned_location = TARGET_LOCATION
-    if current_ip.startswith("192.168.1."):
-        try:
-            last_octet = int(current_ip.split(".")[-1])
-            if 101 <= last_octet <= 140 or last_octet in (145, 146, 148, 150):
-                assigned_location = "DIGIHUB"
-        except ValueError:
-            pass
+    # 3. Genuinely new device: determine strict location
+    # BYOD location is STRICTLY for 192.168.30.x (Student Wi-Fi) or 100.x.x.x (Tailscale BYOD)
+    if current_ip.startswith("192.168.30.") or current_ip.startswith("100.") or name.lower().startswith("byod-"):
+        assigned_location = "BYOD"
+    else:
+        assigned_location = "DIGIHUB"
 
     print(f"[NEW-DEVICE] Enrolling newly discovered device '{name}' @ {current_ip} into '{assigned_location}'...")
     enroll_computer(name, current_ip, mac_clean, assigned_location)
@@ -335,14 +357,14 @@ def run_discovery_daemon():
     t_udp = threading.Thread(target=udp_beacon_listener, daemon=True)
     t_udp.start()
     
-    print("[*] Subnet sweeper starting. Interval: 45 seconds.")
+    print("[*] Subnet sweeper starting. Interval: 15 seconds.")
     while True:
         try:
             run_subnet_sweep()
             run_tailscale_sweep()
         except Exception as e:
             print(f"[SWEEP ERR] {e}")
-        time.sleep(45)
+        time.sleep(15)
 
 if __name__ == "__main__":
     run_discovery_daemon()
