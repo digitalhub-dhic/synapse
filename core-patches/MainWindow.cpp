@@ -461,9 +461,9 @@ MainWindow::MainWindow( VeyonMaster &masterCore, QWidget* parent ) :
 		"   color: #E4E4E7;"
 		"   font-weight: 500;"
 		"   font-size: 11px;"
-		"   padding: 0px 10px;"
+		"   padding: 0px 8px;"
 		"   min-width: 0px;"
-		"   max-width: 160px;"
+		"   max-width: 220px;"
 		"   min-height: 32px;"
 		"   max-height: 32px;"
 		"}"
@@ -1963,8 +1963,12 @@ void MainWindow::addFeaturesToToolBar()
 								   feature.shortcut() );
 		btn->setToolButtonStyle( Qt::ToolButtonTextBesideIcon );
 		btn->setIconSize( QSize( 15, 15 ) );
-		btn->setMinimumSize( 0, 32 );
-		btn->setMaximumWidth( 160 );
+		QFont btnMeasureFont = btn->font();
+		btnMeasureFont.setPixelSize( 11 );
+		btnMeasureFont.setWeight( QFont::DemiBold );
+		const int btnWidth = QFontMetrics( btnMeasureFont ).horizontalAdvance( text ) + 48;
+		btn->setMinimumSize( btnWidth, 32 );
+		btn->setMaximumWidth( qMax( 160, btnWidth + 16 ) );
 		btn->setFixedHeight( 32 );
 		connect(btn, &QToolButton::clicked, this, [=, this] () {
 			if( feature.name().compare( QStringLiteral("PowerDown"), Qt::CaseInsensitive ) == 0 )
