@@ -311,13 +311,13 @@ void ComputerItemDelegate::paint(QPainter* painter, const QStyleOptionViewItem& 
 	else
 	{
 		// Pill badge in top right: "OFFLINE"
-		const QRect badgeRect(previewRect.right() - 54, previewRect.top() + 5, 50, 16);
-		painter->setBrush(QColor(37, 40, 48, 235)); // #252830
-		painter->setPen(QPen(QColor(55, 58, 68), 1));
+		const QRect badgeRect(previewRect.right() - 58, previewRect.top() + 5, 54, 16);
+		painter->setBrush(QColor(37, 40, 48, 245)); // #252830
+		painter->setPen(QPen(QColor(63, 67, 78), 1));
 		painter->drawRoundedRect(badgeRect, 4, 4);
 
-		painter->setPen(QColor(180, 184, 194)); // #B4B8C2 high-contrast readable
-		painter->setFont(QFont(QStringLiteral("Segoe UI"), 6, QFont::Bold));
+		painter->setPen(QColor(226, 232, 240)); // #E2E8F0 high-contrast readable
+		painter->setFont(QFont(QStringLiteral("Segoe UI"), 7, QFont::Bold));
 		painter->drawText(badgeRect, Qt::AlignCenter, QStringLiteral("OFFLINE"));
 	}
 
@@ -330,7 +330,7 @@ void ComputerItemDelegate::paint(QPainter* painter, const QStyleOptionViewItem& 
 
 	// Computer Name
 	painter->setFont(QFont(QStringLiteral("Segoe UI"), 9, QFont::Bold));
-	painter->setPen(QColor(244, 244, 245));
+	painter->setPen(QColor(250, 250, 250));
 	QFontMetrics fmName(painter->font());
 	const QString elidedName = fmName.elidedText(compName, Qt::ElideRight, infoRect.width());
 	painter->drawText(QRect(infoRect.left(), infoRect.top(), infoRect.width(), 16), Qt::AlignLeft | Qt::AlignVCenter, elidedName);
@@ -356,16 +356,16 @@ void ComputerItemDelegate::paint(QPainter* painter, const QStyleOptionViewItem& 
 	}
 	else
 	{
-		statusDotColor = QColor(140, 144, 153); // Slate / Muted Gray
+		statusDotColor = QColor(148, 163, 184); // Slate-400
 	}
 
 	painter->setBrush(statusDotColor);
 	painter->setPen(Qt::NoPen);
 	painter->drawEllipse(dotCenter, 3, 3);
 
-	// Text beside dot - High contrast secondary text
+	// Text beside dot - High contrast secondary text (D4D4D8 for crystal clear IP contrast)
 	painter->setFont(QFont(QStringLiteral("Segoe UI"), 8));
-	painter->setPen(QColor(180, 184, 194)); // #B4B8C2 clear and crisp
+	painter->setPen(QColor(212, 212, 216)); // #D4D4D8 clear and crisp
 
 	QString detailsText;
 	if (isOnline)
