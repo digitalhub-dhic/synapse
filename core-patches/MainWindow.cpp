@@ -899,8 +899,8 @@ MainWindow::MainWindow( VeyonMaster &masterCore, QWidget* parent ) :
 	sortCombo->setObjectName( QStringLiteral("sortCombo") );
 	sortCombo->setStyleSheet( QStringLiteral(
 		"QComboBox { background: #191B20; border: 1px solid #252830; border-radius: 6px; color: #FAFAFA; padding: 2px 8px; font-size: 10px; font-weight: 600; min-height: 20px; }"
-		"QComboBox:hover { border-color: #20232B; color: #191B20; }"
-		"QComboBox QAbstractItemView { background: #191B20; border: 1px solid #252830; color: #FAFAFA; selection-background-color: #FAFAFA; selection-color: #FAFAFA; }"
+		"QComboBox:hover { border-color: #343944; color: #FAFAFA; }"
+		"QComboBox QAbstractItemView { background: #191B20; border: 1px solid #252830; color: #FAFAFA; selection-background-color: #252830; selection-color: #B7E34B; }"
 	) );
 	sortCombo->addItem( tr("Sort: Hostname A-Z"), 0 );
 	sortCombo->addItem( tr("Sort: Online First"), 1 );
