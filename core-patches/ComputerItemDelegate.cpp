@@ -62,24 +62,24 @@ void ComputerItemDelegate::paint(QPainter* painter, const QStyleOptionViewItem& 
 
 	// 1. Draw Card Surface & Border
 	QPainterPath cardPath;
-	cardPath.addRoundedRect(rect, 8, 8);
+	cardPath.addRoundedRect(rect, 6, 6);
 
 	if (isSelected)
 	{
-		painter->fillPath(cardPath, QColor(39, 39, 42)); // #252830 WCAG AA selection
-		painter->setPen(QPen(QColor(74, 91, 40), 1.5)); // #4A5B28 Signal Lime focus border
+		painter->fillPath(cardPath, QColor(25, 27, 32)); // #191B20 surface
+		painter->setPen(QPen(QColor(183, 227, 75), 1.5)); // #B7E34B active focus border
 		painter->drawPath(cardPath);
 	}
 	else if (isHovered)
 	{
-		painter->fillPath(cardPath, QColor(39, 39, 42)); // #191B20 elevated hover
-		painter->setPen(QPen(QColor(72, 72, 79), 1.0));
+		painter->fillPath(cardPath, QColor(32, 35, 42)); // elevated hover
+		painter->setPen(QPen(QColor(55, 58, 68), 1.0));
 		painter->drawPath(cardPath);
 	}
 	else
 	{
 		painter->fillPath(cardPath, QColor(25, 27, 32)); // #191B20 surface
-		painter->setPen(QPen(QColor(37, 40, 48), 1.0)); // #20232B subtle border
+		painter->setPen(QPen(QColor(37, 40, 48), 1.0)); // #252830 subtle border
 		painter->drawPath(cardPath);
 	}
 
@@ -185,7 +185,7 @@ void ComputerItemDelegate::paint(QPainter* painter, const QStyleOptionViewItem& 
 		else
 		{
 			painter->fillRect(previewRect, QColor(23, 25, 26));
-			painter->setPen(QColor(23, 25, 26));
+			painter->setPen(QColor(161, 161, 170));
 			QFont loadingFont(QStringLiteral("Segoe UI"), 8);
 			painter->setFont(loadingFont);
 			painter->drawText(previewRect, Qt::AlignCenter, tr("Connecting Stream..."));
@@ -206,7 +206,7 @@ void ComputerItemDelegate::paint(QPainter* painter, const QStyleOptionViewItem& 
 		painter->drawEllipse(QPoint(cx, cy - 8), 4, 4);
 
 		painter->setFont(QFont(QStringLiteral("Segoe UI"), 8, QFont::DemiBold));
-		painter->setPen(QColor(52, 52, 58));
+		painter->setPen(QColor(224, 163, 74));
 		painter->drawText(QRect(previewRect.left(), cy + 2, previewRect.width(), 16),
 						  Qt::AlignCenter, tr("Connecting..."));
 	}
@@ -230,14 +230,14 @@ void ComputerItemDelegate::paint(QPainter* painter, const QStyleOptionViewItem& 
 		painter->drawLine(cx, cy + 10, cx, cy + 14);
 		painter->drawLine(cx - 8, cy + 14, cx + 8, cy + 14);
 
-		// Status text
+		// Status text - High contrast and readable
 		painter->setFont(QFont(QStringLiteral("Segoe UI"), 8, QFont::DemiBold));
-		painter->setPen(QColor(52, 52, 58));
+		painter->setPen(QColor(212, 212, 216));
 		painter->drawText(QRect(previewRect.left(), cy + 18, previewRect.width(), 16),
 						  Qt::AlignCenter, tr("Computer Offline"));
 
 		painter->setFont(QFont(QStringLiteral("Segoe UI"), 7));
-		painter->setPen(QColor(52, 52, 58));
+		painter->setPen(QColor(140, 144, 153));
 		painter->drawText(QRect(previewRect.left(), cy + 34, previewRect.width(), 14),
 						  Qt::AlignCenter, tr("Standby • Ready for WOL"));
 	}
@@ -247,11 +247,11 @@ void ComputerItemDelegate::paint(QPainter* painter, const QStyleOptionViewItem& 
 	{
 		const QRect hoverBar(previewRect.left() + 4, previewRect.bottom() - 22, previewRect.width() - 8, 20);
 		painter->setBrush(QColor(25, 27, 32, 245));
-		painter->setPen(QPen(QColor(74, 91, 40), 1));
+		painter->setPen(QPen(QColor(183, 227, 75), 1));
 		painter->drawRoundedRect(hoverBar, 4, 4);
 
 		painter->setFont(QFont(QStringLiteral("Segoe UI"), 7, QFont::DemiBold));
-		painter->setPen(QColor(23, 25, 26));
+		painter->setPen(QColor(244, 244, 245));
 		if (isOnline)
 		{
 			const int third = hoverBar.width() / 3;
@@ -261,7 +261,7 @@ void ComputerItemDelegate::paint(QPainter* painter, const QStyleOptionViewItem& 
 			painter->drawText(rView, Qt::AlignCenter, tr("View"));
 			painter->drawText(rCtrl, Qt::AlignCenter, tr("Control"));
 			painter->drawText(rMsg, Qt::AlignCenter, tr("Message"));
-			painter->setPen(QColor(37, 40, 48));
+			painter->setPen(QColor(55, 58, 68));
 			painter->drawLine(rCtrl.left(), hoverBar.top() + 3, rCtrl.left(), hoverBar.bottom() - 3);
 			painter->drawLine(rMsg.left(), hoverBar.top() + 3, rMsg.left(), hoverBar.bottom() - 3);
 		}
@@ -312,12 +312,12 @@ void ComputerItemDelegate::paint(QPainter* painter, const QStyleOptionViewItem& 
 	{
 		// Pill badge in top right: "OFFLINE"
 		const QRect badgeRect(previewRect.right() - 54, previewRect.top() + 5, 50, 16);
-		painter->setBrush(QColor(48, 48, 54, 235));
-		painter->setPen(QPen(QColor(37, 40, 48), 1));
-		painter->drawRoundedRect(badgeRect, 8, 8);
+		painter->setBrush(QColor(37, 40, 48, 235)); // #252830
+		painter->setPen(QPen(QColor(55, 58, 68), 1));
+		painter->drawRoundedRect(badgeRect, 4, 4);
 
-		painter->setPen(QColor(52, 52, 58));
-		painter->setFont(QFont(QStringLiteral("Segoe UI"), 6, QFont::DemiBold));
+		painter->setPen(QColor(180, 184, 194)); // #B4B8C2 high-contrast readable
+		painter->setFont(QFont(QStringLiteral("Segoe UI"), 6, QFont::Bold));
 		painter->drawText(badgeRect, Qt::AlignCenter, QStringLiteral("OFFLINE"));
 	}
 
@@ -356,16 +356,16 @@ void ComputerItemDelegate::paint(QPainter* painter, const QStyleOptionViewItem& 
 	}
 	else
 	{
-		statusDotColor = QColor(180, 184, 194); // Slate / Gray
+		statusDotColor = QColor(140, 144, 153); // Slate / Muted Gray
 	}
 
 	painter->setBrush(statusDotColor);
 	painter->setPen(Qt::NoPen);
 	painter->drawEllipse(dotCenter, 3, 3);
 
-	// Text beside dot
+	// Text beside dot - High contrast secondary text
 	painter->setFont(QFont(QStringLiteral("Segoe UI"), 8));
-	painter->setPen(QColor(52, 52, 58));
+	painter->setPen(QColor(180, 184, 194)); // #B4B8C2 clear and crisp
 
 	QString detailsText;
 	if (isOnline)
